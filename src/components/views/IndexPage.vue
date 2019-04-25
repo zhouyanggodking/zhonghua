@@ -51,6 +51,8 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 p {
   padding: 0;
   margin: 0;
@@ -106,12 +108,7 @@ p {
       .el-button {
         width: 134px;
         height: 44px;
-        padding: 10px 34px;
-        margin: 0 30px 0 30px;
-        color: #ffffff;
-        background-color: #C1B071;
-        border-radius: 4px;
-        border: none;
+        @include buttonStyle;
       }
     }
   }
