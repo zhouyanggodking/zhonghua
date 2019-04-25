@@ -96,6 +96,7 @@ export default {
     }
   
     .el-main {
+      height: calc(100vh - 240px);
       padding: 20px 50px 0 30px;
       background-color: #f5f7f9;
       color: #333;
