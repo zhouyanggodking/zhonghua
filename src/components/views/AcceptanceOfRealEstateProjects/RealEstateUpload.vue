@@ -50,9 +50,7 @@
         </el-tab-pane>
         <el-tab-pane label="选择文件上传" name="fileUpload">配置管理</el-tab-pane>
       </el-tabs>
-    <div class="top-box">
-      <bread-crumb :data="breadCrumbList"></bread-crumb>
-    </div>
+    </div>  
   </div>
 </template>
 <script>
@@ -310,5 +308,7 @@ export default {
           margin: 0 16px;
         }
       }
+    }
+  }
 }
 </style>
