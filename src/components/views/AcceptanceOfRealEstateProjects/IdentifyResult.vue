@@ -1,11 +1,13 @@
 <template>
   <div class="identify-page">
     <div class="identify-page-title">
-      <div class="uploadTitle">
+      <!-- <div class="uploadTitle">
         <i class="el-icon-arrow-left backBorder" @click="goBack"></i>
         <router-link class="backToIndex" to="/home">首页/资产识别比对</router-link>/比对结果
+      </div> -->
+      <div class="top-box">
+        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
       </div>
-      <div class="title-num">识别结果</div>
     </div>
     <div class="identify-page-search">
       <div class="identify-page_search_condition">
@@ -102,6 +104,8 @@
   </div>
 </template>
 <script>
+import BreadCrumb from '@/components/common/BreadCrumb';
+
 const PAGE_SIZE = 10;
 
 export default {
@@ -115,6 +119,8 @@ export default {
       multipleSelection: [],
       currentPage:1,
       totalCount:0,
+      currentTitle:'识别结果',
+      breadCrumbList:['首页','资产识别比对','比对结果'],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
@@ -174,12 +180,22 @@ export default {
     handleCurrentChange(currPage) {
       this.currentPage = currPage;
     },
+  },
+  components:{
+    BreadCrumb
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .identify-page {
+  .top-box {
+    height: 130px;
+    background-color: #ffffff;
+    .bread-crumb {
+      padding: 14px 20px 0px;
+    }
+  }
   .identify-page-title {
     background-color: #ffffff;
     height: 129px;
@@ -208,13 +224,7 @@ export default {
       margin-left: 30px;
     }
 
-    .title-num {
-      font-family: "PingFangSC-Semibold";
-      font-size: 20px;
-      color: #333333;
-      margin-top: 33px;
-      margin-left: 30px;
-    }
+    
   }
   .identify-page-search {
     height: 160px;
