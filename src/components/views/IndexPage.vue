@@ -1,0 +1,119 @@
+<template>
+  <div class="index-page">
+    <div class="index-logo">
+      某某某，欢迎登录智鉴通系统!
+    </div>
+    <div class="files-count-group">
+      <div class="single-file" :class="{'upload': item.type==='upload', 'download': item.type==='download'}" v-for="(item, index) in filesCountList" :key="index">
+        <img src="../../assets/imgs/zlsc.png" alt="" v-if="index === 0">
+        <img src="../../assets/imgs/zcxz.png" alt="" v-if="index === 1">
+        <img src="../../assets/imgs/lssc.png" alt="" v-if="index === 2">
+        <img src="../../assets/imgs/zcxz.png" alt="" v-if="index === 3">
+        <div class="text">
+          <p class="title">{{item.title}}</p>
+          <p class="count" v-if="item.type === 'upload'">已上传资料<span>{{item.count}}</span>份</p>
+          <p class="count" v-else>已提取完成资料<span>{{item.count}}</span>份</p>
+        </div>
+        <el-button class="upload" v-if="item.type === 'upload'">去上传</el-button>
+        <el-button class="download" v-else>去下载</el-button>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      filesCountList: [
+        {
+          title: '付款申请上传',
+          type: 'upload',
+          count: 10
+        },
+        {
+          title: '付款申请提取结果下载',
+          type: 'download',
+          count: 10
+        },
+        {
+          title: '征信授权书上传',
+          type: 'upload',
+          count: 10
+        },
+        {
+          title: '征信授权书结果下载',
+          type: 'download',
+          count: 10
+        }
+      ]
+    };
+  }
+}
+</script>
+<style lang="scss" scoped>
+p {
+  padding: 0;
+  margin: 0;
+}
+.index-page {
+  .index-logo {
+    height: 110px;
+    line-height: 110px;
+    padding-left: 30px;
+    font-size: 26px;
+    font-weight: bold;
+    color: #666666;
+    background: url('../../assets/imgs/home-first.png') no-repeat right bottom;
+    background-size: cover;
+  }
+  .files-count-group {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    .single-file {
+      display: flex;
+      align-items: center;
+      height: 200px;
+      // width: 572px;
+      margin: 20px 0 0 0;
+      img {
+        width: 78px;
+        height: 78px;
+        margin-left: 30px;
+        border-radius: 50%;
+      }
+      &.upload {
+        background: url('../../assets/imgs/uploadnew.png') no-repeat;
+        background-size: 100% 100%;
+      }
+      &.download {
+        background: url('../../assets/imgs/uploadnew.png') no-repeat;
+        background-size: 100% 100%;
+      }
+      .text {
+        width: 180px;
+        margin-left: 20px;
+        .title {
+          font-size: 22px;
+          font-weight: bold;
+          color: #666666;
+        }
+        .count {
+          font-size: 22px;
+          color:#666666;
+        }
+      }
+      .el-button {
+        width: 134px;
+        height: 44px;
+        padding: 10px 34px;
+        margin: 0 30px 0 30px;
+        color: #ffffff;
+        background-color: #C1B071;
+        border-radius: 4px;
+        border: none;
+      }
+    }
+  }
+}
+</style>
