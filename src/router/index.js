@@ -8,6 +8,7 @@ const indexPage = resolve => require.ensure([], () => resolve(require('../compon
 // 地产承兑
 const realEstateUpload = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/RealEstateUpload.vue')), '文件上传');
 const identifyResult = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyResult.vue')), '识别结果');
+const identifyResultDetail = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyResultDetail.vue')), 'indentify-result-details');
 // 征信
 const creditUpload = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/CreditUpload.vue')), '文件上传');
 const creditReupload = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/CreditReupload.vue')), '文件补录');
@@ -18,58 +19,62 @@ const userManagement = resolve => require.ensure([], () => resolve(require('../c
 
 const router = new Router({
   // mode: 'history',
-  routes: [
-    {
-      path: '/',
-      name: 'homePage',
-      component: homePage,
-      meta: { requiresAuth: true },
-      children: [
-        {
-          path: 'index',
-          name: 'index',
-          component: indexPage,
-        },
-        // 地产承兑
-        {
-          path: 'realEstateUpload',
-          name: '文件上传',
-          component: realEstateUpload,
-        },
-        {
-          path: 'realEstateIdentifyResult',
-          name: '识别结果',
-          component: identifyResult,
-        },
-        // 征信
-        {
-          path: 'creditUpload',
-          name: '文件上传',
-          component: creditUpload,
-        },
-        {
-          path: 'creditReupload',
-          name: '文件补录',
-          component: creditReupload,
-        },
-        {
-          path: 'creditElectronicBatchInformation',
-          name: '电子版批次信息',
-          component: electronicBatchInformation,
-        },
-        {
-          path: 'creditPaperBatchInformation',
-          name: '纸质版批次信息',
-          component: paperBatchInformation,
-        },
-        {
-          path: 'userManagement',
-          name: '用户管理',
-          component: userManagement,
-        }
-      ]
-    }
-  ]
+  routes: [{
+    path: '/',
+    name: 'homePage',
+    component: homePage,
+    meta: {
+      requiresAuth: true
+    },
+    children: [{
+        path: 'index',
+        name: 'index',
+        component: indexPage,
+      },
+      // 地产承兑
+      {
+        path: 'realEstateUpload',
+        name: '文件上传',
+        component: realEstateUpload,
+      },
+      {
+        path: 'indentify-result-details',
+        name: 'indentify-result-details',
+        component: identifyResultDetail
+      },
+      {
+        path: 'realEstateIdentifyResult',
+        name: '识别结果',
+        component: identifyResult,
+      },
+      // 征信
+      {
+        path: 'creditUpload',
+        name: '文件上传',
+        component: creditUpload,
+      },
+      {
+        path: 'creditReupload',
+        name: '文件补录',
+        component: creditReupload,
+      },
+      {
+        path: 'creditElectronicBatchInformation',
+        name: '电子版批次信息',
+        component: electronicBatchInformation,
+      },
+      {
+        path: 'creditPaperBatchInformation',
+        name: '纸质版批次信息',
+        component: paperBatchInformation,
+      },
+      {
+        path: 'userManagement',
+        name: '用户管理',
+        component: userManagement,
+      }
+    ]
+  }]
 });
 
 // router.beforeEach((to, from, next) => {
