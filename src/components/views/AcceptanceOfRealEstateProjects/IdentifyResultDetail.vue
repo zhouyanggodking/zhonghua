@@ -152,6 +152,11 @@ export default {
       currentTitle: "付款公司名称-合同编号-付款主题"
     };
   },
+  methods:{
+      tableItemDetails(){
+          this.$router.push({name:'identify-payment-request-origin'})
+      }
+  },
   components: {
     BreadCrumb
   }

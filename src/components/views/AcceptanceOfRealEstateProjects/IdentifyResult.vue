@@ -215,6 +215,8 @@ export default {
     tableItemRejected() {
       // this.dialogVisible = true;
       this.isDialogVisible = true;
+      this.dialogHintText="请确认是否驳回";
+      this.dialogHintOperate="驳回";
     },
     reviewPass(){
       this.isDialogVisible=false;
@@ -433,7 +435,7 @@ export default {
       }
     }
     .el-dialog__body {
-      padding-bottom: 10px;
+      padding-bottom: 30px;
     }
     .el-dialog__footer {
       border: none;
@@ -534,9 +536,11 @@ export default {
   }
   .el-dialog__body {
     padding-bottom: 20px;
+
   }
   .el-dialog__footer {
     padding-top: 0;
+    border: none;
     padding-bottom: 30px;
     .el-button {
       width: 135px !important;
