@@ -1,9 +1,12 @@
 <template>
-  <div class="identify-page">
+  <div class="identify-result-detail-page">
     <div class="identify-page-title">
       <div class="top-box">
         <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
       </div>
+    </div>
+    <div class="identify-result-detail-page-content">
+
     </div>
   </div>
 </template>
@@ -25,7 +28,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.identify-page {
+.identify-result-detail-page {
   .top-box {
     height: 130px;
     background-color: #ffffff;
@@ -33,7 +36,11 @@ export default {
       padding: 14px 20px 0px;
     }
   }
-
+    .identify-result-detail-page-content{
+        margin-top: 30px;
+        background: #fff;
+        padding: 30px;
+    }
 }
 /deep/ .el-button {
   width: 135px;
