@@ -85,17 +85,7 @@
         </el-table>
       </div>
       <div class="table-footer">
-        <div class="row pager">
-          <el-pagination
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="currentPage"
-            :page-sizes="pageSizes"
-            :page-size="pageSize"
-            layout="total, prev, pager, next, jumper"
-            :total="totalCount"
-          ></el-pagination>
-        </div>
+        <Pagination></Pagination>
       </div>
     </div>
     <el-dialog
@@ -143,6 +133,7 @@
 </template>
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
+import Pagination from "@/components/common/Pagination";
 
 const PAGE_SIZE = 10;
 
@@ -246,7 +237,8 @@ export default {
     }
   },
   components: {
-    BreadCrumb
+    BreadCrumb,
+    Pagination
   }
 };
 </script>
@@ -400,35 +392,7 @@ export default {
       }
     }
     .table-footer {
-      margin-top: 25px;
-      .pager {
-        /deep/ .el-pagination {
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          position: relative;
-          .el-pagination__total {
-            position: absolute;
-            left: 0;
-          }
-          .el-pager {
-            .number {
-              font-size: 12px;
-            }
-            .active {
-              color: #c1b071;
-            }
-          }
-          .el-pagination button {
-            color: #c1b071;
-          }
-          .el-pagination__jump {
-            font-size: 12px;
-          }
-          .el-pagination__editor.el-input .el-input__inner {
-          }
-        }
-      }
+      margin-top: 25px;   
     }
   }
 }
