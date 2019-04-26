@@ -19,6 +19,7 @@ export default {
     return {
       currentPage:1,
       totalCount: 0,
+      currentPage: 0,
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE]
     };

@@ -48,20 +48,58 @@
             </el-dialog>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="选择文件上传" name="fileUpload">配置管理</el-tab-pane>
+        <el-tab-pane label="选择文件上传" name="fileUpload">
+          <div class="file-upload">
+            <file-upload class="file-upload-box"></file-upload>
+            <div class="upload-history">
+              <div class="title">上传记录</div>
+              <el-table
+                :data="tableData"
+                border
+                style="width: 100%">
+                <el-table-column
+                  align="center"
+                  prop="date"
+                  label="序号"
+                  width="50">
+                </el-table-column>
+                <el-table-column
+                  prop="name"
+                  align="center"
+                  label="文件名">
+                </el-table-column>
+                <el-table-column
+                  align="center"
+                  prop="address"
+                  label="上传日期"
+                  width="352">
+                </el-table-column>
+              </el-table>
+              <Pagination></Pagination>
+            </div>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </div>  
   </div>
 </template>
 <script>
 import BreadCrumb from '@/components/common/BreadCrumb';
+import FileUpload from '@/components/common/FileUpload';
+import Pagination from "@/components/common/Pagination";
+
+const PAGE_SIZE = 10;
 
 export default {
   data() {
     return {
+      currentPage: 1,
+      totalCount: 0,
+      pageSize: PAGE_SIZE,
+      pageSizes: [PAGE_SIZE],
       dialogFormVisible: false,
       formLabelWidth: '120px',
-      activeName: 'filedEdit',
+      activeName: 'fileUpload',
       breadCrumbList: [
         '动产项目承兑', '文件上传'
       ],
@@ -94,7 +132,24 @@ export default {
         text: [
           { required: true, message: '请输入提取字段(必填)', trigger: 'blur' }
         ],
-      }
+      },
+      tableData: [{
+        date: '1',
+        name: '组件1235体育热图新方法付付的111.zip',
+        address: '2016-05-03'
+      }, {
+        date: '2',
+        name: '组件1235体育热图新方法付付的111.zip',
+        address: '2016-05-03'
+      }, {
+        date: '3',
+        name: '组件1235体育热图新方法付付的111.zip',
+        address: '2016-05-03'
+      }, {
+        date: '4',
+        name: '组件1235体育热图新方法付付的111.zip',
+        address: '2016-05-03'
+      }]
     };
   },
   methods: {
@@ -125,7 +180,9 @@ export default {
     }
   },
   components: {
-    BreadCrumb
+    BreadCrumb,
+    FileUpload,
+    Pagination
   }
 }
 </script>
@@ -270,6 +327,24 @@ export default {
                   height: 40px;
                   @include cancleBtnStyle;
                   margin: 0 14px;
+                }
+              }
+            }
+            .file-upload {
+              padding: 20px 30px;
+              .file-upload-box {
+                padding: 20px 30px;
+              }
+              .upload-history {
+                border-top: 1px solid #ebebeb;
+                .title {
+                  margin: 30px 0 10px;
+                  font-size: 18px;
+                  font-weight: bold;
+                  color: #9A8B7B;
+                }
+                .el-pagination {
+                  margin-top: 10px;
                 }
               }
             }
