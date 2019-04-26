@@ -111,6 +111,11 @@
           type="primary"
           @click="reviewPass"
         >{{dialogHintOperate}}</el-button>
+        <el-button
+          v-if="dialogHintOperate==='批量通过'"
+          type="primary"
+          @click="batchReviewPass"
+        >{{dialogHintOperate}}</el-button>
       </div>
     </el-dialog>
     <el-dialog
@@ -203,7 +208,14 @@ export default {
     goBack() {},
     search() {},
     tableDownload() {},
-    batchReview() {},
+    batchReview() {
+      this.isDialogVisible=true;
+      this.dialogHintText="请确认是否批量通过";
+      this.dialogHintOperate="批量通过";
+    },
+    batchReviewPass(){
+
+    },
     tableItemDetails() {
       this.$router.push({name:'indentify-result-details'})
     },
