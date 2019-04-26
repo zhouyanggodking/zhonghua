@@ -75,6 +75,7 @@
                   width="352">
                 </el-table-column>
               </el-table>
+              <Pagination></Pagination>
             </div>
           </div>
         </el-tab-pane>
@@ -85,10 +86,17 @@
 <script>
 import BreadCrumb from '@/components/common/BreadCrumb';
 import FileUpload from '@/components/common/FileUpload';
+import Pagination from "@/components/common/Pagination";
+
+const PAGE_SIZE = 10;
 
 export default {
   data() {
     return {
+      currentPage: 1,
+      totalCount: 0,
+      pageSize: PAGE_SIZE,
+      pageSizes: [PAGE_SIZE],
       dialogFormVisible: false,
       formLabelWidth: '120px',
       activeName: 'fileUpload',
@@ -173,7 +181,8 @@ export default {
   },
   components: {
     BreadCrumb,
-    FileUpload
+    FileUpload,
+    Pagination
   }
 }
 </script>
@@ -333,6 +342,9 @@ export default {
                   font-size: 18px;
                   font-weight: bold;
                   color: #9A8B7B;
+                }
+                .el-pagination {
+                  margin-top: 10px;
                 }
               }
             }

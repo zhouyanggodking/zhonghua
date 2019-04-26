@@ -1,38 +1,136 @@
 <template>
-  <el-upload
-    class="upload-demo"
-    drag
-    show-file-list
-    :file-list="fileList"
-    action="https://jsonplaceholder.typicode.com/posts/"
-    multiple>
-    <i class="el-icon-upload"></i>
-    <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
-    <div class="accept-type">支持.pdf/.jpg/.png/.tif/.zip/.rar格式</div>
-  </el-upload>
+  <div>
+    <el-upload
+      class="upload-demo"
+      drag
+      :on-progress="onFileUploading"
+      :on-success="onFileUploadingSuccess"
+      :on-error="onFileUploadingError"
+      action="https://jsonplaceholder.typicode.com/posts/"
+      multiple>
+      <i class="el-icon-upload"></i>
+      <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
+      <div class="accept-type">支持.pdf/.jpg/.png/.tif/.zip/.rar格式</div>
+    </el-upload>
+    <div class="file-list">
+      <div class="file-list-item" v-for="(item, index) in fileList" :key="index">
+        <div class="left"><i class="el-icon-document"></i>{{item.name}}</div>
+        <div class="right">
+          <div>{{item.size}}</div>
+          <div>
+            <span class="status succeed" v-if="item.status === 'success'">上传成功</span>
+            <span class="status failed" v-else>上传失败</span>
+          </div>
+          <i class="el-icon-circle-close"></i>
+        </div>
+      </div>
+      <div v-if="isUploading" class="file-list-item">
+        <div class="left"><i class="el-icon-document"></i>{{uploadingFile.name}}</div>
+        <div class="right">
+          <el-progress :text-inside="true" :stroke-width="16" :percentage="progressBarPercent" status="success"></el-progress>
+          <span class="status uploading">上传中</span>
+          <i class="el-icon-circle-close"></i>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
 export default {
   data() {
     return {
+      isUploading: false,
+      completeUpload: false,
+      progressBarPercent: 0,
       fileList: [
         {
           name: 'food.jpeg',
           size: '300kb',
+          status: 'fail',
           url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
         },
         {
           name: 'food2.jpeg',
           size: '300kb',
+          status: 'success',
           url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
         }
-      ]
+      ],
+      uploadingFile: {
+        name: '',
+        status: '',
+        size: '',
+        url: ''
+      }
     };
+  },
+  methods: {
+    onFileUploading(event, file) {
+      this.isUploading = true;
+      this.progressBarPercent = 0;
+      this.progressBarPercent = parseInt(event.percent);
+      this.uploadingFile.name = file.name;
+      this.uploadingFile = {
+        name: file.name,
+        status: file.status,
+        size: file.size
+      }
+    },
+    onFileUploadingSuccess() {
+      this.isUploading = false;
+      this.fileList.push(this.uploadingFile);
+    },
+    onFileUploadingError() {
+      this.isUploading = false;
+      this.fileList.push(this.uploadingFile);
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.file-list {
+  width:600px;
+  margin: 0 auto;
+  .file-list-item {
+    display: flex;
+    align-items: center;
+    // padding: 0 150px;
+    margin: 6px 0;
+    font-size: 14px;
+    color: #666666;
+    .left {
+      .el-icon-document {
+        margin-right: 10px;
+      }
+    }
+    .right {
+      display: flex;
+      margin-left: auto;
+      .el-icon-circle-close {
+        line-height: 20px;
+      }
+      .status {
+        display: inline-block;
+        margin: 0 40px 0 24px;
+        &.succeed {
+          color: #7FE085;
+        }
+        &.failed {
+          color: #D0021B;
+        }
+        &.uploading {
+          color: #F5A623;
+        }
+      }
+      /deep/ {
+        .el-progress {
+          width: 100px;
+        }
+      }
+    }
+  }
+}
 /deep/ {
   .el-upload {
     width: 100%;
@@ -54,6 +152,7 @@ export default {
     }
   }
   .el-upload-list {
+    display: none;
     padding: 0 150px;
   }
 }
