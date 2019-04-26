@@ -8,7 +8,7 @@
     <div class="identify-result-detail-page-content">
       <div class="header">
         <div class="title">付款申请</div>
-        <div class="look-origin-btn">查看原件</div>
+        <div class="look-origin-btn" @click="lookPayRequestOrigin">查看原件</div>
       </div>
       <div class="content-table">
         <el-row>
@@ -154,6 +154,9 @@ export default {
   },
   methods:{
       tableItemDetails(){
+          this.$router.push({name:'identify-invoice-origin'})
+      },
+      lookPayRequestOrigin(){
           this.$router.push({name:'identify-payment-request-origin'})
       }
   },
