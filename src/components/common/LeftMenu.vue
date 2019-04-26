@@ -96,10 +96,9 @@ export default {
       ]
     };
   },
-  watch: {
-    'this.$route.name'(newval) {
-      console.log(newval);
-      this.activeMenu = newval;
+  watch:{
+    $route(to){
+      this.activeMenu = to.name;
     }
   },
   mounted() {
