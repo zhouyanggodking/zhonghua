@@ -1,14 +1,11 @@
 <template>
   <div class="identify-page">
     <div class="identify-page-title">
-      <!-- <div class="uploadTitle">
-        <i class="el-icon-arrow-left backBorder" @click="goBack"></i>
-        <router-link class="backToIndex" to="/home">首页/资产识别比对</router-link>/比对结果
-      </div> -->
       <div class="top-box">
         <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
       </div>
     </div>
+    <router-view/>
     <div class="identify-page-search">
       <div class="identify-page_search_condition">
         <div class="search-condition_input">
@@ -42,7 +39,7 @@
     </div>
     <div class="identify-page-table">
       <div class="identify-page-table_btn">
-        <el-checkbox v-model="checked">全选</el-checkbox>
+        <el-checkbox v-model="allChecked">全选</el-checkbox>
         <el-button class="btn" @click="tableDownload()">下载</el-button>
         <el-button class="btn" @click="batchReview()">批量审核</el-button>
       </div>
@@ -101,10 +98,51 @@
         </div>
       </div>
     </div>
+    <el-dialog
+      class="dialog-common"
+      title
+      :visible.sync="isDialogVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <div class="dialog-content">
+        <div class="dialog-content_icon"></div>
+        <div class="dialog-content_text">{{dialogHintText}}</div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button class="cancel-btn" @click="isDialogVisible = false">取消</el-button>
+        <el-button
+          v-if="dialogHintOperate==='驳回'"
+          type="primary"
+          @click="rejectOpinion"
+        >{{dialogHintOperate}}</el-button>
+        <el-button
+          v-if="dialogHintOperate==='审核通过'"
+          type="primary"
+          @click="reviewPass"
+        >{{dialogHintOperate}}</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog
+      class="dialog"
+      :title="dialogTitle"
+      :visible.sync="dialogVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <div class="reject-content">
+        <div class="label-content">驳回意见</div>
+        <el-input v-model="rejectContent" placeholder="请输入内容"></el-input>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">驳 回</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import BreadCrumb from '@/components/common/BreadCrumb';
+import BreadCrumb from "@/components/common/BreadCrumb";
 
 const PAGE_SIZE = 10;
 
@@ -114,13 +152,20 @@ export default {
       payTheme: "",
       contractNum: "",
       payer: "",
+      allChecked:false,
+      dialogHintText: "请确认是否驳回",
+      dialogHintOperate: "驳回",
+      isDialogVisible: false,
+      rejectContent: "",
       collector: "",
+      dialogTitle: "填写驳回意见",
+      dialogVisible: false,
       reviewStatus: "全部",
       multipleSelection: [],
-      currentPage:1,
-      totalCount:0,
-      currentTitle:'识别结果',
-      breadCrumbList:['首页','资产识别比对','比对结果'],
+      currentPage: 1,
+      totalCount: 0,
+      currentTitle: "识别结果",
+      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
@@ -168,9 +213,28 @@ export default {
     search() {},
     tableDownload() {},
     batchReview() {},
-    tableItemDetails() {},
-    tableItemReview() {},
-    tableItemRejected() {},
+    tableItemDetails() {
+      this.$router.push({name:'indentify-result-details'})
+    },
+    tableItemReview() {
+      this.isDialogVisible = true;
+      this.dialogHintText="请确认是否审核通过";
+      this.dialogHintOperate="审核通过";
+    },
+    tableItemRejected() {
+      // this.dialogVisible = true;
+      this.isDialogVisible = true;
+    },
+    reviewPass(){
+      this.isDialogVisible=false;
+    },
+    rejectOpinion() {
+      this.isDialogVisible = false;
+      this.dialogVisible = true;
+    },
+    handleClose() {
+      this.dialogVisible = false;
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
@@ -179,9 +243,9 @@ export default {
     },
     handleCurrentChange(currPage) {
       this.currentPage = currPage;
-    },
+    }
   },
-  components:{
+  components: {
     BreadCrumb
   }
 };
@@ -223,8 +287,6 @@ export default {
       padding-top: 33px;
       margin-left: 30px;
     }
-
-    
   }
   .identify-page-search {
     height: 160px;
@@ -337,34 +399,33 @@ export default {
         padding: 0;
       }
     }
-    .table-footer{
+    .table-footer {
       margin-top: 25px;
-      .pager{
-       /deep/ .el-pagination{
+      .pager {
+        /deep/ .el-pagination {
           display: flex;
           justify-content: flex-end;
           align-items: center;
           position: relative;
-          .el-pagination__total{
+          .el-pagination__total {
             position: absolute;
             left: 0;
           }
-          .el-pager{
-            .number{
+          .el-pager {
+            .number {
               font-size: 12px;
             }
-            .active{
-              color: #C1B071;
+            .active {
+              color: #c1b071;
             }
           }
-          .el-pagination button{
-            color: #C1B071;
+          .el-pagination button {
+            color: #c1b071;
           }
-          .el-pagination__jump{
+          .el-pagination__jump {
             font-size: 12px;
           }
-          .el-pagination__editor.el-input .el-input__inner{
-
+          .el-pagination__editor.el-input .el-input__inner {
           }
         }
       }
@@ -380,6 +441,10 @@ export default {
     font-size: 14px;
     color: #ffffff;
   }
+  &:hover {
+    background-color: #e9d58b;
+    border-color: #e9d58b;
+  }
 }
 .el-button:active {
   border-color: #c1b071;
@@ -390,5 +455,129 @@ export default {
 }
 .el-button + .el-button {
   margin-left: 0;
+}
+.dialog-common {
+  /deep/ .el-dialog {
+    width: 521px !important;
+    height: 228px !important;
+    border-radius: 0;
+    .el-dialog__header {
+      padding-top: 0;
+      padding-bottom: 4px;
+      .el-dialog__headerbtn {
+        display: none;
+      }
+    }
+    .el-dialog__body {
+      padding-bottom: 10px;
+    }
+    .el-dialog__footer {
+      border: none;
+      .dialog-footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 40px;
+        .el-button {
+          width: 135px;
+          height: 40px;
+        }
+      }
+    }
+
+    .dialog-footer {
+      .cancel-btn {
+        margin-right: 40px;
+        background: #ffffff;
+        border: 1px solid #d9d9d9;
+        span {
+          font-family: PingFangSC-Regular;
+          font-size: 16px;
+          color: #666666 !important;
+        }
+      }
+    }
+  }
+
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .dialog-content_icon {
+    width: 36px;
+    height: 36px;
+    background: red;
+  }
+  .dialog-content_text {
+    margin-top: 20px;
+    font-family: PingFangSC-Semibold;
+    font-size: 20px;
+    color: #666666;
+  }
+}
+.dialog {
+  .reject-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 123px;
+    border-top: 2px solid #ebebeb;
+    border-bottom: 2px solid #ebebeb;
+    .label-content {
+      font-family: PingFangSC-Semibold;
+      font-size: 14px;
+      color: #666666;
+      margin-right: 10px;
+    }
+    /deep/ .el-input {
+      width: 300px;
+      .el-input__inner {
+        width: 300px;
+        height: 44px;
+      }
+    }
+  }
+  .dialog-footer {
+    /deep/ .cancel-btn {
+      margin-right: 40px;
+      background: #ffffff;
+      border: 1px solid #d9d9d9;
+      span {
+        font-family: PingFangSC-Regular;
+        font-size: 16px;
+        color: #666666 !important;
+      }
+    }
+  }
+}
+/deep/ .el-dialog {
+  width: 660px !important;
+  .el-dialog__header {
+    .el-dialog__title {
+      font-size: 20px;
+      color: #9a8b7b;
+    }
+    .el-dialog__headerbtn {
+      // width: 30px;
+      // height: 30px;
+      font-size: 30px;
+      .el-dialog__close {
+        color: rgba(51, 51, 51, 0.3);
+      }
+    }
+  }
+  .el-dialog__body {
+    padding-bottom: 20px;
+  }
+  .el-dialog__footer {
+    padding-top: 0;
+    padding-bottom: 30px;
+    .el-button {
+      width: 135px !important;
+      height: 40px !important;
+    }
+  }
 }
 </style>
