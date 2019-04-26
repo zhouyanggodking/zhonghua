@@ -1,6 +1,6 @@
 <template>
   <el-menu
-    default-active="1"
+    :default-active="activeMenu"
     background-color="#333333"
     :router="userRouter"
     :unique-opened="uniqueOpened"
@@ -28,6 +28,7 @@
 export default {
   data() {
     return {
+      activeMenu: '',
       uniqueOpened: true,
       userRouter: true,
       menuList:[
@@ -94,6 +95,15 @@ export default {
         },
       ]
     };
+  },
+  watch: {
+    'this.$route.name'(newval) {
+      console.log(newval);
+      this.activeMenu = newval;
+    }
+  },
+  mounted() {
+    this.activeMenu = this.$route.name;
   }
 }
 </script>

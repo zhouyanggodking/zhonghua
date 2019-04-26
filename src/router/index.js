@@ -19,62 +19,63 @@ const userManagement = resolve => require.ensure([], () => resolve(require('../c
 
 const router = new Router({
   // mode: 'history',
-  routes: [{
-    path: '/',
-    name: 'homePage',
-    component: homePage,
-    meta: {
-      requiresAuth: true
-    },
-    children: [{
-        path: 'index',
-        name: 'index',
-        component: indexPage,
-      },
-      // 地产承兑
-      {
-        path: 'realEstateUpload',
-        name: '文件上传',
-        component: realEstateUpload,
-      },
-      {
-        path: 'indentify-result-details',
-        name: 'indentify-result-details',
-        component: identifyResultDetail
-      },
-      {
-        path: 'realEstateIdentifyResult',
-        name: '识别结果',
-        component: identifyResult,
-      },
-      // 征信
-      {
-        path: 'creditUpload',
-        name: '文件上传',
-        component: creditUpload,
-      },
-      {
-        path: 'creditReupload',
-        name: '文件补录',
-        component: creditReupload,
-      },
-      {
-        path: 'creditElectronicBatchInformation',
-        name: '电子版批次信息',
-        component: electronicBatchInformation,
-      },
-      {
-        path: 'creditPaperBatchInformation',
-        name: '纸质版批次信息',
-        component: paperBatchInformation,
-      },
-      {
-        path: 'userManagement',
-        name: '用户管理',
-        component: userManagement,
-      }
-    ]
-  }]
+  routes: [
+    {
+      path: '/',
+      name: 'homePage',
+      component: homePage,
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: 'index',
+          name: 'index',
+          component: indexPage,
+        },
+        // 地产承兑
+        {
+          path: 'realEstateUpload',
+          name: 'realEstateUpload',
+          component: realEstateUpload,
+        },
+        {
+          path: 'realEstateIdentifyResult',
+          name: 'realEstateIdentifyResult',
+          component: identifyResult,
+        },
+        {
+          path: 'indentify-result-details',
+          name: 'indentify-result-details',
+          component: identifyResultDetail
+        },
+        // 征信
+        {
+          path: 'creditUpload',
+          name: 'creditUpload',
+          component: creditUpload,
+        },
+        {
+          path: 'creditReupload',
+          name: 'creditReupload',
+          component: creditReupload,
+        },
+        {
+          path: 'creditElectronicBatchInformation',
+          name: 'creditElectronicBatchInformation',
+          component: electronicBatchInformation,
+        },
+        {
+          path: 'creditPaperBatchInformation',
+          name: 'creditPaperBatchInformation',
+          component: paperBatchInformation,
+        },
+        {
+          path: 'userManagement',
+          name: 'userManagement',
+          component: userManagement,
+        }
+      ]
+    }
+  ]
 });
 
 // router.beforeEach((to, from, next) => {
