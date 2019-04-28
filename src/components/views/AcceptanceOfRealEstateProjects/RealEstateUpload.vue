@@ -1,10 +1,16 @@
 <template>
   <div class="real-estate-upload">
-    <bread-crumb :data="breadCrumbList"></bread-crumb>
-    <div class="tags">
-      <el-tabs v-model="activeName">
-        <el-tab-pane label="提取字段编辑" name="filedEdit">
-          <div class="filed-edit">
+    <bread-crumb :data="breadCrumbList" currentTitle="文件上传"></bread-crumb>
+    <div class="upload-main">
+      <file-upload class="file-upload-box"></file-upload>
+      <div class="filed-edit">
+        <div class="title">提取字段编辑</div>
+        <div class="collapse" v-if="!isShowFiledList" @click="toggleFiledList">
+          <div class="collapse-text">点击展开查看或编辑提取字段</div>
+          <div class="collapse-icon"></div>
+        </div>
+        <el-collapse-transition>
+          <div v-show="isShowFiledList">
             <div class="filed-list">
               <div class="filed-box-title">
                 <div class="text-one">标准字段</div>
@@ -13,7 +19,7 @@
               </div>
               <div class="filed-box-content">
                 <div class="filed-item" v-for="(item, index) in filedList" :key="index">
-                  <div class="title">
+                  <div class="filed-edit-name">
                     {{item.name}}
                   </div>
                   <div class="input-box">
@@ -26,61 +32,60 @@
             <div class="add-filed" @click="addNewFiled">
               +&nbsp;新增字段
             </div>
-            <div class="filed-option">
-              <el-button class="cancle-btn">取消</el-button>
-              <el-button class="submit-btn">提交</el-button>
-              <el-button class="save-btn">保存</el-button>
-            </div>
-            <el-dialog title="新增字段" :visible.sync="dialogFormVisible">
-              <el-form :model="addFiledform" :rules="rules" ref="addFiledform">
-                <el-form-item label="标准字段" :label-width="formLabelWidth" prop="name">
-                  <el-input placeholder="请输入标准字段(必填)" v-model="addFiledform.name" autocomplete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="本次提取字段" :label-width="formLabelWidth" prop="text">
-                  <el-input placeholder="请输入提取字段(必填)" v-model="addFiledform.text" autocomplete="off"></el-input>
-                </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button class="cancle-btn" @click="dialogFormVisible = false">取 消</el-button>
-                <el-button class="goon-btn" type="primary" @click="handleSubmitClick('goonBtn')">继续新增</el-button>
-                <el-button class="submit-btn" type="primary" @click="handleSubmitClick('sureBtn')">确 定</el-button>
-              </div>
-            </el-dialog>
           </div>
-        </el-tab-pane>
-        <el-tab-pane label="选择文件上传" name="fileUpload">
-          <div class="file-upload">
-            <file-upload class="file-upload-box"></file-upload>
-            <div class="upload-history">
-              <div class="title">上传记录</div>
-              <el-table
-                :data="tableData"
-                border
-                style="width: 100%">
-                <el-table-column
-                  align="center"
-                  prop="date"
-                  label="序号"
-                  width="50">
-                </el-table-column>
-                <el-table-column
-                  prop="name"
-                  align="center"
-                  label="文件名">
-                </el-table-column>
-                <el-table-column
-                  align="center"
-                  prop="address"
-                  label="上传日期"
-                  width="352">
-                </el-table-column>
-              </el-table>
-              <Pagination></Pagination>
-            </div>
+        </el-collapse-transition>
+        <div class="collapse" v-if="isShowFiledList" @click="toggleFiledList">
+          <div class="collapse-text">点击收起</div>
+          <div class="collapse-icon"></div>
+        </div>
+        <el-dialog title="新增字段" :visible.sync="dialogFormVisible">
+          <el-form :model="addFiledform" :rules="rules" ref="addFiledform">
+            <el-form-item label="标准字段" :label-width="formLabelWidth" prop="name">
+              <el-input placeholder="请输入标准字段(必填)" v-model="addFiledform.name" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="本次提取字段" :label-width="formLabelWidth" prop="text">
+              <el-input placeholder="请输入提取字段(必填)" v-model="addFiledform.text" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button class="cancle-btn" @click="dialogFormVisible = false">取 消</el-button>
+            <el-button class="goon-btn" type="primary" @click="handleSubmitClick('goonBtn')">继续新增</el-button>
+            <el-button class="submit-btn" type="primary" @click="handleSubmitClick('sureBtn')">确 定</el-button>
           </div>
-        </el-tab-pane>
-      </el-tabs>
-    </div>  
+        </el-dialog>
+      </div>
+      <div class="upload-history">
+        <div class="title">上传记录</div>
+        <el-table
+          :data="tableData"
+          border
+          style="width: 100%">
+          <el-table-column
+            align="center"
+            prop="date"
+            label="序号"
+            width="50">
+          </el-table-column>
+          <el-table-column
+            prop="name"
+            align="center"
+            label="文件名">
+          </el-table-column>
+          <el-table-column
+            align="center"
+            prop="address"
+            label="上传日期"
+            width="352">
+          </el-table-column>
+        </el-table>
+        <Pagination></Pagination>
+      </div>
+      <div class="filed-option">
+          <el-button class="cancle-btn">取消</el-button>
+          <el-button class="submit-btn">提交</el-button>
+          <el-button class="save-btn">保存</el-button>
+        </div>
+    </div>
     <el-dialog
       :visible.sync="delDialogVisiable"
       :show-close="false"
@@ -106,6 +111,7 @@ const PAGE_SIZE = 10;
 export default {
   data() {
     return {
+      isShowFiledList: false,
       delDialogVisiable: false,
       currentPage: 1,
       totalCount: 0,
@@ -168,6 +174,9 @@ export default {
     };
   },
   methods: {
+    toggleFiledList() {
+      this.isShowFiledList = !this.isShowFiledList;
+    },
     removeItem(item) {
       this.delDialogVisiable  = true;
       this.readyDeleteItem = item;
@@ -214,162 +223,141 @@ export default {
   flex-direction: column;
   .bread-crumb {
     background-color: #ffffff;
-    padding: 14px 20px 0px;
+    padding: 14px 20px;
   }
-  .tags {
-    /deep/ {
-      .el-tabs {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        .el-tabs__header {
-          background-color: #ffffff;
-          .el-tabs__nav-wrap {
-            padding: 20px 0 0 34px;
-            &::after {
-              content: '';
-              height: 0px;
+  .upload-main {
+    padding: 20px 30px 0  30px;
+    margin-top: 20px;
+    background-color: #ffffff;
+    .file-upload-box {
+      margin-bottom: 40px;
+    }
+    .filed-edit {
+      padding-bottom: 60px;
+      border-top: 1px solid #ebebeb;
+      .title {
+        margin: 30px 0 10px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #9A8B7B;
+      }
+      .collapse {
+        height: 100px;
+        padding: 20px 0;
+        text-align: center;
+        background: #FAFAFA;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #4A90E2;
+        cursor: pointer;
+      }
+      .filed-list {
+        .filed-box-title {
+          display: flex;
+          // justify-content: center;
+          align-items: center;
+          background: #FAFAFA;
+          >div {
+            height: 44px;
+            line-height: 44px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333333;
+            border: 1px solid #EBEBEB;
+            text-align: center;
+            &.text-one {
+              width: 200px;
+              border-right: none;
             }
-            .el-tabs__nav-scroll {
-              .el-tabs__nav {
-                .el-tabs__active-bar {
-                  background-color: #9B8B7C;
-                }
-                .el-tabs__item {
-                  font-weight: normal;
-                  &:hover {
-                    color: #9B8B7C;
-                  }
-                  &.is-active {
-                    color: #9B8B7C;
-                  }
-                }
-              }
+            &.text-two {
+              flex: 1;
+              border-right: none;
+            }
+            &.text-three {
+              width: 150px;
             }
           }
         }
-        .el-tabs__content {
-          background-color: #ffffff;
-          .el-tab-pane {
-            .filed-edit {
-              padding: 60px 30px;
-              .filed-list {
-                .filed-box-title {
-                  display: flex;
-                  // justify-content: center;
-                  align-items: center;
-                  background: #FAFAFA;
-                  >div {
-                    height: 44px;
-                    line-height: 44px;
-                    font-size: 14px;
-                    font-weight: bold;
-                    color: #333333;
-                    border: 1px solid #EBEBEB;
-                    text-align: center;
-                    &.text-one {
-                      width: 200px;
-                      border-right: none;
-                    }
-                    &.text-two {
-                      flex: 1;
-                      border-right: none;
-                    }
-                    &.text-three {
-                      width: 150px;
-                    }
-                  }
-                }
-                .filed-box-content {
-                  .filed-item {
-                    display: flex;
-                    >div {
-                      height: 56px;
-                      line-height: 56px;
-                      font-size: 14px;
-                      color: #666666;
-                      text-align: center;
-                      border: 1px solid #EBEBEB;
-                      border-top: none;
-                      &.title {
-                        width: 200px;
-                        border-right: none;
-                      }
-                      &.input-box {
-                        flex: 1;
-                        padding: 0px 40px;
-                        border-right: none;
-                        /deep/ {
-                          .el-input {
-                            .el-input__inner {
-                              height: 44px;
-                              line-height: 44px;
+        .filed-box-content {
+          .filed-item {
+            display: flex;
+            >div {
+              height: 56px;
+              line-height: 56px;
+              font-size: 14px;
+              color: #666666;
+              text-align: center;
+              border: 1px solid #EBEBEB;
+              border-top: none;
+              &.filed-edit-name {
+                width: 200px;
+                border-right: none;
+              }
+              &.input-box {
+                flex: 1;
+                padding: 0px 40px;
+                border-right: none;
+                /deep/ {
+                  .el-input {
+                    .el-input__inner {
+                      height: 44px;
+                      line-height: 44px;
 
-                            }
-                          }
-                        }
-                      }
-                      &.del-btn {
-                        width: 150px;
-                        color: #4A90E2;
-                        cursor: pointer;
-                      }
                     }
                   }
                 }
               }
-              .add-filed {
-                height: 44px;
-                line-height: 44px;
-                margin-top: 20px;
-                border: 2px dashed #EBEBEB;
-                text-align: center;
+              &.del-btn {
+                width: 150px;
+                color: #4A90E2;
                 cursor: pointer;
-                &:hover {
-                  border-color: #C1B071;
-                  color: #C1B071;
-                }
-              }
-              .filed-option {
-                display: flex;
-                padding-top: 30px;
-                margin-top: 40px;
-                justify-content: flex-end;
-                border-top: 1px solid #EBEBEB;
-                .submit-btn, .save-btn {
-                  width: 136px;
-                  height: 40px;
-                  @include buttonStyle;
-                  margin: 0 14px;
-                }
-                .cancle-btn {
-                  width: 136px;
-                  height: 40px;
-                  @include cancleBtnStyle;
-                  margin: 0 14px;
-                }
-              }
-            }
-            .file-upload {
-              padding: 20px 30px;
-              .file-upload-box {
-                padding: 20px 30px;
-              }
-              .upload-history {
-                border-top: 1px solid #ebebeb;
-                .title {
-                  margin: 30px 0 10px;
-                  font-size: 18px;
-                  font-weight: bold;
-                  color: #9A8B7B;
-                }
-                .el-pagination {
-                  margin-top: 10px;
-                }
               }
             }
           }
         }
+      }
+      .add-filed {
+        height: 44px;
+        line-height: 44px;
+        margin-top: 20px;
+        border: 2px dashed #EBEBEB;
+        text-align: center;
+        cursor: pointer;
+        &:hover {
+          border-color: #C1B071;
+          color: #C1B071;
+        }
+      }
+    }
+    .upload-history {
+      border-top: 1px solid #ebebeb;
+      .title {
+        margin: 30px 0 10px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #9A8B7B;
+      }
+      .el-pagination {
+        margin-top: 10px;
+      }
+    }
+    .filed-option {
+      display: flex;
+      padding-top: 30px;
+      margin: 40px 0;
+      justify-content: flex-end;
+      border-top: 1px solid #EBEBEB;
+      .submit-btn, .save-btn {
+        width: 136px;
+        height: 40px;
+        @include buttonStyle;
+        margin: 0 14px;
+      }
+      .cancle-btn {
+        width: 136px;
+        height: 40px;
+        @include cancleBtnStyle;
+        margin: 0 14px;
       }
     }
   }
