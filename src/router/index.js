@@ -36,7 +36,7 @@ const router = new Router({
       // 地产承兑
       {
         path: 'realEstateUpload',
-        name: '文件上传',
+        name: 'realEstateUpload',
         component: realEstateUpload,
       },
       {
@@ -56,33 +56,33 @@ const router = new Router({
       },
       {
         path: 'realEstateIdentifyResult',
-        name: '识别结果',
+        name: 'realEstateIdentifyResult',
         component: identifyResult,
       },
       // 征信
       {
         path: 'creditUpload',
-        name: '文件上传',
+        name: 'creditUpload',
         component: creditUpload,
       },
       {
         path: 'creditReupload',
-        name: '文件补录',
+        name: 'creditReupload',
         component: creditReupload,
       },
       {
         path: 'creditElectronicBatchInformation',
-        name: '电子版批次信息',
+        name: 'creditElectronicBatchInformation',
         component: electronicBatchInformation,
       },
       {
         path: 'creditPaperBatchInformation',
-        name: '纸质版批次信息',
+        name: 'creditPaperBatchInformation',
         component: paperBatchInformation,
       },
       {
         path: 'userManagement',
-        name: '用户管理',
+        name: 'userManagement',
         component: userManagement,
       }
     ]

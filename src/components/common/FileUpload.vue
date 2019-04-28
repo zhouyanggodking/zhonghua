@@ -8,20 +8,20 @@
       :on-error="onFileUploadingError"
       action="https://jsonplaceholder.typicode.com/posts/"
       multiple>
-      <i class="el-icon-upload"></i>
+      <img src="../../assets/imgs/upload-icon.png" alt="">
       <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
       <div class="accept-type">支持.pdf/.jpg/.png/.tif/.zip/.rar格式</div>
     </el-upload>
     <div class="file-list">
       <div class="file-list-item" v-for="(item, index) in fileList" :key="index">
-        <div class="left"><i class="el-icon-document"></i>{{item.name}}</div>
+        <div class="left">{{item.name}}</div>
         <div class="right">
           <div>{{item.size}}</div>
           <div>
             <span class="status succeed" v-if="item.status === 'success'">上传成功</span>
             <span class="status failed" v-else>上传失败</span>
           </div>
-          <i class="el-icon-circle-close"></i>
+          <span class="del-btn"></span>
         </div>
       </div>
       <div v-if="isUploading" class="file-list-item">
@@ -29,7 +29,7 @@
         <div class="right">
           <el-progress :text-inside="true" :stroke-width="16" :percentage="progressBarPercent" status="success"></el-progress>
           <span class="status uploading">上传中</span>
-          <i class="el-icon-circle-close"></i>
+          <span class="del-btn"></span>
         </div>
       </div>
     </div>
@@ -100,6 +100,17 @@ export default {
     font-size: 14px;
     color: #666666;
     .left {
+      display: flex;
+      align-items: center;
+      &:before {
+        content: '';
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        margin-right: 8px;
+        background: url('../../assets/imgs/file-icon.png') no-repeat;
+        background-size: cover;
+      }
       .el-icon-document {
         margin-right: 10px;
       }
@@ -128,6 +139,14 @@ export default {
           width: 100px;
         }
       }
+      .del-btn {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: url('../../assets/imgs/del-btn.png') no-repeat;
+        background-size: cover;
+        cursor: pointer;
+      }
     }
   }
 }
@@ -135,7 +154,9 @@ export default {
   .el-upload {
     width: 100%;
     .el-upload-dragger {
+      padding: 70px 0 50px 0;
       width: 100%;
+      height: auto;
       .el-upload__text {
         font-size: 16px;
         color: rgba(0,0,0,0.85);

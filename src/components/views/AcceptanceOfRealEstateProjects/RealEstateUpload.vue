@@ -81,6 +81,19 @@
         </el-tab-pane>
       </el-tabs>
     </div>  
+    <el-dialog
+      :visible.sync="delDialogVisiable"
+      :show-close="false"
+      class="confirmDialog"
+      width="520px"
+      center>
+      <div class="icon"></div>
+      <div class="text">请确认是否删除</div>
+      <span slot="footer" class="dialog-footer">
+        <el-button class="cancle-btn" @click="delDialogVisiable = false">取 消</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleDeleteClick">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -93,13 +106,14 @@ const PAGE_SIZE = 10;
 export default {
   data() {
     return {
+      delDialogVisiable: false,
       currentPage: 1,
       totalCount: 0,
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       dialogFormVisible: false,
       formLabelWidth: '120px',
-      activeName: 'fileUpload',
+      activeName: 'filedEdit',
       breadCrumbList: [
         '动产项目承兑', '文件上传'
       ],
@@ -149,14 +163,20 @@ export default {
         date: '4',
         name: '组件1235体育热图新方法付付的111.zip',
         address: '2016-05-03'
-      }]
+      }],
+      readyDeleteItem: null
     };
   },
   methods: {
     removeItem(item) {
-      const index = this.filedList.indexOf(item);
+      this.delDialogVisiable  = true;
+      this.readyDeleteItem = item;
+    },
+    handleDeleteClick() {
+      const index = this.filedList.indexOf(this.readyDeleteItem);
       if (index !== -1) {
         this.filedList.splice(index, 1);
+        this.delDialogVisiable  = false;
       }
     },
     addNewFiled() {
@@ -381,6 +401,43 @@ export default {
           @include buttonStyle;
           padding: 4px 10px;
           margin: 0 16px;
+        }
+      }
+    }
+  }
+  &.confirmDialog {
+    .el-dialog {
+      .el-dialog__footer {
+        border: none;
+        .dialog-footer {
+          .el-button {
+            width: 136px;
+            height: 40px;
+            &.cancle-btn {
+              @include cancleBtnStyle;
+              padding: 0px;
+            }
+            &.submit-btn {
+              @include buttonStyle;
+              padding: 0px;
+            }
+          }
+        }
+      }
+      .el-dialog__body {
+        .icon {
+          width: 40px;
+          height: 40px;
+          margin: 0 auto;
+          background: url('../../../assets/imgs/warning-icon.png') no-repeat;
+          background-size: contain;
+        }
+        .text {
+          margin-top: 20px;
+          font-size: 20px;
+          font-weight: bold;
+          color: #666666;
+          text-align: center;
         }
       }
     }
