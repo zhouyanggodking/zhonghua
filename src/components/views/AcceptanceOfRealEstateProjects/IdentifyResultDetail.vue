@@ -76,10 +76,10 @@
             <div class="grid-content grid-result red-text">壹贰叁肆伍陆柒捌玖零</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content column1">应付未付金额：</div>
+            <div class="grid-content column1 green-text">应付未付金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">134566</div>
+            <div class="grid-content grid-result green-text">134566</div>
           </el-col>
         </el-row>
       </div>
@@ -435,7 +435,10 @@ export default {
   color: #9a8b7b;
 }
 .red-text {
-  color: #d0021b;
+  color: #d0021b !important;
+}
+.green-text{
+    color: green !important;
 }
 .divide-line {
   margin: 30px 0;
