@@ -4,6 +4,7 @@
       <div class="top-box">
         <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
       </div>
+      <div class="export-excel" @click="exportExcel">导出Excel</div>
     </div>
     <div class="identify-result-detail-page-content">
       <div class="header">
@@ -90,12 +91,7 @@
           <div class="invoice-num red-text">发票数量：</div>
         </div>
         <div class="invoice-table_content">
-          <el-table
-            ref="multipleTable"
-            :data="tableData"
-            tooltip-effect="dark"
-            style="width: 100%"
-          >
+          <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
             <el-table-column type="index" label="序号" width="50"></el-table-column>
             <el-table-column label="发票号码" width="120">
               <template slot-scope="scope">{{ scope.row.date }}</template>
@@ -133,11 +129,41 @@
       </div>
       <div class="divide-line"></div>
       <div class="review-btn-group">
-        <el-button class="cancel-btn">取消</el-button>
-        <el-button>审核通过</el-button>
-        <el-button>驳回</el-button>
+        <el-button class="cancel-btn" @click="previous">取消</el-button>
+        <el-button @click="reviewPass">审核通过</el-button>
+        <el-button @click="reviewReject">驳回</el-button>
       </div>
     </div>
+    <el-dialog
+      class="dialog-common"
+      title
+      :visible.sync="isDialogVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <div class="dialog-content">
+        <div class="dialog-content_icon"></div>
+        <div class="dialog-content_text">{{dialogHintText}}</div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button class="cancel-btn" @click="isDialogVisible = false">取消</el-button>
+        <el-button
+          v-if="dialogHintOperate==='驳回'"
+          type="primary"
+          @click="rejectOpinionOperate"
+        >{{dialogHintOperate}}</el-button>
+        <el-button
+          v-if="dialogHintOperate==='审核通过'"
+          type="primary"
+          @click="reviewPassOpearte"
+        >{{dialogHintOperate}}</el-button>
+        <el-button
+          v-if="dialogHintOperate==='批量通过'"
+          type="primary"
+          @click="batchReviewPass"
+        >{{dialogHintOperate}}</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -148,17 +174,48 @@ export default {
     return {
       tableData: [],
       textarea: "",
+      isDialogVisible:false,
+      dialogVisible:false,
+      dialogTitle:'',
+      dialogHintText: "请确认是否驳回",
+      dialogHintOperate: "驳回",
+      rejectContent:'',
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       currentTitle: "付款公司名称-合同编号-付款主题"
     };
   },
-  methods:{
-      tableItemDetails(){
-          this.$router.push({name:'identify-invoice-origin'})
+  methods: {
+    tableItemDetails() {
+      this.$router.push({ name: "identify-invoice-origin" });
+    },
+    exportExcel(){
+
+    },
+    reviewPass(){
+        this.isDialogVisible = true;
+      this.dialogHintText = "请确认是否审核通过";
+      this.dialogHintOperate = "审核通过";
+    },
+    reviewReject(){
+    this.isDialogVisible = true;
+      this.dialogHintText = "请确认是否驳回";
+      this.dialogHintOperate = "驳回";
+    },
+    rejectOpinionOperate(){
+
+    },
+    reviewPassOpearte(){
+
+    },
+    handleClose() {
+      this.dialogVisible = false;
+    },
+    previous(){
+          this.$router.go(-1);
       },
-      lookPayRequestOrigin(){
-          this.$router.push({name:'identify-payment-request-origin'})
-      }
+    lookPayRequestOrigin() {
+      this.$router.push({ name: "identify-payment-request-origin" });
+    }
   },
   components: {
     BreadCrumb
@@ -168,6 +225,24 @@ export default {
 
 <style lang="scss" scoped>
 .identify-result-detail-page {
+  .identify-page-title {
+    position: relative;
+    .export-excel {
+      position: absolute;
+      width: 135px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      right: 100px;
+      bottom: 30px;
+      font-size: 16px;
+      color: #4a90e2;
+      background: #ffffff;
+      border: 1px solid #4a90e2;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  }
   .top-box {
     height: 130px;
     background-color: #ffffff;
@@ -342,10 +417,10 @@ export default {
   }
   &:hover {
     background-color: #fff;
-    border-color: #D9D9D9;
+    border-color: #c1b071;
   }
-  &:active{
-      border-color: #D9D9D9;
+  &:active {
+    border-color: #c1b071;
   }
 }
 .btn {
@@ -366,5 +441,66 @@ export default {
   margin: 30px 0;
   height: 1px;
   background: #ebebeb;
+}
+.dialog-common {
+  /deep/ .el-dialog {
+    width: 521px !important;
+    height: 228px !important;
+    border-radius: 0;
+    .el-dialog__header {
+      padding-top: 0;
+      padding-bottom: 4px;
+      .el-dialog__headerbtn {
+        display: none;
+      }
+    }
+    .el-dialog__body {
+      padding-bottom: 30px;
+    }
+    .el-dialog__footer {
+      border: none;
+      .dialog-footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 40px;
+        .el-button {
+          width: 135px;
+          height: 40px;
+        }
+      }
+    }
+
+    .dialog-footer {
+      .cancel-btn {
+        margin-right: 40px;
+        background: #ffffff;
+        border: 1px solid #d9d9d9;
+        span {
+          font-family: PingFangSC-Regular;
+          font-size: 16px;
+          color: #666666 !important;
+        }
+      }
+    }
+  }
+
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .dialog-content_icon {
+    width: 36px;
+    height: 36px;
+    background: red;
+  }
+  .dialog-content_text {
+    margin-top: 20px;
+    font-family: PingFangSC-Semibold;
+    font-size: 20px;
+    color: #666666;
+  }
 }
 </style>

@@ -34,6 +34,7 @@
             </el-select>
           </div>
           <el-button class="search-btn" @click="search">查询</el-button>
+          <div class="export-excel" @click="exportExcel">导出Excel</div>
         </div>
       </div>
     </div>
@@ -51,8 +52,8 @@
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column type="selection" width="30"></el-table-column>
-          <el-table-column type="index" label="序号" width="50"></el-table-column>
+          <el-table-column fixed type="selection" width="30"></el-table-column>
+          <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
           <el-table-column label="付款主题" width="120">
             <template slot-scope="scope">{{ scope.row.date }}</template>
           </el-table-column>
@@ -61,6 +62,10 @@
           <el-table-column prop="address" label="收款单位" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="合同动态金额" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="累计已付金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="本次应付金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="票据总金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="票据数量" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="状态" show-overflow-tooltip></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
@@ -148,7 +153,7 @@ export default {
       payTheme: "",
       contractNum: "",
       payer: "",
-      allChecked:false,
+      allChecked: false,
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
       isDialogVisible: false,
@@ -209,29 +214,28 @@ export default {
     search() {},
     tableDownload() {},
     batchReview() {
-      this.isDialogVisible=true;
-      this.dialogHintText="请确认是否批量通过";
-      this.dialogHintOperate="批量通过";
+      this.isDialogVisible = true;
+      this.dialogHintText = "请确认是否批量通过";
+      this.dialogHintOperate = "批量通过";
     },
-    batchReviewPass(){
-
-    },
+    batchReviewPass() {},
     tableItemDetails() {
-      this.$router.push({name:'indentify-result-details'})
+      this.$router.push({ name: "indentify-result-details" });
     },
+    exportExcel() {},
     tableItemReview() {
       this.isDialogVisible = true;
-      this.dialogHintText="请确认是否审核通过";
-      this.dialogHintOperate="审核通过";
+      this.dialogHintText = "请确认是否审核通过";
+      this.dialogHintOperate = "审核通过";
     },
     tableItemRejected() {
       // this.dialogVisible = true;
       this.isDialogVisible = true;
-      this.dialogHintText="请确认是否驳回";
-      this.dialogHintOperate="驳回";
+      this.dialogHintText = "请确认是否驳回";
+      this.dialogHintOperate = "驳回";
     },
-    reviewPass(){
-      this.isDialogVisible=false;
+    reviewPass() {
+      this.isDialogVisible = false;
     },
     rejectOpinion() {
       this.isDialogVisible = false;
@@ -329,6 +333,16 @@ export default {
           margin-left: 66px;
           font-family: "PingFangSC-Semibold";
         }
+        .export-excel {
+          width: 123px;
+          height: 20px;
+          margin-top: 10px;
+          text-align: center;
+          line-height: 20px;
+          font-size: 14px;
+          color: #c1b071;
+          cursor: pointer;
+        }
       }
       .second {
         margin-top: 20px;
@@ -350,12 +364,33 @@ export default {
     .identify-page-table_content {
       margin-top: 20px;
       /deep/ .el-table {
+        .el-table__fixed-header-wrapper {
+          thead {
+            th,
+            tr {
+              background: #fafafa !important;
+            }
+            th {
+              border-color: rgba(0, 0, 0, 0.09);
+              .cell {
+                font-family: PingFangSC-Medium;
+                font-size: 14px;
+                color: rgba(0, 0, 0, 0.85);
+                line-height: 22px;
+              }
+            }
+            th.is-leaf {
+              border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+            }
+          }
+        }
         .el-table__header-wrapper {
           .el-table__header {
             tr {
               border-radius: 4px 4px 0px 0px;
+              background: #fafafa !important;
               th {
-                background: #fafafa;
+                background: #fafafa !important;
                 border-color: rgba(0, 0, 0, 0.09);
                 .cell {
                   font-family: PingFangSC-Medium;
@@ -406,7 +441,7 @@ export default {
       }
     }
     .table-footer {
-      margin-top: 25px;   
+      margin-top: 25px;
     }
   }
 }
@@ -548,7 +583,6 @@ export default {
   }
   .el-dialog__body {
     padding-bottom: 20px;
-
   }
   .el-dialog__footer {
     padding-top: 0;
