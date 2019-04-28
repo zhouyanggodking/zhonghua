@@ -24,11 +24,11 @@
             </div>
             <div class="btn-group">
               <el-button class="cancel-btn" @click="previous">返回</el-button>
-              <el-button class="modify-btn">修改</el-button>
+              <el-button  v-if="!isSaveBtn" class="modify-btn" @click="modifyFile">修改</el-button>
+             <el-button  v-else class="modify-btn" @click="saveFile">保存</el-button>
             </div>
           </div>
           <div class="save-btn">
-            <el-button>保存</el-button>
           </div>
         </div>
       </div>
@@ -43,6 +43,7 @@ export default {
     return {
       tableData: [],
       textarea: "",
+      isSaveBtn:false,
       itemResult: [
         "合同名称：",
         "合同编号：",
@@ -62,6 +63,12 @@ export default {
   methods:{
       previous(){
           this.$router.go(-1);
+      },
+      modifyFile(){
+          this.isSaveBtn=true;
+      },
+      saveFile(){
+          this.isSaveBtn=false;
       }
   },
   components: {
