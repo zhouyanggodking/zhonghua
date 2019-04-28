@@ -142,7 +142,8 @@
       :before-close="handleClose"
     >
       <div class="dialog-content">
-        <div class="dialog-content_icon"></div>
+        <div class="dialog-content_icon" :class="{'review-icon':dialogHintOperate==='审核通过','reject-icon':dialogHintOperate==='驳回'}"
+></div>
         <div class="dialog-content_text">{{dialogHintText}}</div>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -504,6 +505,16 @@ export default {
     width: 36px;
     height: 36px;
     background: red;
+  }
+  .review-icon {
+    width: 36px;
+    height: 37px;
+    background: url("./../../../assets/imgs/9.png") no-repeat;
+    background-size: cover;
+  }
+  .reject-icon {
+    background: url("./../../../assets/imgs/8.png") no-repeat;
+    background-size: cover;
   }
   .dialog-content_text {
     margin-top: 20px;
