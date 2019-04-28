@@ -17,6 +17,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .el-footer {
+  min-width: 1200px;
   height: 132px !important;
   padding-left: 50px;
   background-color: #f5f7f9;
