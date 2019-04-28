@@ -10,7 +10,13 @@
         <div class="left">
           <div class="title">付款申请原件</div>
           <div class="result">
-            <img>
+            <img
+              id="image"
+              class="img-src"
+              :src="imagesSrc"
+              height="633"
+              width="494"
+            >
           </div>
         </div>
         <div class="right">
@@ -24,26 +30,29 @@
             </div>
             <div class="btn-group">
               <el-button class="cancel-btn" @click="previous">返回</el-button>
-              <el-button  v-if="!isSaveBtn" class="modify-btn" @click="modifyFile">修改</el-button>
-             <el-button  v-else class="modify-btn" @click="saveFile">保存</el-button>
+              <el-button v-if="!isSaveBtn" class="modify-btn" @click="modifyFile">修改</el-button>
+              <el-button v-else class="modify-btn" @click="saveFile">保存</el-button>
             </div>
           </div>
-          <div class="save-btn">
-          </div>
+          <div class="save-btn"></div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
+import Viewer from "viewerjs";
 import BreadCrumb from "@/components/common/BreadCrumb";
 
 export default {
   data() {
     return {
       tableData: [],
+      imagesSrc: 
+        "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
+      ,
       textarea: "",
-      isSaveBtn:false,
+      isSaveBtn: false,
       itemResult: [
         "合同名称：",
         "合同编号：",
@@ -60,16 +69,36 @@ export default {
       currentTitle: "付款公司名称-合同编号-付款主题"
     };
   },
-  methods:{
-      previous(){
-          this.$router.go(-1);
-      },
-      modifyFile(){
-          this.isSaveBtn=true;
-      },
-      saveFile(){
-          this.isSaveBtn=false;
+  methods: {
+    previous() {
+      this.$router.go(-1);
+    },
+    modifyFile() {
+      this.isSaveBtn = true;
+    },
+    saveFile() {
+      this.isSaveBtn = false;
+    }
+  },
+  mounted() {
+    const viewer = new Viewer(document.getElementById("image"), {
+      inline: true,
+      button: false, //右上角按钮
+      navbar: false, //底部缩略图
+      title: false, //当前图片标题
+      toolbar: false, //底部工具栏
+      tooltip: true, //显示缩放百分比
+      movable: true, //是否可以移动
+      zoomable: true, //是否可以缩放
+      rotatable: true, //是否可旋转
+      scalable: true, //是否可翻转
+      transition: true, //使用 CSS3 过度
+      fullscreen: false, //播放时是否全屏
+      keyboard: true, //是否支持键盘
+      viewed() {
+        viewer.zoomTo(1);
       }
+    });
   },
   components: {
     BreadCrumb
@@ -103,6 +132,14 @@ export default {
           height: 633px;
           margin-top: 10px;
           border: 1px solid #ebebeb;
+          .result-img {
+            width: 494px;
+            height: 633px;
+          }
+          .img-src {
+            display: none;
+          }
+         
         }
       }
       .right {
@@ -122,6 +159,7 @@ export default {
             padding-bottom: 20px;
             margin-top: 10px;
             border-top: 1px solid #ebebeb;
+
             .item {
               margin-bottom: 20px;
               .item_title {
@@ -132,8 +170,8 @@ export default {
                 color: #333333;
               }
             }
-            .item:last-child{
-                margin-bottom: 0;
+            .item:last-child {
+              margin-bottom: 0;
             }
           }
           .btn-group {
