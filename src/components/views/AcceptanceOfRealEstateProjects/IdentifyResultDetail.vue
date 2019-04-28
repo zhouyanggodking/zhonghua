@@ -172,7 +172,13 @@ import BreadCrumb from "@/components/common/BreadCrumb";
 export default {
   data() {
     return {
-      tableData: [],
+      tableData: [
+        {
+          index: '1',
+          name: 'test',
+          address: '北京'
+        }
+      ],
       textarea: "",
       isDialogVisible:false,
       dialogVisible:false,

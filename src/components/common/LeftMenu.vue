@@ -1,7 +1,6 @@
 <template>
   <el-menu
     :default-active="activeMenu"
-    background-color="#333333"
     :router="userRouter"
     :unique-opened="uniqueOpened"
     text-color="rgba(255,255,255,0.60)"
@@ -110,6 +109,7 @@ export default {
 .el-menu {
   font-size: 14px;
   border-right: none;
+  background-color: #333333;
   .level-one {
     .el-submenu {
       >.el-submenu__title {
@@ -117,6 +117,9 @@ export default {
         line-height: 36px !important;
         padding-left: 60px !important;
         text-align: left;
+        &:hover {
+          background-color: #121213;
+        }
       }
       >.el-menu--inline {
         >.el-menu-item {
@@ -152,10 +155,12 @@ export default {
         }
       }
       &.is-opened {
+        background-color: #121213 !important; 
         .el-submenu__title {
           color: #C1B071 !important;
         }
         .el-menu--inline {
+          background-color: #121213 !important;
           >.el-menu-item {
             &.is-active {
               background: #C1B071 !important;
@@ -175,6 +180,9 @@ export default {
     &.is-active {
       background: #C1B071 !important;
       color: #ffffff !important;
+    }
+    &:hover {
+      background-color: #121213;
     }
   }
 }

@@ -5,10 +5,10 @@
     </div>
     <div class="files-count-group">
       <div class="single-file" :class="{'upload': item.type==='upload', 'download': item.type==='download'}" v-for="(item, index) in filesCountList" :key="index">
-        <img src="../../assets/imgs/zlsc.png" alt="" v-if="index === 0">
-        <img src="../../assets/imgs/zcxz.png" alt="" v-if="index === 1">
-        <img src="../../assets/imgs/lssc.png" alt="" v-if="index === 2">
-        <img src="../../assets/imgs/zcxz.png" alt="" v-if="index === 3">
+        <img src="../../assets/imgs/fksc.png" alt="" v-if="index === 0">
+        <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 1">
+        <img src="../../assets/imgs/zxsc.png" alt="" v-if="index === 2">
+        <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 3">
         <div class="text">
           <p class="title">{{item.title}}</p>
           <p class="count" v-if="item.type === 'upload'">已上传资料<span>{{item.count}}</span>份</p>
@@ -85,11 +85,11 @@ p {
         border-radius: 50%;
       }
       &.upload {
-        background: url('../../assets/imgs/uploadnew.png') no-repeat;
+        background: url('../../assets/imgs/bg-sc.png') no-repeat;
         background-size: 100% 100%;
       }
       &.download {
-        background: url('../../assets/imgs/uploadnew.png') no-repeat;
+        background: url('../../assets/imgs/bg-xz.png') no-repeat;
         background-size: 100% 100%;
       }
       .text {
