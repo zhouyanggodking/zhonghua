@@ -10,7 +10,7 @@
       </div>
       <left-menu></left-menu>
     </el-aside>
-    <el-container>
+    <el-container class="content">
       <el-header>
         <div class="system-name">智鉴通-财务公司</div>
       </el-header>
@@ -42,6 +42,11 @@ export default {
 <style lang="scss" scoped>
   body > .el-container {
     height: 100%;
+    .content{
+      // width: calc( 100% -236px);
+      // min-width: 1200px;
+      overflow: auto;
+    }
     .el-header {
       display: flex;
       align-items: center;
@@ -96,7 +101,7 @@ export default {
     }
   
     .el-main {
-      // min-width: 1200px;
+      min-width: 1200px;
       height: calc(100vh - 240px);
       padding: 20px 50px 0 30px;
       background-color: #f5f7f9;
