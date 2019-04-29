@@ -69,12 +69,17 @@ p {
     background-size: cover;
   }
   .files-count-group {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
+    // display: flex;
+    // justify-content: space-around;
+    // flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-column-gap: 20px;
+    grid-row-gap: 10px;
     .single-file {
       display: flex;
       align-items: center;
+      justify-content: space-around;
       height: 200px;
       // width: 572px;
       margin: 20px 0 0 0;
@@ -86,14 +91,16 @@ p {
       }
       &.upload {
         background: url('../../assets/imgs/bg-sc.png') no-repeat;
-        background-size: 100% 100%;
+        background-position: bottom right;
+        background-color: #ffffff;
       }
       &.download {
         background: url('../../assets/imgs/bg-xz.png') no-repeat;
-        background-size: 100% 100%;
+        background-position: bottom right;
+        background-color: #ffffff;
       }
       .text {
-        width: 180px;
+        // width: 180px;
         margin-left: 20px;
         .title {
           font-size: 22px;
@@ -106,7 +113,7 @@ p {
         }
       }
       .el-button {
-        width: 134px;
+        // width: 134px;
         height: 44px;
         @include buttonStyle;
       }
