@@ -168,6 +168,13 @@ export default {
             }
           }
         }
+        .level-two {
+          .el-submenu {
+            .el-submenu__title {
+              background-color: #121213 !important;
+            }
+          }
+        }
       }
     }
   }

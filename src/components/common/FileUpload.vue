@@ -157,6 +157,7 @@ export default {
       padding: 70px 0 50px 0;
       width: 100%;
       height: auto;
+      background-color: #FAFAFA;
       .el-upload__text {
         font-size: 16px;
         color: rgba(0,0,0,0.85);

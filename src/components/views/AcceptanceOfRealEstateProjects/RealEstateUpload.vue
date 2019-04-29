@@ -8,7 +8,7 @@
         <div class="add-filed-btn">
           <el-button @click="addNewFiled">新增字段</el-button>
         </div>
-        <div class="collapse up" v-if="!isShowFiledList" @click="toggleFiledList">
+        <div class="collapse down" v-if="!isShowFiledList" @click="toggleFiledList">
           <div class="collapse-text">点击展开查看或编辑提取字段</div>
           <div class="collapse-icon"></div>
         </div>
@@ -32,7 +32,7 @@
                 </div>
               </div>
             </div>
-            <div class="add-filed" @click="addNewFiled">
+            <div class="add-filed" :class="{'add-filed-disabled': filedList.length >= 15}" @click="addNewFiled">
               +&nbsp;新增字段
             </div>
             <div class="filed-option">
@@ -42,7 +42,7 @@
             </div>
           </div>
         </el-collapse-transition>
-        <div class="collapse down" v-if="isShowFiledList" @click="toggleFiledList">
+        <div class="collapse up" v-if="isShowFiledList" @click="toggleFiledList">
           <div class="collapse-text">点击收起</div>
           <div class="collapse-icon"></div>
         </div>
@@ -57,8 +57,8 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button class="cancle-btn" @click="dialogFormVisible = false">取 消</el-button>
-            <el-button class="goon-btn" type="primary" @click="handleSubmitClick('goonBtn')">继续新增</el-button>
-            <el-button class="submit-btn" type="primary" @click="handleSubmitClick('sureBtn')">确 定</el-button>
+            <el-button class="goon-btn" :disabled="filedList.length >= 15" type="primary" @click="handleSubmitClick('goonBtn')">继续新增</el-button>
+            <el-button class="submit-btn" :disabled="filedList.length >= 15" type="primary" @click="handleSubmitClick('sureBtn')">确 定</el-button>
           </div>
         </el-dialog>
       </div>
@@ -150,6 +150,10 @@ export default {
         {
           name: '合同名称',
           text: ''
+        },
+        {
+          name: '合同名称',
+          text: ''
         }
       ],
       rules: {
@@ -196,7 +200,9 @@ export default {
       }
     },
     addNewFiled() {
-      this.dialogFormVisible = true;
+      if (this.filedList.length < 15) {
+        this.dialogFormVisible = true;
+      }
     },
     handleSubmitClick(btnType) {
       this.$refs.addFiledform.validate((valid) => {
@@ -361,6 +367,13 @@ export default {
         &:hover {
           border-color: #C1B071;
           color: #C1B071;
+        }
+        &.add-filed-disabled {
+          cursor: not-allowed;
+          &:hover {
+            border-color: #666666;
+            color: #666666;
+          }
         }
       }
       .filed-option {
