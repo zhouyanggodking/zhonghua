@@ -5,7 +5,10 @@
       <file-upload class="file-upload-box"></file-upload>
       <div class="filed-edit">
         <div class="title">提取字段编辑</div>
-        <div class="collapse" v-if="!isShowFiledList" @click="toggleFiledList">
+        <div class="add-filed-btn">
+          <el-button @click="addNewFiled">新增字段</el-button>
+        </div>
+        <div class="collapse up" v-if="!isShowFiledList" @click="toggleFiledList">
           <div class="collapse-text">点击展开查看或编辑提取字段</div>
           <div class="collapse-icon"></div>
         </div>
@@ -32,9 +35,14 @@
             <div class="add-filed" @click="addNewFiled">
               +&nbsp;新增字段
             </div>
+            <div class="filed-option">
+              <el-button class="cancle-btn">取消</el-button>
+              <el-button class="submit-btn">提交</el-button>
+              <el-button class="save-btn">保存</el-button>
+            </div>
           </div>
         </el-collapse-transition>
-        <div class="collapse" v-if="isShowFiledList" @click="toggleFiledList">
+        <div class="collapse down" v-if="isShowFiledList" @click="toggleFiledList">
           <div class="collapse-text">点击收起</div>
           <div class="collapse-icon"></div>
         </div>
@@ -78,13 +86,8 @@
             width="352">
           </el-table-column>
         </el-table>
-        <Pagination></Pagination>
+        <Pagination class="history-pagination"></Pagination>
       </div>
-      <div class="filed-option">
-          <el-button class="cancle-btn">取消</el-button>
-          <el-button class="submit-btn">提交</el-button>
-          <el-button class="save-btn">保存</el-button>
-        </div>
     </div>
     <el-dialog
       :visible.sync="delDialogVisiable"
@@ -99,6 +102,10 @@
         <el-button class="submit-btn" type="primary" @click="handleDeleteClick">确 定</el-button>
       </span>
     </el-dialog>
+    <div class="real-estate-upload-footer">
+      <el-button class="return-back">返回</el-button>
+      <el-button class="start-identify">开始识别 </el-button>
+    </div>
   </div>
 </template>
 <script>
@@ -221,6 +228,7 @@ export default {
 .real-estate-upload {
   display: flex;
   flex-direction: column;
+  padding-bottom: 200px;
   .bread-crumb {
     background-color: #ffffff;
     padding: 14px 20px;
@@ -241,8 +249,17 @@ export default {
         font-weight: bold;
         color: #9A8B7B;
       }
+      .add-filed-btn {
+        /deep/ {
+          .el-button {
+            @include buttonStyle;
+            padding: 10px  36px;
+            margin: 0 0 20px 0;
+          }
+        }
+      }
       .collapse {
-        height: 100px;
+        height: 60px;
         padding: 20px 0;
         text-align: center;
         background: #FAFAFA;
@@ -250,6 +267,24 @@ export default {
         font-size: 14px;
         color: #4A90E2;
         cursor: pointer;
+        &.down {
+          .collapse-icon {
+            width: 28px;
+            height: 28px;
+            margin: 10px auto;
+            background: url('../../../assets/imgs/arrow-down.png') no-repeat;
+            background-size: cover;
+          }
+        }
+        &.up {
+          .collapse-icon {
+            width: 28px;
+            height: 28px;
+            margin: 10px auto;
+            background: url('../../../assets/imgs/arrow-up.png') no-repeat;
+            background-size: cover;
+          }
+        }
       }
       .filed-list {
         .filed-box-title {
@@ -328,6 +363,25 @@ export default {
           color: #C1B071;
         }
       }
+      .filed-option {
+        display: flex;
+        padding-top: 30px;
+        margin: 40px 0;
+        justify-content: flex-end;
+        border-top: 1px solid #EBEBEB;
+        .submit-btn, .save-btn {
+          width: 136px;
+          height: 40px;
+          @include buttonStyle;
+          margin: 0 14px;
+        }
+        .cancle-btn {
+          width: 136px;
+          height: 40px;
+          @include cancleBtnStyle;
+          margin: 0 14px;
+        }
+      }
     }
     .upload-history {
       border-top: 1px solid #ebebeb;
@@ -337,27 +391,30 @@ export default {
         font-weight: bold;
         color: #9A8B7B;
       }
-      .el-pagination {
-        margin-top: 10px;
+      .history-pagination {
+        padding: 10px 0 50px;
       }
     }
-    .filed-option {
-      display: flex;
-      padding-top: 30px;
-      margin: 40px 0;
-      justify-content: flex-end;
-      border-top: 1px solid #EBEBEB;
-      .submit-btn, .save-btn {
-        width: 136px;
-        height: 40px;
-        @include buttonStyle;
-        margin: 0 14px;
-      }
-      .cancle-btn {
-        width: 136px;
-        height: 40px;
-        @include cancleBtnStyle;
-        margin: 0 14px;
+  }
+  .real-estate-upload-footer {
+    position: fixed;
+    bottom: 0;
+    left: 236px;
+    width: calc(100vw - 236px);
+    padding: 24px  0;
+    background-color: #ffffff;
+    text-align: right;
+    z-index: 999;
+    /deep/ {
+      .el-button {
+        &.return-back {
+          @include cancleBtnStyle;
+          margin: 0;
+        }
+        &.start-identify {
+          @include buttonStyle;
+          margin: 0 110px 0 30px;
+        }
       }
     }
   }
