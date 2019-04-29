@@ -168,7 +168,9 @@
   </div>
 </template>
 <script>
+
 import BreadCrumb from "@/components/common/BreadCrumb";
+import resourceWrapper from "@/rest/resourceWrapper";
 
 export default {
   data() {
@@ -180,6 +182,7 @@ export default {
           address: '北京'
         }
       ],
+      id:1,
       textarea: "",
       isDialogVisible:false,
       dialogVisible:false,
@@ -222,7 +225,16 @@ export default {
       },
     lookPayRequestOrigin() {
       this.$router.push({ name: "identify-payment-request-origin" });
+    },
+    getPaymentDetailData(userId,id){
+        resourceWrapper.paymentDetailsPage(userId,id).then(res=>{
+            console.log(res);
+        })
     }
+  },
+  mounted(){
+      this.id=this.$route.query.id;
+      this.getPaymentDetailData(1,1);
   },
   components: {
     BreadCrumb
