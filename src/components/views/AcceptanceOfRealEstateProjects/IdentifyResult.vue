@@ -66,7 +66,7 @@
           <el-table-column prop="address" label="票据总金额" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="票据数量" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="状态" show-overflow-tooltip></el-table-column>
-          <el-table-column label="操作" width="165">
+          <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
               <el-button
                 class="table-btn"
