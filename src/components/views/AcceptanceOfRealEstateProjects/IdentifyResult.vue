@@ -223,7 +223,7 @@ export default {
     },
     batchReviewPass() {},
     tableItemDetails() {
-      this.$router.push({ name: "indentify-result-details" });
+      this.$router.push({ name: "indentify-result-details",query:{id:1}});
     },
     exportExcel() {},
     tableItemReview() {
