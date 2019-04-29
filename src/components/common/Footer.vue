@@ -1,5 +1,5 @@
 <template>
-  <el-footer>
+  <el-footer v-if="currentRoute!=='realEstateUpload'">
     <div class="footer-items-group">
       <div class="footer-item" v-for="(item, index) in footerItems" :key="index">{{item}}</div>
     </div>
@@ -10,14 +10,22 @@
 export default {
   data() {
     return {
-      footerItems: ['关于我们', '联系我们', '关注微信', '免责声明']
+      footerItems: ['关于我们', '联系我们', '关注微信', '免责声明'],
+      currentRoute: ''
     };
+  },
+  watch: {
+    $route(to) {
+      this.currentRoute = to.name;
+    }
+  },
+  mounted() {
+    this.currentRoute = this.$route.name;
   }
 }
 </script>
 <style lang="scss" scoped>
 .el-footer {
-  min-width: 1200px;
   height: 132px !important;
   padding-left: 50px;
   background-color: #f5f7f9;

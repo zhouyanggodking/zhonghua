@@ -25,7 +25,7 @@
         </div>
       </div>
       <div v-if="isUploading" class="file-list-item">
-        <div class="left"><i class="el-icon-document"></i>{{uploadingFile.name}}</div>
+        <div class="left">{{uploadingFile.name}}</div>
         <div class="right">
           <el-progress :text-inside="true" :stroke-width="16" :percentage="progressBarPercent" status="success"></el-progress>
           <span class="status uploading">上传中</span>
