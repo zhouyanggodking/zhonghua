@@ -66,7 +66,7 @@
           <el-table-column prop="address" label="票据总金额" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="票据数量" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="状态" show-overflow-tooltip></el-table-column>
-          <el-table-column label="操作">
+          <el-table-column label="操作" width="165">
             <template slot-scope="scope">
               <el-button
                 class="table-btn"
@@ -387,6 +387,11 @@ export default {
             }
           }
         }
+        .el-table__fixed-body-wrapper{
+          .el-table__body{
+
+          }
+        }
         .el-table__header-wrapper {
           .el-table__header {
             tr {
@@ -419,7 +424,10 @@ export default {
             .el-table__row {
               .el-table_1_column_1 {
               }
-              .el-table_1_column_2 {
+              .el-table_1_column_13  {
+                .cell{
+                  // display: flex;
+                }
               }
             }
           }
