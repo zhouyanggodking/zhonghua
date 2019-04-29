@@ -614,4 +614,7 @@ export default {
     }
   }
 }
+.el-table__fixed-right::before, .el-table__fixed::before{
+  display: none;
+}
 </style>
