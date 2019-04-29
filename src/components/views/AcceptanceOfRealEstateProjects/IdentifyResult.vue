@@ -21,8 +21,6 @@
             <div class="text">付款方</div>
             <el-input v-model="payer" placeholder="请输入内容"></el-input>
           </div>
-        </div>
-        <div class="search-condition_input second">
           <div class="search-condition_input_item">
             <div class="text">收款方</div>
             <el-input v-model="collector" placeholder="请输入内容"></el-input>
@@ -33,8 +31,10 @@
               <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
             </el-select>
           </div>
-          <el-button class="search-btn" @click="search">查询</el-button>
-          <div class="export-excel" @click="exportExcel">导出Excel</div>
+          <div class="search-condition_input_item second">
+            <el-button class="search-btn" @click="search">查询</el-button>
+            <div class="export-excel" @click="exportExcel">导出Excel</div>
+          </div>
         </div>
       </div>
     </div>
@@ -223,7 +223,7 @@ export default {
     },
     batchReviewPass() {},
     tableItemDetails() {
-      this.$router.push({ name: "indentify-result-details",query:{id:1}});
+      this.$router.push({ name: "indentify-result-details", query: { id: 1 } });
     },
     exportExcel() {},
     tableItemReview() {
@@ -302,21 +302,23 @@ export default {
     }
   }
   .identify-page-search {
-    height: 160px;
     background: #fff;
     margin-top: 20px;
+    padding-bottom: 30px;
     .identify-page_search_condition {
       display: flex;
       flex-direction: column;
-      padding-top: 30px;
+      padding-top: 10px;
       margin-left: 30px;
       .search-condition_input {
         display: flex;
+        flex-wrap: wrap;
         .search-condition_input_item {
           display: inline-flex;
           align-items: center;
           width: 266px;
           margin-right: 30px;
+          margin-top: 20px;
           .text {
             width: 56px;
             margin-right: 10px;
@@ -339,16 +341,12 @@ export default {
         .export-excel {
           width: 123px;
           height: 20px;
-          margin-top: 10px;
           text-align: center;
           line-height: 20px;
           font-size: 14px;
           color: #c1b071;
           cursor: pointer;
         }
-      }
-      .second {
-        margin-top: 20px;
       }
     }
   }
@@ -387,9 +385,8 @@ export default {
             }
           }
         }
-        .el-table__fixed-body-wrapper{
-          .el-table__body{
-
+        .el-table__fixed-body-wrapper {
+          .el-table__body {
           }
         }
         .el-table__header-wrapper {
@@ -424,8 +421,8 @@ export default {
             .el-table__row {
               .el-table_1_column_1 {
               }
-              .el-table_1_column_13  {
-                .cell{
+              .el-table_1_column_13 {
+                .cell {
                   // display: flex;
                 }
               }
@@ -613,5 +610,9 @@ export default {
       height: 40px !important;
     }
   }
+}
+.el-table__fixed-right::before,
+.el-table__fixed::before {
+  display: none;
 }
 </style>
