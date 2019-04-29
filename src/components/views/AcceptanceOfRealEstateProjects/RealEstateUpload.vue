@@ -237,7 +237,7 @@ export default {
   padding-bottom: 200px;
   .bread-crumb {
     background-color: #ffffff;
-    padding: 14px 20px;
+    padding: 14px 20px 30px 20px;
   }
   .upload-main {
     padding: 20px 30px 0  30px;
