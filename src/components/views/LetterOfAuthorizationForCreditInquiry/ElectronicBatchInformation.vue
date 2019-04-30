@@ -74,55 +74,6 @@
         <Pagination></Pagination>
       </div>
     </div>
-    <el-dialog
-      class="dialog-common"
-      title
-      :visible.sync="isDialogVisible"
-      width="30%"
-      :before-close="handleClose"
-    >
-      <div class="dialog-content">
-        <div
-          class="dialog-content_icon"
-          :class="{'review-icon':dialogHintOperate==='审核通过','reject-icon':dialogHintOperate==='驳回'}"
-        ></div>
-        <div class="dialog-content_text">{{dialogHintText}}</div>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button class="cancel-btn" @click="isDialogVisible = false">取消</el-button>
-        <el-button
-          v-if="dialogHintOperate==='驳回'"
-          type="primary"
-          @click="rejectOpinion"
-        >{{dialogHintOperate}}</el-button>
-        <el-button
-          v-if="dialogHintOperate==='审核通过'"
-          type="primary"
-          @click="reviewPass"
-        >{{dialogHintOperate}}</el-button>
-        <el-button
-          v-if="dialogHintOperate==='批量通过'"
-          type="primary"
-          @click="batchReviewPass"
-        >{{dialogHintOperate}}</el-button>
-      </div>
-    </el-dialog>
-    <el-dialog
-      class="dialog"
-      :title="dialogTitle"
-      :visible.sync="dialogVisible"
-      width="30%"
-      :before-close="handleClose"
-    >
-      <div class="reject-content">
-        <div class="label-content">驳回意见</div>
-        <el-input v-model="rejectContent" placeholder="请输入内容"></el-input>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">驳 回</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -205,20 +156,9 @@ export default {
     },
     batchReviewPass() {},
     tableItemDetails() {
-      this.$router.push({ name: "indentify-result-details", query: { id: 1 } });
+      // this.$router.push({ name: "indentify-result-details", query: { id: 1 } });
     },
     exportExcel() {},
-    tableItemReview() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否审核通过";
-      this.dialogHintOperate = "审核通过";
-    },
-    tableItemRejected() {
-      // this.dialogVisible = true;
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否驳回";
-      this.dialogHintOperate = "驳回";
-    },
     reviewPass() {
       this.isDialogVisible = false;
     },
