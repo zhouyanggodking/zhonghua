@@ -1,15 +1,32 @@
 <template>
-  <div class="identify-page">
+  <div class="elect-batch-info-page-details">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <bread-crumb :data="breadCrumbList"></bread-crumb>
+      </div>
+      <div class="btn-group">
+        <div
+          class="btn-group_item"
+          :class="{'btn-actived':index===activedIndex}"
+          v-for="(item,index) in topBtnGroup"
+          :key="index"
+          @click="topMenus(index)"
+        >{{item}}</div>
       </div>
     </div>
     <div class="identify-page-search">
       <div class="identify-page_search_condition">
         <div class="search-condition_input">
-          <div class="search-condition_input_item date-picker">
-            <div class="text">申请日期</div>
+          <div class="search-condition_input_item">
+            <div class="text">部门</div>
+            <el-input v-model="payTheme" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">公司名称</div>
+            <el-input v-model="contractNum" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">授权提交时间</div>
             <el-date-picker
               v-model="applyDate"
               type="daterange"
@@ -17,6 +34,20 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
             ></el-date-picker>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">公司名称一致</div>
+            <el-input v-model="collector" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">是否法人</div>
+            <el-input v-model="collector" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">授权有效期</div>
+            <el-select v-model="reviewStatus" placeholder="请选择">
+              <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+            </el-select>
           </div>
           <div class="search-condition_input_item">
             <div class="text">审核状态</div>
@@ -35,6 +66,7 @@
       <div class="identify-page-table_btn">
         <el-checkbox v-model="allChecked">全选</el-checkbox>
         <el-button class="btn" @click="tableDownload()">下载</el-button>
+        <el-button class="btn" @click="batchReview()">批量审核</el-button>
       </div>
       <div class="identify-page-table_content">
         <el-table
@@ -46,22 +78,32 @@
         >
           <el-table-column fixed type="selection" width="30"></el-table-column>
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column label="申请日期" width="120">
+          <el-table-column label="公司名称" width="120">
             <template slot-scope="scope">{{ scope.row.date }}</template>
           </el-table-column>
-          <el-table-column prop="name" label="申请日提交" width="120"></el-table-column>
-          <el-table-column prop="address" label="非申请日提交" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="上传文件数量" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="状态" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="上传人员" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="上传日期" show-overflow-tooltip></el-table-column>
-          <el-table-column label="操作" width="80" fixed="right">
+          <el-table-column prop="name" label="公章" width="120"></el-table-column>
+          <el-table-column prop="address" label="公章是否一致" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="人名章" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="是否法人" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="授权提交时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="签署时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="授权有效期" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="审核状态" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="档案编号" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="提供纸质授权书" show-overflow-tooltip></el-table-column>
+          <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
               <el-button
                 class="table-btn"
                 size="mini"
                 @click="tableItemDetails(scope.$index, scope.row)"
               >详情</el-button>
+              <el-button
+                class="table-btn"
+                size="mini"
+                type="danger"
+                @click="tableItemRejected(scope.$index, scope.row)"
+              >驳回</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -70,6 +112,55 @@
         <Pagination></Pagination>
       </div>
     </div>
+    <el-dialog
+      class="dialog-common"
+      title
+      :visible.sync="isDialogVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <div class="dialog-content">
+        <div
+          class="dialog-content_icon"
+          :class="{'review-icon':dialogHintOperate==='审核通过','reject-icon':dialogHintOperate==='驳回'}"
+        ></div>
+        <div class="dialog-content_text">{{dialogHintText}}</div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button class="cancel-btn" @click="isDialogVisible = false">取消</el-button>
+        <el-button
+          v-if="dialogHintOperate==='驳回'"
+          type="primary"
+          @click="rejectOpinion"
+        >{{dialogHintOperate}}</el-button>
+        <el-button
+          v-if="dialogHintOperate==='审核通过'"
+          type="primary"
+          @click="reviewPass"
+        >{{dialogHintOperate}}</el-button>
+        <el-button
+          v-if="dialogHintOperate==='批量通过'"
+          type="primary"
+          @click="batchReviewPass"
+        >{{dialogHintOperate}}</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog
+      class="dialog"
+      :title="dialogTitle"
+      :visible.sync="dialogVisible"
+      width="30%"
+      :before-close="handleClose"
+    >
+      <div class="reject-content">
+        <div class="label-content">驳回意见</div>
+        <el-input v-model="rejectContent" placeholder="请输入内容"></el-input>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">驳 回</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -84,7 +175,9 @@ export default {
       payTheme: "",
       contractNum: "",
       payer: "",
-      applyDate:'',
+      applyDate: "",
+      activedIndex: 0,
+      topBtnGroup: ["查询清单", "未匹配查询清单授权书"],
       allChecked: false,
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
@@ -97,7 +190,7 @@ export default {
       multipleSelection: [],
       currentPage: 1,
       totalCount: 0,
-      currentTitle: "电子版授权书批次识别结果",
+      currentTitle: "识别结果",
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
@@ -150,12 +243,25 @@ export default {
       this.dialogHintText = "请确认是否批量通过";
       this.dialogHintOperate = "批量通过";
     },
+    topMenus(index){
+      this.activedIndex=index;
+    },
     batchReviewPass() {},
     tableItemDetails() {
-      
-      this.$router.push({ name: "credit-auth-elect-result-details", query: { id: 1 } });
+      this.$router.push({ name: "elec-batch-info-identify-details", query: { id: 1 } });
     },
     exportExcel() {},
+    tableItemReview() {
+      this.isDialogVisible = true;
+      this.dialogHintText = "请确认是否审核通过";
+      this.dialogHintOperate = "审核通过";
+    },
+    tableItemRejected() {
+      // this.dialogVisible = true;
+      this.isDialogVisible = true;
+      this.dialogHintText = "请确认是否驳回";
+      this.dialogHintOperate = "驳回";
+    },
     reviewPass() {
       this.isDialogVisible = false;
     },
@@ -184,7 +290,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.identify-page {
+.elect-batch-info-page-details {
   .top-box {
     height: 130px;
     background-color: #ffffff;
@@ -192,9 +298,11 @@ export default {
       padding: 14px 20px 0px;
     }
   }
+
   .identify-page-title {
     background-color: #ffffff;
     height: 129px;
+    position: relative;
     .uploadTitle {
       padding: 20px 0px 0 14px;
       font-size: 12px;
@@ -211,7 +319,24 @@ export default {
         margin-right: 5px;
       }
     }
-
+    .btn-group {
+      display: flex;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      .btn-group_item {
+        height: 42px;
+        margin: 0 20px 0 30px;
+        font-family: PingFangSC-Semibold;
+        font-size: 14px;
+        color: #999999;
+        cursor: pointer;
+      }
+      .btn-actived {
+        color: #9b8b7c;
+        border-bottom: 3px solid #c1b071;
+      }
+    }
     .title-name {
       font-family: "PingFangSC-Regular";
       font-size: 12px;
@@ -232,15 +357,14 @@ export default {
       .search-condition_input {
         display: flex;
         flex-wrap: wrap;
-
         .search-condition_input_item {
           display: inline-flex;
           align-items: center;
-          width: 266px;
+          // width: 266px;
           margin-right: 30px;
           margin-top: 20px;
           .text {
-            width: 56px;
+            width: 100px;
             margin-right: 10px;
             font-family: "PingFangSC-Semibold";
             font-size: 14px;
@@ -253,9 +377,6 @@ export default {
               width: 200px;
             }
           }
-        }
-        .date-picker{
-          width: 430px;
         }
         .search-btn {
           margin-left: 66px;
@@ -534,9 +655,8 @@ export default {
     }
   }
 }
-/deep/ .el-table__fixed-right::before,
+.el-table__fixed-right::before,
 .el-table__fixed::before {
   display: none;
-  height: 0;
 }
 </style>
