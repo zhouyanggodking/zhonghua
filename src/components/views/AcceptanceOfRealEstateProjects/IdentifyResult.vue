@@ -5,7 +5,6 @@
         <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
       </div>
     </div>
-    <router-view/>
     <div class="identify-page-search">
       <div class="identify-page_search_condition">
         <div class="search-condition_input">
