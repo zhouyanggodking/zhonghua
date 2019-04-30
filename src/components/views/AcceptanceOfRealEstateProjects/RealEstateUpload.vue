@@ -23,10 +23,10 @@
               <div class="filed-box-content">
                 <div class="filed-item" v-for="(item, index) in filedList" :key="index">
                   <div class="filed-edit-name">
-                    {{item.name}}
+                    {{item.standardName}}
                   </div>
                   <div class="input-box">
-                    <el-input :placeholder="item.name"></el-input>
+                    <el-input :placeholder="item.editName" v-model="item.editName"></el-input>
                   </div>
                   <div class="del-btn" @click="removeItem(item)">删除</div>
                 </div>
@@ -112,6 +112,7 @@
 import BreadCrumb from '@/components/common/BreadCrumb';
 import FileUpload from '@/components/common/FileUpload';
 import Pagination from "@/components/common/Pagination";
+import {getOcrExtractTemplateFields} from '@/rest/realEstateUploadApi';
 
 const PAGE_SIZE = 10;
 
@@ -134,28 +135,7 @@ export default {
         name: '',
         text: ''
       },
-      filedList: [
-        {
-          name: '合同名称',
-          text: ''
-        },
-        {
-          name: '合同编号',
-          text: ''
-        },
-        {
-          name: '申请日期',
-          text: ''
-        },
-        {
-          name: '合同名称',
-          text: ''
-        },
-        {
-          name: '合同名称',
-          text: ''
-        }
-      ],
+      filedList: [],
       rules: {
         name: [
           { required: true, message: '请输入标准字段(必填)', trigger: 'blur' }
@@ -219,7 +199,16 @@ export default {
           text: ''
         }
       });
+    },
+    fetchTemplateFileds() {
+      getOcrExtractTemplateFields(1, 1, '')
+      .then((res) => {
+        this.filedList = res.data;
+      });
     }
+  },
+  mounted() {
+    this.fetchTemplateFileds();
   },
   components: {
     BreadCrumb,
