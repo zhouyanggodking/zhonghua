@@ -1,5 +1,5 @@
 <template>
-  <el-footer v-if="currentRoute!=='realEstateUpload'">
+  <el-footer v-if="currentRoute!=='realEstateUpload' && currentRoute!=='creditUpload'">
     <div class="footer-items-group">
       <div class="footer-item" v-for="(item, index) in footerItems" :key="index">{{item}}</div>
     </div>
