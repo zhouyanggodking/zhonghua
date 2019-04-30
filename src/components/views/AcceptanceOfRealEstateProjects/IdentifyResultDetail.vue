@@ -170,7 +170,7 @@
 <script>
 
 import BreadCrumb from "@/components/common/BreadCrumb";
-import resourceWrapper from "@/rest/resourceWrapper";
+// import resourceWrapper from "@/rest/resourceWrapper";
 
 export default {
   data() {
@@ -226,15 +226,15 @@ export default {
     lookPayRequestOrigin() {
       this.$router.push({ name: "identify-payment-request-origin" });
     },
-    getPaymentDetailData(userId,id){
-        resourceWrapper.paymentDetailsPage(userId,id).then(res=>{
-            console.log(res);
-        })
-    }
+    // getPaymentDetailData(userId,id){
+        // resourceWrapper.paymentDetailsPage(userId,id).then(res=>{
+            // console.log(res);
+        // })
+    // }
   },
   mounted(){
       this.id=this.$route.query.id;
-      this.getPaymentDetailData(1,1);
+    //   this.getPaymentDetailData(1,1);
   },
   components: {
     BreadCrumb
