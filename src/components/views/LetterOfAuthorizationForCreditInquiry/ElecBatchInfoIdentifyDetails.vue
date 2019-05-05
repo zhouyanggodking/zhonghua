@@ -8,7 +8,9 @@
     <div class="elect-batch-container">
       <div class="elect-batch-row">
         <div class="elect-batch-row_item">
-          <div class="elect-batch-row_item_title">Excel提取信息</div>
+          <div class="elect-batch-row_item_header">
+            <div class="title">Excel提取信息</div>
+          </div>
           <div class="content">
             <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
               <el-col class="item-title" :span="10">
@@ -21,7 +23,11 @@
           </div>
         </div>
         <div class="elect-batch-row_item">
-          <div class="elect-batch-row_item_title">Excel提取信息</div>
+          <div class="elect-batch-row_item_header">
+            <div class="title">电子文件识别结果</div>
+            <div class="look-origin" @click="lookOriginElect">查看原件</div>
+          </div>
+
           <div class="content">
             <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
               <el-col class="item-title" :span="10">
@@ -36,7 +42,10 @@
       </div>
       <div class="elect-batch-row">
         <div class="elect-batch-row_item">
-          <div class="elect-batch-row_item_title">智罗盘信息</div>
+          <div class="elect-batch-row_item_header">
+            <div class="title">智罗盘信息</div>
+            <div class="look-origin" @click="lookCompanyInfo">查看企业详细信息</div>
+          </div>
           <div class="content">
             <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
               <el-col class="item-title" :span="10">
@@ -49,7 +58,10 @@
           </div>
         </div>
         <div class="elect-batch-row_item">
-          <div class="elect-batch-row_item_title">纸质文件信息匹配</div>
+          <div class="elect-batch-row_item_header">
+            <div class="title">纸质文件信息匹配</div>
+            <div class="look-origin" @click="lookOriginPaper">查看原件</div>
+          </div>
           <div class="content">
             <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
               <el-col class="item-title" :span="10">
@@ -171,16 +183,23 @@ export default {
     previous() {
       this.$router.go(-1);
     },
-    rejectOpinionOperate(){
-
-    },
-    reviewPassOpearte(){
-
-    },
+    rejectOpinionOperate() {},
+    reviewPassOpearte() {},
     reviewReject() {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否驳回";
       this.dialogHintOperate = "驳回";
+    },
+    //智罗盘 查看企业详细信息
+    lookCompanyInfo() {
+      this.$router.push({ name: "look-company-info" });
+    },
+    //查看原件
+    lookOriginPaper() {
+      this.$router.push({ name: "look-origin" });
+    },
+    lookOriginElect() {
+      this.$router.push({ name: "look-origin" });
     }
   },
   components: {
@@ -239,14 +258,25 @@ export default {
         min-width: 400px;
         background: #ffffff;
         border-radius: 2px;
-        .elect-batch-row_item_title {
+        .elect-batch-row_item_header {
+          display: flex;
+          justify-content: space-between;
           height: 56px;
           padding-left: 30px;
+          padding-right: 30px;
           line-height: 56px;
           border-bottom: 1px solid #e8e8e8;
-          font-family: PingFangSC-Semibold;
-          font-size: 18px;
-          color: #9a8b7b;
+          .title {
+            font-family: PingFangSC-Semibold;
+            font-size: 18px;
+            color: #9a8b7b;
+          }
+          .look-origin {
+            font-size: 16px;
+            color: #4a90e2;
+            text-align: left;
+            cursor: pointer;
+          }
         }
         .content {
           padding: 30px;
