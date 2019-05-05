@@ -8,3 +8,7 @@ export const getOcrExtractTemplateFields = (businessTypeId, userId, id)=> {
     return Promise.reject(err)
   })
 }
+
+export const deleteTemplateField = () => {
+  
+}

@@ -8,12 +8,14 @@ const indexPage = resolve => require.ensure([], () => resolve(require('../compon
 // 地产承兑
 const realEstateUpload = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/RealEstateUpload.vue')), '文件上传');
 const identifyResult = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyResult.vue')), '识别结果');
-const identifyResultDetail = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyResultDetail.vue')), '识别结果');
-const IdentifyInvoiceOrigin = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyInvoiceOrigin.vue')), '识别结果');
-const IdentifyPaymentRequestOrigin = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyPaymentRequestOrigin.vue')), '识别结果');
+const identifyResultPage = resolve => require.ensure([], () => resolve(require('../components/views/IdentifyResultPage.vue')), '识别结果');
+const identifyResultDetail = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyResultDetail.vue')), 'indentify-result-details');
+const IdentifyInvoiceOrigin = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyInvoiceOrigin.vue')), 'identify-invoice-origin');
+const IdentifyPaymentRequestOrigin = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyPaymentRequestOrigin.vue')), 'identify-payment-request-origin');
 // 征信
 const creditUpload = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/CreditUpload.vue')), '文件上传');
 const creditReupload = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/CreditReupload.vue')), '文件补录');
+const creditElectronicIdentifyResultPage = resolve => require.ensure([], () => resolve(require('../components/views/CreditElectronicIdentifyResultPage.vue')), '识别结果');
 const electronicBatchInformation = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/ElectronicBatchInformation.vue')), '电子版批次信息');
 const electronicBatchInformationDetails = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/ElectronicBatchInformationDetails.vue')), '电子版批次信息详情');
 const elecBatchInfoIdentifyDetails = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/ElecBatchInfoIdentifyDetails.vue')), '电子版批次识别详情');
@@ -25,14 +27,12 @@ const router = new Router({
   // mode: 'history',
   routes: [{
     path: '/',
-    name: 'homePage',
     component: homePage,
     meta: {
       requiresAuth: true
     },
     children: [{
-        path: 'index',
-        name: 'index',
+        path: '',
         component: indexPage,
       },
       // 地产承兑
@@ -42,24 +42,30 @@ const router = new Router({
         component: realEstateUpload,
       },
       {
-        path: 'indentify-result-details',
-        name: 'indentify-result-details',
-        component: identifyResultDetail
-      },
-      {
-        path:'identify-invoice-origin',
-        name:'identify-invoice-origin',
-        component:IdentifyInvoiceOrigin
-      },
-      {
-        path:'identify-payment-request-origin',
-        name:'identify-payment-request-origin',
-        component:IdentifyPaymentRequestOrigin
-      },
-      {
         path: 'realEstateIdentifyResult',
-        name: 'realEstateIdentifyResult',
-        component: identifyResult,
+        component: identifyResultPage,
+        children: [
+          {
+            path: '/',
+            name: 'realEstateIdentifyResult',
+            component: identifyResult
+          },
+          {
+            path: 'indentify-result-details',
+            name: 'indentify-result-details',
+            component: identifyResultDetail
+          },
+          {
+            path:'identify-payment-request-origin',
+            name:'identify-payment-request-origin',
+            component:IdentifyPaymentRequestOrigin
+          },
+          {
+            path:'identify-invoice-origin',
+            name:'identify-invoice-origin',
+            component:IdentifyInvoiceOrigin
+          }
+        ]
       },
       // 征信
       {
@@ -74,18 +80,24 @@ const router = new Router({
       },
       {
         path: 'creditElectronicBatchInformation',
-        name: 'creditElectronicBatchInformation',
-        component: electronicBatchInformation,
-      },
-      {
-        path:'electronicBatchInformationDetails',
-        name:'credit-auth-elect-result-details',
-        component:electronicBatchInformationDetails
-      },
-      {
-        path:'elecBatchInfoIdentifyDetails',
-        name:'elec-batch-info-identify-details',
-        component:elecBatchInfoIdentifyDetails
+        component: creditElectronicIdentifyResultPage,
+        children: [
+          {
+            path: '/',
+            name: 'creditElectronicBatchInformation',
+            component: electronicBatchInformation,
+          },
+          {
+            path:'electronicBatchInformationDetails',
+            name:'credit-auth-elect-result-details',
+            component:electronicBatchInformationDetails
+          },
+          {
+            path:'elecBatchInfoIdentifyDetails',
+            name:'elec-batch-info-identify-details',
+            component:elecBatchInfoIdentifyDetails
+          },
+        ]
       },
       {
         path: 'creditPaperBatchInformation',

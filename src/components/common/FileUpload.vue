@@ -29,7 +29,6 @@
         <div class="right">
           <el-progress :text-inside="true" :stroke-width="16" :percentage="progressBarPercent" status="success"></el-progress>
           <span class="status uploading">上传中</span>
-          <span class="del-btn"></span>
         </div>
       </div>
     </div>
