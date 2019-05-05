@@ -10,15 +10,19 @@
       <el-submenu v-if="item.children.length" :index="item.index">
         <span slot="title">{{item.name}}</span>
         <div class="level-two" v-for="(child, idx) in item.children" :key="idx">
-          <el-submenu v-if="child.children.length" :index="child.index">
+          <el-submenu  v-if="child.children.length" :index="child.index">
             <template slot="title">{{child.name}}</template>
-            <el-menu-item v-for="(item, index) in child.children" :key="index" :index="item.index">{{item.name}}</el-menu-item>
+            <el-menu-item v-for="(item, index) in child.children" :key="index" :index="item.index">
+              {{item.name}}
+            </el-menu-item>
           </el-submenu>
-          <el-menu-item v-else :index="child.index">{{child.name}}</el-menu-item>
+          <el-menu-item :disabled="child.index === 'creditReupload'" v-else :index="child.index">
+            {{child.name}}
+          </el-menu-item>
         </div>
       </el-submenu>
-      <el-menu-item v-else :index="item.index">
-        <span slot="title">{{item.name}}</span>
+      <el-menu-item :disabled="item.index === '2'" v-else :index="item.index">
+        {{item.name}}
       </el-menu-item>
     </div>
   </el-menu>
@@ -27,13 +31,13 @@
 export default {
   data() {
     return {
-      activeMenu: '',
+      activeMenu: '/',
       uniqueOpened: true,
       userRouter: true,
       menuList:[
         {
           name: '首页',
-          index: 'index',
+          index: '/',
           children: []
         },
         {
@@ -47,41 +51,41 @@ export default {
           children: [
             {
               name: '文件上传',
-              index: 'realEstateUpload',
+              index: '/realEstateUpload',
               children: []
             },
             {
               name: '识别结果',
-              index: 'realEstateIdentifyResult',
+              index: '/realEstateIdentifyResult',
               children: []
             }
           ]
         },
         {
           name: '征信查询授权书',
-          index: 'credit',
+          index: '/credit',
           children: [
             {
               name: '文件上传',
-              index: 'creditUpload',
+              index: '/creditUpload',
               children: []
             },
             {
               name: '文件补录',
-              index: 'creditReupload',
+              index: '/creditReupload',
               children: []
             },
             {
               name: '识别结果',
-              index: 'creditIdentifyResult',
+              index: '/creditIdentifyResult',
               children: [
                 {
                   name: '电子版批次信息',
-                  index: 'creditElectronicBatchInformation'
+                  index: '/creditElectronicBatchInformation'
                 },
                 {
                   name: '纸质版批次信息',
-                  index: 'creditPaperBatchInformation'
+                  index: '/creditPaperBatchInformation'
                 }
               ]
             }
@@ -97,11 +101,11 @@ export default {
   },
   watch:{
     $route(to){
-      this.activeMenu = to.name;
+      this.activeMenu = `/${to.name}`;
     }
   },
   mounted() {
-    this.activeMenu = this.$route.name;
+    this.activeMenu = `/${this.$route.path.split('/')[1]}`;
   }
 }
 </script>
