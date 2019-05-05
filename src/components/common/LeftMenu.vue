@@ -93,7 +93,7 @@ export default {
         },
         {
           name: '用户管理',
-          index: 'userManagement',
+          index: '/userManagement',
           children: []
         },
       ]
