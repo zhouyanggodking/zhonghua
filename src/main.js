@@ -6,11 +6,10 @@ import 'viewerjs/dist/viewer.css';
 import App from './App.vue';
 import store from './store';
 import router from './router';
-import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
+import './main.scss';
 // import axios from 'axios';
 
 Vue.config.productionTip = false;
-Vue.component(CollapseTransition.name, CollapseTransition)
 Vue.use(ElementUI);
 Vue.use(Viewer);
 

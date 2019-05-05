@@ -1,37 +1,39 @@
 <template>
   <div class="usermanagement-page">
-    <router-view/>
     <div class="usermanagement-page-search">
-      <div class="usermanagement-page_search_condition">
-        <div class="search-condition_input">
-          <div class="search-condition_input_item date-picker">
-            <div class="text">申请日期</div>
-            <el-date-picker
-              v-model="applyDate"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </div>
-          <div class="search-condition_input_item">
-            <div class="text">审核状态</div>
-            <el-select v-model="reviewStatus" placeholder="请选择">
-              <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
-            </el-select>
-          </div>
-          <div class="search-condition_input_item second">
-            <el-button class="search-btn" @click="search">查询</el-button>
-            <div class="export-excel" @click="exportExcel">导出Excel</div>
-          </div>
+      <div class="search-conditions">
+        <div class="search-box search-name">
+          <div class="text">姓名</div>
+          <el-input></el-input>
+        </div>
+        <div class="search-box search-phonenumber">
+          <div class="text">手机号</div>
+          <el-input></el-input>
+        </div>
+        <div class="search-box search-department">
+          <div class="text">部门</div>
+          <el-select v-model="reviewStatus" placeholder="请选择">
+            <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+          </el-select>
+        </div>
+        <div class="search-box search-authority">
+          <div class="text">权限</div>
+          <el-checkbox-group v-model="selectedAuthority">
+            <el-checkbox v-for="(item, index) in checkList" :key="index" :label="item"></el-checkbox>
+          </el-checkbox-group>
+        </div>
+        <div class="search-box search-options">
+          <div class="text"></div>
+          <el-button>查询</el-button>
+          <div class="export-excle">导出excle</div>
         </div>
       </div>
     </div>
-    <div class="identify-page-table">
-      <div class="identify-page-table_btn">
-        <el-button class="btn" @click="tableDownload()">下载</el-button>
+    <div class="usermanagement-page-table">
+      <div class="usermanagement-page-table_btn">
+        <el-button class="btn" @click="addNewUser()">新增用户</el-button>
       </div>
-      <div class="identify-page-table_content">
+      <div class="usermanagement-page-table_content">
         <el-table
           ref="multipleTable"
           :data="tableData"
@@ -44,22 +46,18 @@
           <el-table-column label="付款主题" width="120">
             <template slot-scope="scope">{{ scope.row.date }}</template>
           </el-table-column>
-          <el-table-column prop="name" label="合同编号" width="120"></el-table-column>
-          <el-table-column prop="address" label="付款单位" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="收款单位" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="合同动态金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="累计已付金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="本次应付金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="票据总金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="票据数量" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="状态" show-overflow-tooltip></el-table-column>
-          <el-table-column label="操作" width="80" fixed="right">
+          <el-table-column prop="name" label="序号" width="120"></el-table-column>
+          <el-table-column prop="address" label="姓名" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="手机号" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="部门" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="权限" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="创建人" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="变更人" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="修改时间" show-overflow-tooltip></el-table-column>
+          <el-table-column label="操作" width="120" fixed="right">
             <template slot-scope="scope">
-              <el-button
-                class="table-btn"
-                size="mini"
-                @click="tableItemDetails(scope.$index, scope.row)"
-              >详情</el-button>
+              <span class="option-btn" @click="freezeAccount(scope.$index, scope.row)">冻结</span>
+              <span class="option-btn" @click="updateAccount(scope.$index, scope.row)">变更</span>
             </template>
           </el-table-column>
         </el-table>
@@ -68,6 +66,43 @@
         <Pagination></Pagination>
       </div>
     </div>
+    <el-dialog class="dialog-form user-dialog" :title="dialogTitle" :visible.sync="isDialogVisible">
+      <el-form :model="addUserform" :rules="rules" ref="addUserform">
+        <el-form-item label="姓名" :label-width="formLabelWidth" prop="name">
+          <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" :label-width="formLabelWidth" prop="phoneNum">
+          <el-input placeholder="请输入提取字段(必填)" v-model="addUserform.phoneNum" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="部门" :label-width="formLabelWidth" prop="department">
+          <el-select v-model="addUserform.department" placeholder="请选择">
+            <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="权限" :label-width="formLabelWidth" prop="authority">
+          <el-checkbox-group v-model="addUserform.authority">
+            <el-checkbox v-for="(item, index) in checkList" :key="index" :label="item"></el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button class="cancle-btn" @click="isDialogVisible = false">取 消</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleSubmitClick('sureBtn')">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog
+      :visible.sync="confirmDialogVisiable"
+      :show-close="false"
+      class="confirmDialog"
+      width="520px"
+      center>
+      <div class="icon"></div>
+      <div class="text">请确认是否冻结该用户</div>
+      <span slot="footer" class="dialog-footer">
+        <el-button class="cancle-btn" @click="confirmDialogVisiable = false">取 消</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleFreezeClick">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -78,24 +113,14 @@ const PAGE_SIZE = 10;
 export default {
   data() {
     return {
-      payTheme: "",
-      contractNum: "",
-      payer: "",
-      applyDate:'',
-      allChecked: false,
-      dialogHintText: "请确认是否驳回",
-      dialogHintOperate: "驳回",
+      checkList: ['地产承兑', '其他承兑', '贴现', '征信查询'],
+      selectedAuthority: [],
       isDialogVisible: false,
-      rejectContent: "",
-      collector: "",
-      dialogTitle: "填写驳回意见",
-      dialogVisible: false,
+      confirmDialogVisiable: false,
       reviewStatus: "全部",
       multipleSelection: [],
       currentPage: 1,
       totalCount: 0,
-      currentTitle: "电子版授权书批次识别结果",
-      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
@@ -135,17 +160,54 @@ export default {
           name: "王小虎",
           address: "上海市普陀区金沙江路 1518 弄"
         }
-      ]
+      ],
+      addUserform: {
+        name: '',
+        phoneNum: '',
+        department: '',
+        authority: []
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入姓名(必填)', trigger: 'blur' }
+        ],
+        phoneNum: [
+          { required: true, message: '请输入手机号(必填)', trigger: 'blur' }
+        ],
+        department: [
+          { required: true, message: '请选择部门(必填)', trigger: 'blur' }
+        ],
+        authority: [
+          { required: true, message: '请选择权限(必填)', trigger: 'blur' }
+        ],
+      },
+      formLabelWidth: '100px',
+      dialogTitle: '新增用户'
     };
   },
   methods: {
-    goBack() {},
     search() {},
-    tableDownload() {},
     batchReview() {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否批量通过";
       this.dialogHintOperate = "批量通过";
+    },
+    addNewUser() {
+      this.isDialogVisible = true;
+      this.dialogTitle = '新增用户'
+    },
+    handleSubmitClick() {
+
+    },
+    freezeAccount() {
+      this.confirmDialogVisiable = true;
+    },
+    handleFreezeClick() {
+      this.confirmDialogVisiable = false;
+    },
+    updateAccount() {
+      this.isDialogVisible = true;
+      this.dialogTitle = '用户变更';
     },
     batchReviewPass() {},
     tableItemDetails() {
@@ -177,74 +239,52 @@ export default {
   }
 };
 </script>
-
 <style lang="scss" scoped>
 .usermanagement-page {
-  .top-box {
-    height: 130px;
-    background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
-  }
   .usermanagement-page-search {
     background: #fff;
     margin-top: 20px;
     padding-bottom: 30px;
-    .usermanagement-page_search_condition {
+    .search-conditions {
       display: flex;
-      flex-direction: column;
-      padding-top: 10px;
-      margin-left: 30px;
-      .search-condition_input {
-        display: flex;
-        flex-wrap: wrap;
-
-        .search-condition_input_item {
-          display: inline-flex;
-          align-items: center;
-          width: 266px;
-          margin-right: 30px;
-          margin-top: 20px;
-          .text {
-            width: 56px;
-            margin-right: 10px;
-            font-family: "PingFangSC-Semibold";
-            font-size: 14px;
-            color: #666666;
-          }
-          /deep/ .el-input {
+      flex-wrap: wrap;
+      /deep/ {
+        .el-input {
+          .el-input__inner {
             width: 200px;
-
-            .el-input__inner {
-              width: 200px;
-            }
+            height: 40px;
           }
         }
-        .date-picker{
-          width: 430px;
-        }
-        .search-btn {
-          margin-left: 66px;
-          font-family: "PingFangSC-Semibold";
-        }
-        .export-excel {
-          width: 123px;
-          height: 20px;
-          text-align: center;
-          line-height: 20px;
+      }
+      .search-box {
+        display: flex;
+        margin-top: 20px;
+        align-items: center;
+        .text {
+          width: 60px;
+          margin-right: 10px;
+          text-align: right;
+          flex-shrink: 0;
           font-size: 14px;
-          color: #c1b071;
-          cursor: pointer;
+          font-weight: bold;
+          color: #666666;
+        }
+        &.search-options {
+          .export-excle {
+            margin-left: 30px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #C1B071;
+          }
         }
       }
     }
   }
   .usermanagement-page-table {
     margin-top: 20px;
-    padding: 20px 40px;
+    padding: 30px;
     background: #ffffff;
-    .identify-page-table_btn {
+    .usermanagement-page-table_btn {
       .el-checkbox {
         margin-right: 13px;
       }
@@ -320,18 +360,16 @@ export default {
           }
         }
       }
-      /deep/ .table-btn {
+      /deep/ .option-btn {
         width: 28px;
         height: 20px;
-        margin-right: 20px;
+        margin: 0 10px;
         background: none;
         border: none;
         font-weight: normal;
         font-size: 14px;
-        span {
-          color: #4a90e2;
-          // margin-right: 20px;
-        }
+        color: #4a90e2;
+        cursor: pointer;
       }
       .el-button--mini,
       .el-button--mini.is-round {
@@ -340,6 +378,19 @@ export default {
     }
     .table-footer {
       margin-top: 25px;
+    }
+  }
+  .user-dialog {
+    /deep/ {
+      .el-input {
+        &.update-account {
+          .el-input__inner {
+            background-color: #ffffff;
+            border: none;
+            cursor: default;
+          }
+        }
+      }
     }
   }
 }
@@ -366,140 +417,6 @@ export default {
 }
 .el-button + .el-button {
   margin-left: 0;
-}
-.dialog-common {
-  /deep/ .el-dialog {
-    width: 521px !important;
-    height: 228px !important;
-    border-radius: 0;
-    .el-dialog__header {
-      padding-top: 0;
-      padding-bottom: 4px;
-      .el-dialog__headerbtn {
-        display: none;
-      }
-    }
-    .el-dialog__body {
-      padding-bottom: 30px;
-    }
-    .el-dialog__footer {
-      border: none;
-      .dialog-footer {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 40px;
-        .el-button {
-          width: 135px;
-          height: 40px;
-        }
-      }
-    }
-
-    .dialog-footer {
-      .cancel-btn {
-        margin-right: 40px;
-        background: #ffffff;
-        border: 1px solid #d9d9d9;
-        span {
-          font-family: PingFangSC-Regular;
-          font-size: 16px;
-          color: #666666 !important;
-        }
-      }
-    }
-  }
-
-  .dialog-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .dialog-content_icon {
-    width: 36px;
-    height: 38px;
-  }
-  .review-icon {
-    width: 36px;
-    height: 37px;
-    background: url("../../assets/imgs/9.png") no-repeat;
-    background-size: cover;
-  }
-  .reject-icon {
-    background: url("../../assets/imgs/8.png") no-repeat;
-    background-size: cover;
-  }
-  .dialog-content_text {
-    margin-top: 20px;
-    font-family: PingFangSC-Semibold;
-    font-size: 20px;
-    color: #666666;
-  }
-}
-.dialog {
-  .reject-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 123px;
-    border-top: 2px solid #ebebeb;
-    border-bottom: 2px solid #ebebeb;
-    .label-content {
-      font-family: PingFangSC-Semibold;
-      font-size: 14px;
-      color: #666666;
-      margin-right: 10px;
-    }
-    /deep/ .el-input {
-      width: 300px;
-      .el-input__inner {
-        width: 300px;
-        height: 44px;
-      }
-    }
-  }
-  .dialog-footer {
-    /deep/ .cancel-btn {
-      margin-right: 40px;
-      background: #ffffff;
-      border: 1px solid #d9d9d9;
-      span {
-        font-family: PingFangSC-Regular;
-        font-size: 16px;
-        color: #666666 !important;
-      }
-    }
-  }
-}
-/deep/ .el-dialog {
-  width: 660px !important;
-  .el-dialog__header {
-    .el-dialog__title {
-      font-size: 20px;
-      color: #9a8b7b;
-    }
-    .el-dialog__headerbtn {
-      // width: 30px;
-      // height: 30px;
-      font-size: 30px;
-      .el-dialog__close {
-        color: rgba(51, 51, 51, 0.3);
-      }
-    }
-  }
-  .el-dialog__body {
-    padding-bottom: 20px;
-  }
-  .el-dialog__footer {
-    padding-top: 0;
-    border: none;
-    padding-bottom: 30px;
-    .el-button {
-      width: 135px !important;
-      height: 40px !important;
-    }
-  }
 }
 /deep/ .el-table__fixed-right::before,
 .el-table__fixed::before {
