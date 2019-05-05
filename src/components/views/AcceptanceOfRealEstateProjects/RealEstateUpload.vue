@@ -38,7 +38,6 @@
             <div class="filed-option">
               <el-button class="cancle-btn">取消</el-button>
               <el-button class="submit-btn">提交</el-button>
-              <el-button class="save-btn">保存</el-button>
             </div>
           </div>
         </el-collapse-transition>
@@ -371,7 +370,7 @@ export default {
         margin: 40px 0;
         justify-content: flex-end;
         border-top: 1px solid #EBEBEB;
-        .submit-btn, .save-btn {
+        .submit-btn {
           width: 136px;
           height: 40px;
           @include buttonStyle;
