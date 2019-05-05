@@ -19,6 +19,8 @@ const creditElectronicIdentifyResultPage = resolve => require.ensure([], () => r
 const electronicBatchInformation = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/ElectronicBatchInformation.vue')), '电子版批次信息');
 const electronicBatchInformationDetails = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/ElectronicBatchInformationDetails.vue')), '电子版批次信息详情');
 const elecBatchInfoIdentifyDetails = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/ElecBatchInfoIdentifyDetails.vue')), '电子版批次识别详情');
+const lookOrigin = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/LookOrigin.vue')), '电子版批次识别详情');
+const lookCompanyInfo = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/LookCompanyInfo.vue')), '电子版批次识别详情');
 const paperBatchInformation = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/PaperBatchInformation.vue')), '纸质版批次信息');
 // 用户管理
 const userManagement = resolve => require.ensure([], () => resolve(require('../components/views/UserManagementPage.vue')), '纸质版批次信息');
@@ -97,6 +99,16 @@ const router = new Router({
             name:'elec-batch-info-identify-details',
             component:elecBatchInfoIdentifyDetails
           },
+          {
+            path:'lookOrigin',
+            name:'look-origin',
+            component:lookOrigin
+          },
+          {
+            path:'look-company-info',
+            name:'look-company-info',
+            component:lookCompanyInfo
+          }
         ]
       },
       {
