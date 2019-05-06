@@ -206,7 +206,7 @@ export default {
 .retrieve-password {
   width: 100%;
   height: 100%;
-  background: url('../../../assets/imgs/signinBackground.jpg') no-repeat;
+  background: url('../../../assets/imgs/WechatIMG10.jpeg') no-repeat;
   background-size: 100% 100%;
   .title {
     display: flex;
