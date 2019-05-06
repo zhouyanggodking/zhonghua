@@ -14,22 +14,22 @@
             <div class="line"></div>
           </div>
         </div>
-        <el-form ref="signinForm" :model="signinForm" label-width="60px">
-          <el-form-item label="手机号">
+        <el-form ref="signinForm" :rules="rules" :model="signinForm" label-width="60px">
+          <el-form-item label="手机号" prop="name">
             <el-input v-model="signinForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="密码">
-            <el-input v-model="signinForm.name"></el-input>
+          <el-form-item label="密码" prop="password">
+            <el-input type="password" v-model="signinForm.password"></el-input>
           </el-form-item>
-          <el-form-item class="identify-code" label="验证码">
-            <el-input v-model="signinForm.name"></el-input>
-            <identify-code class="identify-code" @click:native="refreshCode" :identifyCode="identifyCode"></identify-code>
+          <el-form-item class="identify-code" label="验证码" prop="identifyCode">
+            <el-input v-model="signinForm.identifyCode"></el-input>
+            <identify-code class="identify-code" @click.native="refreshCode" :identifyCode="identifyCode"></identify-code>
           </el-form-item>
           <div class="forget-pwd">
-            <span>忘记密码?</span>
+            <span @click="toResetPwdPage">忘记密码?</span>
           </div>
           <el-form-item class="sign-in-btn">
-            <el-button>登录</el-button>
+            <el-button @click="handleLoginClick">登录</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -44,9 +44,46 @@ import IdentifyCode from '@/components/common/IdentifyCode';
 
 export default {
   data() {
+    const phoneReg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
+    const phoneMatch = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入手机号码'));
+      } else {
+        if (!value.match(phoneReg)) {
+          callback(new Error('请输入正确手机号码'));
+        } else {
+          callback();
+        }
+      }
+    };
+    const identifyCodeMatch = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入验证码'));
+      } else if (value !== this.identifyCode) {
+        callback(new Error('请输入正确验证码'));
+      } else {
+        callback();
+      }
+    };
     return {
       signinForm: {
-        name: ''
+        name: '',
+        password: '',
+        identifyCode: ''
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { validator: phoneMatch, trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { pattern: /^\d{6}$/, message: '密码为0~6位数字', trigger: 'blur' }
+        ],
+        identifyCode: [
+          { required: true, message: '请输入验证码', trigger: 'blur' },
+          { validator: identifyCodeMatch, trigger: 'blur' }
+        ],
       },
       identifyCodes: "1234567890",
       identifyCode: ""
@@ -58,20 +95,29 @@ export default {
     },
     refreshCode() {
       this.identifyCode = "";
-      this.makeCode(this.identifyCodes, 4);
+      this.initCode(this.identifyCodes, 4);
     },
-    makeCode(o, l) {
+    initCode(o, l) {
       for (let i = 0; i < l; i++) {
         this.identifyCode += this.identifyCodes[
           this.randomNum(0, this.identifyCodes.length)
         ];
       }
-      console.log(this.identifyCode);
+    },
+    handleLoginClick() {
+      // this.$refs.signinForm.validate((valid) => {
+      //   if(valid) {
+      //     return
+      //   } else {}
+      // })
+    },
+    toResetPwdPage() {
+      this.$router.push('/retrievePassword');
     }
   },
   mounted() {
     this.identifyCode = "";
-    this.makeCode(this.identifyCodes, 4);
+    this.initCode(this.identifyCodes, 4);
   },
   components: {
     Footer,
@@ -144,6 +190,9 @@ export default {
               font-size: 12px;
               color: #ffffff;
               text-align: left;
+              &::before {
+                content: '';
+              }
             }
             .el-form-item__content {
               line-height: 36px;

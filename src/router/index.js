@@ -7,6 +7,7 @@ const homePage = resolve => require.ensure([], () => resolve(require('../compone
 const indexPage = resolve => require.ensure([], () => resolve(require('../components/views/IndexPage.vue')), 'indexPage');
 // 登录
 const loginPage = resolve => require.ensure([], () => resolve(require('../components/views/Login/LoginPage.vue')), 'loginPage');
+const retrievePassword = resolve => require.ensure([], () => resolve(require('../components/views/Login/RetrievePassword.vue')), 'retrievePassword');
 // 地产承兑
 const realEstateUpload = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/RealEstateUpload.vue')), '文件上传');
 const identifyResult = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyResult.vue')), '识别结果');
@@ -36,6 +37,11 @@ const router = new Router({
       path: '/login',
       name: 'loginName',
       component: loginPage
+    },
+    {
+      path: '/retrievePassword',
+      name: 'retrievePassword',
+      component: retrievePassword
     },
     {
       path: '/',
