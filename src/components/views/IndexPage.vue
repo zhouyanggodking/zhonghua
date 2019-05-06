@@ -5,10 +5,12 @@
     </div>
     <div class="files-count-group">
       <div class="single-file" :class="{'upload': item.type==='upload', 'download': item.type==='download'}" v-for="(item, index) in filesCountList" :key="index">
-        <img src="../../assets/imgs/fksc.png" alt="" v-if="index === 0">
+        <img src="../../assets/imgs/payApply.png" alt="" v-if="index === 0">
         <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 1">
         <img src="../../assets/imgs/zxsc.png" alt="" v-if="index === 2">
         <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 3">
+        <img src="../../assets/imgs/fksc.png" alt="" v-if="index === 4">
+        <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 5">
         <div class="text">
           <p class="title">{{item.title}}</p>
           <p class="count" v-if="item.type === 'upload'">已上传资料<span>{{item.count}}</span>份</p>
@@ -36,7 +38,17 @@ export default {
           count: 10
         },
         {
-          title: '征信授权书上传',
+          title: '电子版征信授权书上传',
+          type: 'upload',
+          count: 10
+        },
+        {
+          title: '征信授权书结果下载',
+          type: 'download',
+          count: 10
+        },
+        {
+          title: '纸质版征信授权书上传',
           type: 'upload',
           count: 10
         },

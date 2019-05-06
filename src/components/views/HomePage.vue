@@ -13,6 +13,7 @@
     <el-container class="content">
       <el-header>
         <div class="system-name">智鉴通-财务公司</div>
+        <user-account></user-account>
       </el-header>
       <el-main>
         <router-view/>
@@ -23,6 +24,7 @@
 </template>
 <script>
 import '../../assets/iconfont/iconfont.css';
+import UserAccount from '@/components/common/UserAccount';
 import Footer from '@/components/common/Footer';
 import LeftMenu from '@/components/common/LeftMenu';
 
@@ -34,7 +36,8 @@ export default {
   },
   components: {
     Footer,
-    LeftMenu
+    LeftMenu,
+    UserAccount
   }
 }
 </script>
@@ -54,8 +57,8 @@ export default {
       padding: 0 40px 0 30px;
       background-color: #ffffff;
       color: #333333;
-      text-align: center;
-      line-height: 60px;
+      // text-align: center;
+      // line-height: 60px;
       .system-name {
         margin-right: auto;
         font-size: 26px;

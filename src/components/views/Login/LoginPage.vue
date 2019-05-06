@@ -179,7 +179,7 @@ export default {
             margin-bottom: 20px;
             >span {
               font-size: 14px;
-              color: #252525;
+              color: rgba(255,255,255,0.85);
               cursor: pointer;
             }
           }
