@@ -98,6 +98,7 @@ p {
       img {
         width: 78px;
         height: 78px;
+        flex-shrink: 0;
         margin-left: 30px;
         border-radius: 50%;
       }
