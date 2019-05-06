@@ -48,9 +48,12 @@
         <div class="content">
           <el-table :data="tableData" style="width: 100%">
             <el-table-column type="index" label="序号" width="50"></el-table-column>
-            <el-table-column prop="date" label="日期" width="180"></el-table-column>
-            <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-            <el-table-column prop="address" label="地址"></el-table-column>
+            <el-table-column prop="date" label="股东名称" width="180"></el-table-column>
+            <el-table-column prop="name" label="股东名称" width="180"></el-table-column>
+            <el-table-column prop="address" label="证照类型"></el-table-column>
+            <el-table-column prop="address" label="认缴份额"></el-table-column>
+            <el-table-column prop="address" label="实缴份额"></el-table-column>
+            <el-table-column prop="address" label="出资日期"></el-table-column>
           </el-table>
         </div>
       </div>

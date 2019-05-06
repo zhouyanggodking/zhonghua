@@ -14,7 +14,7 @@
         >{{item}}</div>
       </div>
     </div>
-    <div class="identify-page-search">
+    <div class="identify-page-search" v-if="activedIndex===0">
       <div class="identify-page_search_condition">
         <div class="search-condition_input">
           <div class="search-condition_input_item">
@@ -62,7 +62,7 @@
         </div>
       </div>
     </div>
-    <div class="identify-page-table">
+    <div class="identify-page-table" v-if="activedIndex===0">
       <div class="identify-page-table_btn">
         <el-checkbox v-model="allChecked">全选</el-checkbox>
         <el-button class="btn" @click="tableDownload()">下载</el-button>
@@ -111,6 +111,62 @@
       <div class="table-footer">
         <Pagination></Pagination>
       </div>
+    </div>
+    <div class="identify-page-search search-unauth" v-if="activedIndex===1">
+      <div class="identify-page_search_condition">
+        <div class="search-condition_input">
+          <div class="search-condition_input_item">
+            <div class="text">公司章</div>
+            <el-input v-model="payTheme" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">人名章</div>
+            <el-input v-model="contractNum" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">签署时间</div>
+            <el-date-picker
+              v-model="applyDate"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">上传时间</div>
+            <el-date-picker
+              v-model="applyDate"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
+          </div>
+          <div class="search-condition_input_item second">
+            <el-button class="search-btn" @click="search">查询</el-button>
+            <div class="export-excel" @click="exportExcel">导出Excel</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="search-unauth-table">
+      <el-table :data="tableData" style="width: 100%">
+        <el-table-column type="index" label="序号" width="50"></el-table-column>
+        <el-table-column prop="date" label="公司章"></el-table-column>
+        <el-table-column prop="name" label="人名章"></el-table-column>
+        <el-table-column prop="address"  label="签署时间"></el-table-column>
+        <el-table-column prop="address" label="上传时间"></el-table-column>
+        <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button
+                class="table-btn"
+                size="mini"
+                @click="lookOrigin(scope.$index, scope.row)"
+              >详情</el-button>
+            </template>
+          </el-table-column>
+      </el-table>
     </div>
     <el-dialog
       class="dialog-common"
@@ -191,7 +247,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "识别结果",
-      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
+      breadCrumbList: ["征信查询授权书","识别结果","电子版批次信息"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
@@ -243,12 +299,19 @@ export default {
       this.dialogHintText = "请确认是否批量通过";
       this.dialogHintOperate = "批量通过";
     },
-    topMenus(index){
-      this.activedIndex=index;
+    topMenus(index) {
+      this.activedIndex = index;
+    },
+    //未授权 查看原件
+    lookOrigin(){
+      this.$router.push({ name: "look-origin" });
     },
     batchReviewPass() {},
     tableItemDetails() {
-      this.$router.push({ name: "elec-batch-info-identify-details", query: { id: 1 } });
+      this.$router.push({
+        name: "elec-batch-info-identify-details",
+        query: { id: 1 }
+      });
     },
     exportExcel() {},
     tableItemReview() {
@@ -393,6 +456,20 @@ export default {
         }
       }
     }
+  }
+  .search-unauth {
+    .identify-page_search_condition {
+      .search-condition_input_item {
+        .text {
+          width: 56px !important;
+        }
+      }
+    }
+  }
+  .search-unauth-table{
+    margin-top: 30px;
+    background: #fff;
+    padding: 30px;
   }
   .identify-page-table {
     margin-top: 20px;
@@ -659,4 +736,17 @@ export default {
 .el-table__fixed::before {
   display: none;
 }
+/deep/ .table-btn {
+        width: 28px;
+        height: 20px;
+        margin-right: 20px;
+        background: none;
+        border: none;
+        font-weight: normal;
+        font-size: 14px;
+        span {
+          color: #4a90e2;
+          // margin-right: 20px;
+        }
+      }
 </style>
