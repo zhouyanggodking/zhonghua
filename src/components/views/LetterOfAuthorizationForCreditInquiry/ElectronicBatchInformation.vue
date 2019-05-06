@@ -98,7 +98,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "电子版授权书批次识别结果",
-      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
+      breadCrumbList: ["征信查询授权书","识别结果","电子版批次信息"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: ["全部", "未审核", "已审核", "审核中"],

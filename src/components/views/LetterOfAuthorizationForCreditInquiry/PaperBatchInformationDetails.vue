@@ -69,10 +69,11 @@
         >
           <el-table-column fixed type="selection" width="30"></el-table-column>
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column label="公司名称" width="120">
+          <el-table-column label="部门" width="120">
             <template slot-scope="scope">{{ scope.row.date }}</template>
           </el-table-column>
-          <el-table-column prop="name" label="公章" width="120"></el-table-column>
+          <el-table-column prop="name" label="公司名称" width="120"></el-table-column>
+          <el-table-column prop="address" label="公章" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="公章是否一致" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="人名章" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="是否法人" show-overflow-tooltip></el-table-column>
@@ -81,7 +82,7 @@
           <el-table-column prop="address" label="授权有效期" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="审核状态" show-overflow-tooltip></el-table-column>
           <el-table-column prop="address" label="档案编号" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="提供纸质授权书" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="address" label="匹配电子授权书" show-overflow-tooltip></el-table-column>
           <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
               <el-button
