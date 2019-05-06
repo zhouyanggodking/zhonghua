@@ -45,7 +45,7 @@
           <div class="collapse-text">点击收起</div>
           <div class="collapse-icon"></div>
         </div>
-        <el-dialog title="新增字段" :visible.sync="dialogFormVisible">
+        <el-dialog class="dialog-form" title="新增字段" :visible.sync="dialogFormVisible">
           <el-form :model="addFiledform" :rules="rules" ref="addFiledform">
             <el-form-item label="标准字段" :label-width="formLabelWidth" prop="name">
               <el-input placeholder="请输入标准字段(必填)" v-model="addFiledform.name" autocomplete="off"></el-input>
@@ -419,73 +419,24 @@ export default {
       }
     }
   }
-}
-</style>
-<style lang="scss">
-@import '@/scss/mixin.scss';
-
-.el-dialog__wrapper {
-  .el-dialog {
-    border-radius: 6px;
-    .el-dialog__footer {
-      border-top: 1px solid #e8eaec;
-      padding: 20px 20px;
-      .el-button {
-        width: 84px;
-        height: 30px;
-        &.cancle-btn {
-          @include cancleBtnStyle;
-          padding: 4px 20px;
-          margin: 0 16px;
-        }
-        &.submit-btn {
-          @include buttonStyle;
-          padding: 4px 20px;
-          margin: 0 16px;
-        }
-        &.goon-btn {
-          @include buttonStyle;
-          padding: 4px 10px;
-          margin: 0 16px;
-        }
-      }
+  .dialog-form {
+    .cancle-btn {
+      width: 136px;
+      height: 40px;
+      @include cancleBtnStyle;
+      margin: 0 16px;
     }
-  }
-  &.confirmDialog {
-    .el-dialog {
-      .el-dialog__footer {
-        border: none;
-        .dialog-footer {
-          .el-button {
-            width: 136px;
-            height: 40px;
-            &.cancle-btn {
-              @include cancleBtnStyle;
-              padding: 0px;
-            }
-            &.submit-btn {
-              @include buttonStyle;
-              padding: 0px;
-            }
-          }
-        }
-      }
-      .el-dialog__body {
-        .icon {
-          width: 40px;
-          height: 40px;
-          margin: 0 auto;
-          background: url('../../../assets/imgs/warning-icon.png') no-repeat;
-          background-size: contain;
-        }
-        .text {
-          margin-top: 20px;
-          font-size: 20px;
-          font-weight: bold;
-          color: #666666;
-          text-align: center;
-        }
-      }
+    .submit-btn {
+      width: 136px;
+      height: 40px;
+      @include buttonStyle;
+      margin: 0 16px;
+    }
+    .goon-btn {
+      width: 136px;
+      height: 40px;
+      @include buttonStyle;
+      margin: 0 16px;
     }
   }
 }

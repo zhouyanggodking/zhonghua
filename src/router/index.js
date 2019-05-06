@@ -5,6 +5,8 @@ Vue.use(Router);
 
 const homePage = resolve => require.ensure([], () => resolve(require('../components/views/HomePage.vue')), 'homePage');
 const indexPage = resolve => require.ensure([], () => resolve(require('../components/views/IndexPage.vue')), 'indexPage');
+// 登录
+const loginPage = resolve => require.ensure([], () => resolve(require('../components/views/Login/LoginPage.vue')), 'loginPage');
 // 地产承兑
 const realEstateUpload = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/RealEstateUpload.vue')), '文件上传');
 const identifyResult = resolve => require.ensure([], () => resolve(require('../components/views/AcceptanceOfRealEstateProjects/IdentifyResult.vue')), '识别结果');
@@ -27,102 +29,109 @@ const userManagement = resolve => require.ensure([], () => resolve(require('../c
 
 const router = new Router({
   // mode: 'history',
-  routes: [{
-    path: '/',
-    component: homePage,
-    meta: {
-      requiresAuth: true
+  routes: [
+    {
+      path: '/login',
+      name: 'loginName',
+      component: loginPage
     },
-    children: [{
-        path: '',
-        component: indexPage,
-      },
-      // 地产承兑
-      {
-        path: 'realEstateUpload',
-        name: 'realEstateUpload',
-        component: realEstateUpload,
-      },
-      {
-        path: 'realEstateIdentifyResult',
-        component: identifyResultPage,
-        children: [
-          {
-            path: '/',
-            name: 'realEstateIdentifyResult',
-            component: identifyResult
-          },
-          {
-            path: 'indentify-result-details',
-            name: 'indentify-result-details',
-            component: identifyResultDetail
-          },
-          {
-            path:'identify-payment-request-origin',
-            name:'identify-payment-request-origin',
-            component:IdentifyPaymentRequestOrigin
-          },
-          {
-            path:'identify-invoice-origin',
-            name:'identify-invoice-origin',
-            component:IdentifyInvoiceOrigin
-          }
-        ]
-      },
-      // 征信
-      {
-        path: 'creditUpload',
-        name: 'creditUpload',
-        component: creditUpload,
-      },
-      {
-        path: 'creditReupload',
-        name: 'creditReupload',
-        component: creditReupload,
-      },
-      {
-        path: 'creditElectronicBatchInformation',
-        component: creditElectronicIdentifyResultPage,
-        children: [
-          {
-            path: '/',
-            name: 'creditElectronicBatchInformation',
-            component: electronicBatchInformation,
-          },
-          {
-            path:'electronicBatchInformationDetails',
-            name:'credit-auth-elect-result-details',
-            component:electronicBatchInformationDetails
-          },
-          {
-            path:'elecBatchInfoIdentifyDetails',
-            name:'elec-batch-info-identify-details',
-            component:elecBatchInfoIdentifyDetails
-          },
-          {
-            path:'lookOrigin',
-            name:'look-origin',
-            component:lookOrigin
-          },
-          {
-            path:'look-company-info',
-            name:'look-company-info',
-            component:lookCompanyInfo
-          }
-        ]
-      },
-      {
-        path: 'creditPaperBatchInformation',
-        name: 'creditPaperBatchInformation',
-        component: paperBatchInformation,
-      },
-      {
-        path: 'userManagement',
-        name: 'userManagement',
-        component: userManagement,
-      }
-    ]
-  }]
+    {
+      path: '/',
+      component: homePage,
+      meta: { requiresAuth: true },
+        // 地产承兑
+      children: [
+        {
+          path: '',
+          component: indexPage,
+        },
+        // 地产承兑
+        {
+          path: 'realEstateUpload',
+          name: 'realEstateUpload',
+          component: realEstateUpload,
+        },
+        {
+          path: 'realEstateIdentifyResult',
+          component: identifyResultPage,
+          children: [
+            {
+              path: '/',
+              name: 'realEstateIdentifyResult',
+              component: identifyResult
+            },
+            {
+              path: 'indentify-result-details',
+              name: 'indentify-result-details',
+              component: identifyResultDetail
+            },
+            {
+              path:'identify-payment-request-origin',
+              name:'identify-payment-request-origin',
+              component:IdentifyPaymentRequestOrigin
+            },
+            {
+              path:'identify-invoice-origin',
+              name:'identify-invoice-origin',
+              component:IdentifyInvoiceOrigin
+            }
+          ]
+        },
+        // 征信
+        {
+          path: 'creditUpload',
+          name: 'creditUpload',
+          component: creditUpload,
+        },
+        {
+          path: 'creditReupload',
+          name: 'creditReupload',
+          component: creditReupload,
+        },
+        {
+          path: 'creditElectronicBatchInformation',
+          component: creditElectronicIdentifyResultPage,
+          children: [
+            {
+              path: '/',
+              name: 'creditElectronicBatchInformation',
+              component: electronicBatchInformation,
+            },
+            {
+              path:'electronicBatchInformationDetails',
+              name:'credit-auth-elect-result-details',
+              component:electronicBatchInformationDetails
+            },
+            {
+              path:'elecBatchInfoIdentifyDetails',
+              name:'elec-batch-info-identify-details',
+              component:elecBatchInfoIdentifyDetails
+            },
+            {
+              path:'lookOrigin',
+              name:'look-origin',
+              component:lookOrigin
+            },
+            {
+              path:'look-company-info',
+              name:'look-company-info',
+              component:lookCompanyInfo
+            }
+          ]
+        },
+        {
+          path: 'creditPaperBatchInformation',
+          name: 'creditPaperBatchInformation',
+          component: paperBatchInformation,
+        },
+        {
+          path: 'userManagement',
+          name: 'userManagement',
+          component: userManagement,
+        }
+      ]
+    }
+  ]
 });
 
 // router.beforeEach((to, from, next) => {

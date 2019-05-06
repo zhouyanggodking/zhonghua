@@ -14,44 +14,6 @@ export default {
 };
 </script>
 <style lang="scss">
-html, body{
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  font-family: 'Tahoma', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-.el-input.is-active .el-input__inner, .el-input__inner:focus, .el-select .el-input.is-focus .el-input__inner, .el-select .el-input__inner:focus {
-  border: 2px solid rgba(193,176,113,0.47);
-  outline: 0;
-}
-/* width */
-::-webkit-scrollbar {
-    width: 0.5rem;
-    height: 0.625rem;
-  }
 
-// /* Track */
-::-webkit-scrollbar-track {
-    // background-color: #fff; 
-    border-radius: 4px;
-    box-shadow: inset 0 0.125rem 0.0625rem 0 rgba(0, 0, 0, 0.05);
-}
 
-// // /* Handle */
-::-webkit-scrollbar-thumb {
-    background-color: #9A8B7B;
-    border-radius: 20px;
-}
-
-// // /* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background-color: #d8d8d8;
-}
-
-::-webkit-scrollbar-corner {
-  background: #e6ecee;
-}
 </style>
