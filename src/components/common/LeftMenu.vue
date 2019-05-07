@@ -101,7 +101,7 @@ export default {
   },
   watch:{
     $route(to){
-      this.activeMenu = `/${to.name}`;
+      this.activeMenu = `/${to.path.split('/')[1]}`;
     }
   },
   mounted() {
