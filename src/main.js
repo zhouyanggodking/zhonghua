@@ -6,12 +6,14 @@ import 'viewerjs/dist/viewer.css';
 import App from './App.vue';
 import store from './store';
 import router from './router';
+import uploader from 'vue-simple-uploader'
 import './main.scss';
 // import axios from 'axios';
 
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.use(Viewer);
+Vue.use(uploader)
 
 // axios.interceptors.request.use(config => {
 //   if (config.url.indexOf('/api/login') === -1) {

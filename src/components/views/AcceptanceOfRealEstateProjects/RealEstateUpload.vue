@@ -36,8 +36,8 @@
               +&nbsp;新增字段
             </div>
             <div class="filed-option">
-              <el-button class="cancle-btn">取消</el-button>
-              <el-button class="submit-btn">提交</el-button>
+              <el-button class="cancle-btn" @click="cancleEditFileds">返回</el-button>
+              <el-button class="submit-btn" @click="handleUpdateFiledsClick">提交</el-button>
             </div>
           </div>
         </el-collapse-transition>
@@ -47,11 +47,11 @@
         </div>
         <el-dialog class="dialog-form" title="新增字段" :visible.sync="dialogFormVisible">
           <el-form :model="addFiledform" :rules="rules" ref="addFiledform">
-            <el-form-item label="标准字段" :label-width="formLabelWidth" prop="name">
-              <el-input placeholder="请输入标准字段(必填)" v-model="addFiledform.name" autocomplete="off"></el-input>
+            <el-form-item label="标准字段" :label-width="formLabelWidth" prop="standardName">
+              <el-input placeholder="请输入标准字段(必填)" v-model="addFiledform.standardName" autocomplete="off"></el-input>
             </el-form-item>
-            <el-form-item label="本次提取字段" :label-width="formLabelWidth" prop="text">
-              <el-input placeholder="请输入提取字段(必填)" v-model="addFiledform.text" autocomplete="off"></el-input>
+            <el-form-item label="本次提取字段" :label-width="formLabelWidth" prop="editName">
+              <el-input placeholder="请输入提取字段(必填)" v-model="addFiledform.editName" autocomplete="off"></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -69,20 +69,16 @@
           style="width: 100%">
           <el-table-column
             align="center"
-            prop="date"
             label="序号"
+            type="index"
             width="50">
           </el-table-column>
           <el-table-column
-            prop="name"
+            v-for="(item, index) in columns"
+            :key="index"
+            :prop="item.name"
             align="center"
-            label="文件名">
-          </el-table-column>
-          <el-table-column
-            align="center"
-            prop="address"
-            label="上传日期"
-            width="352">
+            :label="item.key">
           </el-table-column>
         </el-table>
         <Pagination class="history-pagination"></Pagination>
@@ -111,7 +107,7 @@
 import BreadCrumb from '@/components/common/BreadCrumb';
 import FileUpload from '@/components/common/FileUpload';
 import Pagination from "@/components/common/Pagination";
-import {getOcrExtractTemplateFields} from '@/rest/realEstateUploadApi';
+import {getOcrExtractTemplateFields, updateOcrExtractTemplateFields, deleteTemplateField, getUploadHistory} from '@/rest/realEstateUploadApi';
 
 const PAGE_SIZE = 10;
 
@@ -131,8 +127,12 @@ export default {
         '动产项目承兑', '文件上传'
       ],
       addFiledform: {
-        name: '',
-        text: ''
+        standardName: '',
+        editName: '',
+        businessTypeId: 1,
+        standardType: 1,
+        createUserId: 1,
+        status: 1
       },
       filedList: [],
       rules: {
@@ -143,24 +143,38 @@ export default {
           { required: true, message: '请输入提取字段(必填)', trigger: 'blur' }
         ],
       },
-      tableData: [{
-        date: '1',
-        name: '组件1235体育热图新方法付付的111.zip',
-        address: '2016-05-03'
-      }, {
-        date: '2',
-        name: '组件1235体育热图新方法付付的111.zip',
-        address: '2016-05-03'
-      }, {
-        date: '3',
-        name: '组件1235体育热图新方法付付的111.zip',
-        address: '2016-05-03'
-      }, {
-        date: '4',
-        name: '组件1235体育热图新方法付付的111.zip',
-        address: '2016-05-03'
-      }],
-      readyDeleteItem: null
+      columns: [
+        {
+          key: '文件名',
+          name: 'filename'
+        },
+        {
+          key: '识别状态',
+          name: 'status',
+          render: (h, params) => {
+            if (params.row.status === '0') {
+              return h('div', {
+                style: {
+                  color: '#f29d39'
+                }
+              }, '未识别')
+            } else if (params.row.status === '1') {
+              return h('div', {
+                style: {
+                  color: 'green'
+                }
+              }, '识别完成')
+            }
+          }
+        },
+        {
+          key: '上传日期',
+          name: 'uploadTime'
+        }
+      ],
+      tableData: [],
+      readyDeleteItem: null,
+      deleteFiledId: null
     };
   },
   methods: {
@@ -170,18 +184,26 @@ export default {
     removeItem(item) {
       this.delDialogVisiable  = true;
       this.readyDeleteItem = item;
+      if (item.id) {
+        this.deleteFiledId = item.id;
+      }
     },
     handleDeleteClick() {
       const index = this.filedList.indexOf(this.readyDeleteItem);
-      if (index !== -1) {
+      if (index !== -1 && this.deleteFiledId) {
+        this.deleteTemplateField(this.deleteFiledId);
+      } else {
         this.filedList.splice(index, 1);
-        this.delDialogVisiable  = false;
+        this.delDialogVisiable = false;
       }
     },
     addNewFiled() {
       if (this.filedList.length < 15) {
         this.dialogFormVisible = true;
       }
+    },
+    cancleEditFileds() {
+      this.fetchTemplateFileds();
     },
     handleSubmitClick(btnType) {
       this.$refs.addFiledform.validate((valid) => {
@@ -194,20 +216,63 @@ export default {
           }
         }
         this.addFiledform = {
-          name: '',
-          text: ''
+          standardName: '',
+          editName: '',
+          businessTypeId: 1,
+          standardType: 1,
+          createUserId: 1,
+          status: 1
         }
       });
+    },
+    handleUpdateFiledsClick() {
+      this.updateTemplateFileds(this.filedList);
+    },
+    fetchHistoryList() {
+      const params = {
+        businessTypeId: '',
+        userId: 1,
+        pageSize: this.pageSize,
+        pageNum: this.currentPage
+      }
+      getUploadHistory(params)
+      .then((res) => {
+        this.tableData = res.data.data;
+        this.totalCount = res.data.total;
+      })
     },
     fetchTemplateFileds() {
       getOcrExtractTemplateFields(1, 1, '')
       .then((res) => {
         this.filedList = res.data;
       });
+    },
+    updateTemplateFileds(data) {
+      updateOcrExtractTemplateFields(data)
+      .then(() => {
+        this.fetchTemplateFileds();
+      })
+    },
+    deleteTemplateField(id) {
+      deleteTemplateField(id)
+      .then(() => {
+        this.delDialogVisiable  = false;
+        this.fetchTemplateFileds();
+        this.$message({
+          message: '删除字段成功',
+          type: 'success'
+        });
+      }, () => {
+        this.$message({
+          message: '删除字段失败',
+          type: 'warning'
+        });
+      })
     }
   },
   mounted() {
     this.fetchTemplateFileds();
+    this.fetchHistoryList();
   },
   components: {
     BreadCrumb,
@@ -424,19 +489,19 @@ export default {
       width: 136px;
       height: 40px;
       @include cancleBtnStyle;
-      margin: 0 16px;
+      margin: 0 10px;
     }
     .submit-btn {
       width: 136px;
       height: 40px;
       @include buttonStyle;
-      margin: 0 16px;
+      margin: 0 10px;
     }
     .goon-btn {
       width: 136px;
       height: 40px;
       @include buttonStyle;
-      margin: 0 16px;
+      margin: 0 10px;
     }
   }
 }

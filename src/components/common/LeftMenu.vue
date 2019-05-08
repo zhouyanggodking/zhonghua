@@ -16,7 +16,7 @@
               {{item.name}}
             </el-menu-item>
           </el-submenu>
-          <el-menu-item :disabled="child.index === 'creditReupload'" v-else :index="child.index">
+          <el-menu-item :disabled="child.index === '/creditReupload'" v-else :index="child.index">
             {{child.name}}
           </el-menu-item>
         </div>
