@@ -17,7 +17,7 @@
             <div class="grid-content column1">付款主题：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">金茂绿地有限公司</div>
+            <div class="grid-content grid-result">{{data.paymentTitle}}</div>
           </el-col>
           <el-col :span="6">
             <div class="grid-content column1"></div>
@@ -31,13 +31,13 @@
             <div class="grid-content column1">合同名称：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">111111111111111</div>
+            <div class="grid-content grid-result">{{data.contractName}}</div>
           </el-col>
           <el-col :span="6">
             <div class="grid-content column1">合同编号：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">222222222</div>
+            <div class="grid-content grid-result">{{data.contractNo}}</div>
           </el-col>
         </el-row>
         <el-row>
@@ -45,13 +45,13 @@
             <div class="grid-content column1">付款单位：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">222222222</div>
+            <div class="grid-content grid-result">{{data.payer}}</div>
           </el-col>
           <el-col :span="6">
             <div class="grid-content column1">收款单位：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">我我我我我我我</div>
+            <div class="grid-content grid-result">{{data.receiver}}</div>
           </el-col>
         </el-row>
         <el-row>
@@ -59,27 +59,27 @@
             <div class="grid-content column1">合同动态金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">111111111111111</div>
+            <div class="grid-content grid-result">{{data.contractDynamicAmount}}</div>
           </el-col>
           <el-col :span="6">
             <div class="grid-content column1">累计已付金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">134566</div>
+            <div class="grid-content grid-result">{{data.acountPayable}}</div>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="6">
-            <div class="grid-content column1 red-text">本次应付金额（大写）：</div>
+            <div class="grid-content column1" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">本次应付金额（大写）：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result red-text">壹贰叁肆伍陆柒捌玖零</div>
+            <div class="grid-content grid-result"  :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">{{data.paidAmount}}</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content column1 green-text">应付未付金额：</div>
+            <div class="grid-content column1" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">应付未付金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result green-text">134566</div>
+            <div class="grid-content grid-result" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">{{data.unpaidAmount}}</div>
           </el-col>
         </el-row>
       </div>
@@ -93,8 +93,7 @@
         <div class="invoice-table_content">
           <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
             <el-table-column type="index" label="序号" width="50"></el-table-column>
-            <el-table-column label="发票号码" width="120">
-              <template slot-scope="scope">{{ scope.row.date }}</template>
+            <el-table-column label="发票号码" prop="invoiceNum" width="120">
             </el-table-column>
             <el-table-column prop="name" label="发票代码" width="120"></el-table-column>
             <el-table-column prop="address" label="购买方" show-overflow-tooltip></el-table-column>
@@ -175,14 +174,9 @@ import resourceWrapper from "@/rest/resourceWrapper";
 export default {
   data() {
     return {
-      tableData: [
-        {
-          index: '1',
-          name: 'test',
-          address: '北京'
-        }
-      ],
+      tableData: [],
       id:1,
+      data:{},
       textarea: "",
       isDialogVisible:false,
       dialogVisible:false,
@@ -228,7 +222,9 @@ export default {
     },
     getPaymentDetailData(userId,id){
         resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
-            console.log(res);
+            this.data=res.data;
+            this.tableData=res.data.estateInvoices;
+            
         })
     }
   },
