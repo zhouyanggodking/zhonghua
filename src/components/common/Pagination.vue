@@ -15,10 +15,15 @@
 const PAGE_SIZE = 10;
 
 export default {
+  props:{
+    totalCount:{
+      type:Number,
+      default:1
+    }
+  },
   data() {
     return {
       currentPage:1,
-      totalCount: 0,
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE]
     };

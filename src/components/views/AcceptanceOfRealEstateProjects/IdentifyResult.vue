@@ -10,11 +10,11 @@
         <div class="search-condition_input">
           <div class="search-condition_input_item">
             <div class="text">付款主题</div>
-            <el-input v-model="payTheme" placeholder="请输入内容"></el-input>
+            <el-input v-model="paymentTitle" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">合同编号</div>
-            <el-input v-model="contractNum" placeholder="请输入内容"></el-input>
+            <el-input v-model="contractNo" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">付款方</div>
@@ -53,18 +53,16 @@
         >
           <el-table-column fixed type="selection" width="30"></el-table-column>
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column label="付款主题" width="120">
-            <template slot-scope="scope">{{ scope.row.date }}</template>
-          </el-table-column>
-          <el-table-column prop="name" label="合同编号" width="120"></el-table-column>
-          <el-table-column prop="address" label="付款单位" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="收款单位" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="合同动态金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="累计已付金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="本次应付金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="票据总金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="票据数量" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="状态" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="paymentTitle" label="付款主题" width="120"></el-table-column>
+          <el-table-column prop="contractNo" label="合同编号" width="120"></el-table-column>
+          <el-table-column prop="payer" label="付款单位" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="receiver" label="收款单位" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="contractDynamicAmount" label="合同动态金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="paidAmount" label="累计已付金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="acountPayable" label="本次应付金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="invoiceTotalPrice" label="票据总金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="invoiceNum" label="票据数量" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="state" label="状态" show-overflow-tooltip></el-table-column>
           <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
               <el-button
@@ -76,12 +74,6 @@
                 class="table-btn"
                 size="mini"
                 type="danger"
-                @click="tableItemReview(scope.$index, scope.row)"
-              >审核</el-button>
-              <el-button
-                class="table-btn"
-                size="mini"
-                type="danger"
                 @click="tableItemRejected(scope.$index, scope.row)"
               >驳回</el-button>
             </template>
@@ -89,7 +81,7 @@
         </el-table>
       </div>
       <div class="table-footer">
-        <Pagination></Pagination>
+        <Pagination :totalCount="totalCount"></Pagination>
       </div>
     </div>
     <el-dialog
@@ -144,6 +136,8 @@
   </div>
 </template>
 <script>
+import resourceWrapper from "@/rest/resourceWrapper";
+
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 
@@ -152,9 +146,13 @@ const PAGE_SIZE = 10;
 export default {
   data() {
     return {
-      payTheme: "",
-      contractNum: "",
+      paymentTitle:'',
+      contractNo:'',
       payer: "",
+      receiver:'',
+      auditState:1,
+      userId:1,
+      pageNum:1,
       allChecked: false,
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
@@ -172,43 +170,7 @@ export default {
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
-      tableData: [
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        }
-      ]
+      tableData: []
     };
   },
   methods: {
@@ -254,7 +216,17 @@ export default {
     },
     handleCurrentChange(currPage) {
       this.currentPage = currPage;
+    },
+    getPaymentOrderInfos(){
+      resourceWrapper.getPaymentOrderInfos(this.userId,this.pageNum,this.pageSize).then(res=>{
+        // console.log(res.data)
+        this.tableData=res.data.data;
+        this.totalCount=res.data.total;
+      })
     }
+  },
+  mounted(){
+    this.getPaymentOrderInfos();
   },
   components: {
     BreadCrumb,
