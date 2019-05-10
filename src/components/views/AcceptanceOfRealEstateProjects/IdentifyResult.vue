@@ -39,12 +39,13 @@
     </div>
     <div class="identify-page-table">
       <div class="identify-page-table_btn">
-        <el-checkbox v-model="allChecked">全选</el-checkbox>
+        <el-checkbox v-model="allChecked" @click="toggleSelection(tableData)">全选</el-checkbox>
         <el-button class="btn" @click="tableDownload()">下载</el-button>
         <el-button class="btn" @click="batchReview()">批量审核</el-button>
       </div>
       <div class="identify-page-table_content">
         <el-table
+          v-loading="isLoading"
           ref="multipleTable"
           :data="tableData"
           tooltip-effect="dark"
@@ -68,13 +69,13 @@
               <el-button
                 class="table-btn"
                 size="mini"
-                @click="tableItemDetails(scope.$index, scope.row)"
+                @click="tableItemDetails(scope.row)"
               >详情</el-button>
               <el-button
                 class="table-btn"
                 size="mini"
                 type="danger"
-                @click="tableItemRejected(scope.$index, scope.row)"
+                @click="tableItemRejected(scope.row)"
               >驳回</el-button>
             </template>
           </el-table-column>
@@ -94,7 +95,7 @@
       <div class="dialog-content">
         <div
           class="dialog-content_icon"
-          :class="{'review-icon':dialogHintOperate==='审核通过','reject-icon':dialogHintOperate==='驳回'}"
+          :class="{'review-icon':dialogHintOperate==='审核通过' || dialogHintOperate==='批量通过','reject-icon':dialogHintOperate==='驳回'}"
         ></div>
         <div class="dialog-content_text">{{dialogHintText}}</div>
       </div>
@@ -130,27 +131,32 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">驳 回</el-button>
+        <el-button type="primary" @click="handleRejectClick">驳 回</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
 import resourceWrapper from "@/rest/resourceWrapper";
-
+import {global_} from '@/global/global';
+import {checkPaymentRequestOrders, checkPaymentRequestOrder} from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 
 const PAGE_SIZE = 10;
+const CHECK = 1;
+const REJECT = 0;
 
 export default {
   data() {
     return {
+      isLoading: false,
       paymentTitle:'',
       contractNo:'',
       payer: "",
       receiver:'',
       auditState:1,
+      rejectId: null,
       userId:1,
       pageNum:1,
       allChecked: false,
@@ -170,46 +176,132 @@ export default {
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
-      tableData: []
+      tableData: [],
     };
   },
+  watch: {
+    'allChecked'() {
+      this.toggleSelection(this.tableData);
+    }
+  },
   methods: {
-    goBack() {},
-    search() {},
-    tableDownload() {},
+    search() {
+      this.getPaymentOrderInfos();
+    },
+    tableDownload() {
+      if (this.multipleSelection.length) {
+        const params = {
+          ids: this.multipleSelection,
+          userId: 1
+        };
+        window.open(`${global_}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById?userId=${params.userId}&ids=${params.ids}`,'_parent');
+      } else {
+        this.$message({
+          message: '请勾选要下载的对象!',
+          type: 'warning'
+        })
+      }
+    },
     batchReview() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否批量通过";
-      this.dialogHintOperate = "批量通过";
+      if (this.multipleSelection.length) {
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否批量通过";
+        this.dialogHintOperate = "批量通过";
+      } else {
+        this.$message({
+          message: '请勾选要审核的对象!',
+          type: 'warning'
+        })
+      }
+      
     },
-    batchReviewPass() {},
-    tableItemDetails() {
-      this.$router.push({ name: "indentify-result-details", query: { id: 1 } });
+    reviewPass() {},
+    // 全选toggle
+    toggleSelection(data) {
+      if (data) {
+        data.forEach(data => {
+          this.$refs.multipleTable.toggleRowSelection(data);
+        });
+      } else {
+        this.$refs.multipleTable.clearSelection();
+      }
     },
-    exportExcel() {},
+    tableItemDetails(row) {
+      this.$router.push({ name: "indentify-result-details", query: { id: row.id } });
+    },
+    exportExcel() {
+      const params = {
+        paymentTitle: this.paymentTitle,
+        contractNo: this.contractNo,
+        payer: this.payer,
+        receiver: this.receiver,
+        auditState: this.auditState,
+        userId: this.userId,
+        fileName: ''
+      }
+      window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrdersToExcel?userId=${params.userId}&paymentTitle=${params.paymentTitle}&contractNo=${params.contractNo}&payer=${params.payer}&receiver=${params.receiver}&fileName=${params.fileName}`,'_parent');
+    },
     tableItemReview() {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否审核通过";
       this.dialogHintOperate = "审核通过";
     },
-    tableItemRejected() {
-      // this.dialogVisible = true;
+    tableItemRejected(row) {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否驳回";
       this.dialogHintOperate = "驳回";
+      this.rejectId = row.id;
     },
-    reviewPass() {
+    // 批量审核
+    batchReviewPass() {
       this.isDialogVisible = false;
+      const params = {
+        ids: this.multipleSelection,
+        state: CHECK,
+        userId: 1
+      };
+      checkPaymentRequestOrders(params).then(() => {
+        this.$message({
+          message: '审核完成',
+          type: 'success'
+        })
+      }, () => {
+        this.$message({
+          message: '审核失败',
+          type: 'warning'
+        })
+      })
     },
+    // 驳回
     rejectOpinion() {
       this.isDialogVisible = false;
       this.dialogVisible = true;
+    },
+    handleRejectClick() {
+      const params = {
+        id: this.rejectId,
+        state: REJECT,
+        userId: 1,
+        rejectReason: this.rejectContent
+      };
+      checkPaymentRequestOrder(params).then(() => {
+        this.$message({
+          message: '驳回成功',
+          type: 'success'
+        });
+        this.dialogVisible = false;
+      },() => {
+        this.$message({
+          message: '驳回失败',
+          type: 'warning'
+        })
+      });
     },
     handleClose() {
       this.dialogVisible = false;
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val;
+      this.multipleSelection = val.map(item => item.id);
     },
     handleSizeChange(pageSize) {
       this.pageSize = pageSize;
@@ -218,10 +310,22 @@ export default {
       this.currentPage = currPage;
     },
     getPaymentOrderInfos(){
-      resourceWrapper.getPaymentOrderInfos(this.userId,this.pageNum,this.pageSize).then(res=>{
-        // console.log(res.data)
+      this.tableData = [];
+      this.isLoading = true;
+      const params = {
+        paymentTitle: this.paymentTitle,
+        contractNo: this.contractNo,
+        payer: this.payer,
+        receiver: this.receiver,
+        auditState: this.auditState,
+        userId: this.userId,
+        pageNum: this.currentPage,
+        pageSize: this.pageSize
+      }
+      resourceWrapper.getPaymentOrderInfos(params).then(res=>{
         this.tableData=res.data.data;
-        this.totalCount=res.data.total;
+        this.totalCount=res.data.total || 0;
+        this.isLoading = false;
       })
     }
   },
@@ -375,15 +479,6 @@ export default {
                   line-height: 22px;
                 }
               }
-              // .el-table_1_column_1{
-              //   .cell{
-              //     display: none;
-              //   }
-              // }
-              // .el-table_1_column_2{
-              //   position: relative;
-
-              // }
             }
           }
         }
@@ -561,8 +656,6 @@ export default {
       color: #9a8b7b;
     }
     .el-dialog__headerbtn {
-      // width: 30px;
-      // height: 30px;
       font-size: 30px;
       .el-dialog__close {
         color: rgba(51, 51, 51, 0.3);
@@ -585,5 +678,10 @@ export default {
 .el-table__fixed-right::before,
 .el-table__fixed::before {
   display: none;
+}
+/deep/ {
+  .el-loading-mask {
+    min-height: 200px;
+  }
 }
 </style>

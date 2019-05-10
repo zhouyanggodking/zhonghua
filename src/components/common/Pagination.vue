@@ -34,6 +34,7 @@ export default {
     },
     handleCurrentChange(currPage) {
       this.currentPage = currPage;
+      this.$emit('change', {pageSize: this.pageSize, pageNum: this.currentPage});
     }
   }
 };

@@ -64,6 +64,7 @@
       <div class="upload-history">
         <div class="title">上传记录</div>
         <el-table
+          v-loading="isLoading"
           :data="tableData"
           border
           style="width: 100%">
@@ -74,14 +75,28 @@
             width="50">
           </el-table-column>
           <el-table-column
-            v-for="(item, index) in columns"
-            :key="index"
-            :prop="item.name"
             align="center"
-            :label="item.key">
+            label="文件名"
+            prop="filename">
+          </el-table-column>
+          <el-table-column
+            align="center"
+            label="识别状态"
+            prop="status">
+            <template slot-scope="scope">
+              <span v-if="scope.row.status === 0">未开始</span>
+              <span v-else-if="scope.row.status === 1" style="color: #4A90E2;">识别中</span>
+              <span v-else-if="scope.row.status === 2" style="color: #417505;">识别成功</span>
+              <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            align="center"
+            label="上传日期"
+            prop="uploadTime">
           </el-table-column>
         </el-table>
-        <Pagination class="history-pagination"></Pagination>
+        <Pagination @change="onHistoryPageNumChange" :totalCount="totalCount" class="history-pagination"></Pagination>
       </div>
     </div>
     <el-dialog
@@ -114,6 +129,7 @@ const PAGE_SIZE = 10;
 export default {
   data() {
     return {
+      isLoading: false,
       isShowFiledList: false,
       delDialogVisiable: false,
       currentPage: 1,
@@ -143,35 +159,6 @@ export default {
           { required: true, message: '请输入提取字段(必填)', trigger: 'blur' }
         ],
       },
-      columns: [
-        {
-          key: '文件名',
-          name: 'filename'
-        },
-        {
-          key: '识别状态',
-          name: 'status',
-          render: (h, params) => {
-            if (params.row.status === '0') {
-              return h('div', {
-                style: {
-                  color: '#f29d39'
-                }
-              }, '未识别')
-            } else if (params.row.status === '1') {
-              return h('div', {
-                style: {
-                  color: 'green'
-                }
-              }, '识别完成')
-            }
-          }
-        },
-        {
-          key: '上传日期',
-          name: 'uploadTime'
-        }
-      ],
       tableData: [],
       readyDeleteItem: null,
       deleteFiledId: null
@@ -228,6 +215,11 @@ export default {
     handleUpdateFiledsClick() {
       this.updateTemplateFileds(this.filedList);
     },
+    onHistoryPageNumChange(res) {
+      this.pageSize = res.pageSize;
+      this.currentPage = res.pageNum;
+      this.fetchHistoryList();
+    },
     fetchHistoryList() {
       const params = {
         businessTypeId: '',
@@ -242,9 +234,12 @@ export default {
       })
     },
     fetchTemplateFileds() {
+      this.filedList = [];
+      this.isLoading = true;
       getOcrExtractTemplateFields(1, 1, '')
       .then((res) => {
         this.filedList = res.data;
+        this.isLoading = false;
       });
     },
     updateTemplateFileds(data) {

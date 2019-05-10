@@ -132,6 +132,14 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   -webkit-transition: color 99999s ease-out, background-color 99999s ease-out;
   transition: color 99999s ease-out, background-color 99999s ease-out;
 }
+// table 固定列样式
+.el-table {
+  .el-table__fixed, .el-table__fixed-right {
+    &::before {
+      height: 0;
+    }
+  }
+}
 /* width */
 ::-webkit-scrollbar {
     width: 0.5rem;
