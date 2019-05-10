@@ -7,16 +7,16 @@ export default class resourceWrapper {
     }
     static getPaymentDetailsPage(userId, id) {
 
-        return axios.get(`/estatePaymentRequestOrderController/getPaymentRequestOrderInfo?userId=${userId}&id=${id}` ).then(res => {
+        return axios.get(`/estate/estatePaymentRequestOrderController/getPaymentRequestOrderInfo?userId=${userId}&id=${id}` ).then(res => {
             return res.data;
         }, (err) => {
             return Promise.reject(err)
         })
     }
 
-    static getPaymentOrderInfos(userId, pageNum,pageSize) {
+    static getPaymentOrderInfos(params) {
 
-        return axios.get(`/estatePaymentRequestOrderController/getPaymentRequestOrderInfos?userId=${userId}&pageNum=${pageNum}&pageSize=${pageSize}` ).then(res => {
+        return axios.get(`/estate/estatePaymentRequestOrderController/getPaymentRequestOrderInfos?userId=${params.userId}&pageNum=${params.pageNum}&pageSize=${params.pageSize}&paymentTitle=${params.paymentTitle}&contractNo=${params.contractNo}&payer=${params.payer}&receiver=${params.receiver}&auditState=${params.auditState}` ).then(res => {
             return res.data;
         }, (err) => {
             return Promise.reject(err)

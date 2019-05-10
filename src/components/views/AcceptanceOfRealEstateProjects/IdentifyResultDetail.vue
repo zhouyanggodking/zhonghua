@@ -92,20 +92,20 @@
         </div>
         <div class="invoice-table_content">
           <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
-            <el-table-column type="index" label="序号" width="50"></el-table-column>
-            <el-table-column label="发票号码" prop="invoiceNum" width="120">
+            <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
+            <el-table-column label="发票号码" prop="invoiceNo" width="120">
             </el-table-column>
-            <el-table-column prop="name" label="发票代码" width="120"></el-table-column>
-            <el-table-column prop="address" label="购买方" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="销售方" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="开票日期" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="invoiceNo" label="发票代码" width="120"></el-table-column>
+            <el-table-column prop="buyyerName" label="购买方" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="salerName" label="销售方" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="createTime" label="开票日期" show-overflow-tooltip></el-table-column>
             <el-table-column prop="address" label="金额" show-overflow-tooltip></el-table-column>
             <el-table-column prop="address" label="已用金额" show-overflow-tooltip></el-table-column>
             <el-table-column prop="address" label="本次使用金额" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="是否盖章" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="凭证联" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="发票验真" show-overflow-tooltip></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column prop="stamped" label="是否盖章" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="invoiceType" label="凭证联" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="verification" label="发票验真" show-overflow-tooltip></el-table-column>
+            <el-table-column fixed="right" label="操作">
               <template slot-scope="scope">
                 <el-button
                   class="table-btn"
@@ -128,9 +128,9 @@
       </div>
       <div class="divide-line"></div>
       <div class="review-btn-group">
-        <el-button class="cancel-btn" @click="previous">取消</el-button>
-        <el-button @click="reviewPass">审核通过</el-button>
-        <el-button @click="reviewReject">驳回</el-button>
+        <el-button class="cancel-btn" @click="previous">返回</el-button>
+        <el-button :disabled="data.state === 1" @click="reviewPass">审核通过</el-button>
+        <el-button :disabled="data.state === 0" @click="reviewReject">驳回</el-button>
       </div>
     </div>
     <el-dialog
@@ -157,11 +157,6 @@
           type="primary"
           @click="reviewPassOpearte"
         >{{dialogHintOperate}}</el-button>
-        <el-button
-          v-if="dialogHintOperate==='批量通过'"
-          type="primary"
-          @click="batchReviewPass"
-        >{{dialogHintOperate}}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -170,10 +165,12 @@
 
 import BreadCrumb from "@/components/common/BreadCrumb";
 import resourceWrapper from "@/rest/resourceWrapper";
+import {global_} from '@/global/global';
 
 export default {
   data() {
     return {
+      checkBtnToggle: false,
       tableData: [],
       id:1,
       data:{},
@@ -193,7 +190,7 @@ export default {
       this.$router.push({ name: "identify-invoice-origin" });
     },
     exportExcel(){
-
+      window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
     },
     reviewPass(){
         this.isDialogVisible = true;
@@ -206,17 +203,19 @@ export default {
       this.dialogHintOperate = "驳回";
     },
     rejectOpinionOperate(){
-
+      this.data.state = 0;
+      this.isDialogVisible = false;
     },
     reviewPassOpearte(){
-
+      this.data.state = 1;
+      this.isDialogVisible = false;
     },
     handleClose() {
       this.dialogVisible = false;
     },
     previous(){
-          this.$router.go(-1);
-      },
+      this.$router.back(-1);
+    },
     lookPayRequestOrigin() {
       this.$router.push({ name: "identify-payment-request-origin" });
     },
@@ -224,13 +223,12 @@ export default {
         resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
             this.data=res.data;
             this.tableData=res.data.estateInvoices;
-            
         })
     }
   },
   mounted(){
       this.id=this.$route.query.id;
-      this.getPaymentDetailData(1,1);
+      this.getPaymentDetailData(1, this.id);
   },
   components: {
     BreadCrumb
@@ -416,6 +414,10 @@ export default {
   &:hover {
     background-color: #e9d58b;
     border-color: #e9d58b;
+  }
+  &.is-disabled {
+    background-color: #d9d9d9;
+    border-color: #d9d9d9;
   }
 }
 .el-button:active {
