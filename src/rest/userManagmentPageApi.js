@@ -2,7 +2,7 @@ import axios from 'axios';
 import Qs from 'qs';
 //获取权限列表
 export const getAuthorityList = ()=> {
-    return axios.get(`/finance/ocr/user/getAllUsersByQuery?`)
+    return axios.get(``)
     .then(res => {
       return res.data;
     }, (err) => {
@@ -11,7 +11,7 @@ export const getAuthorityList = ()=> {
   }
 //获取部门列表
 export const getDepartmentList = ()=> {
-    return axios.get(`/finance/ocr/user/getAllUsersByQuery?`)
+    return axios.get(`?`)
     .then(res => {
       return res.data;
     }, (err) => {
@@ -20,7 +20,7 @@ export const getDepartmentList = ()=> {
   }
 //查询用户列表
 export const getUserList = (params)=> {
-    return axios.get(`/finance/ocr/user/getAllUsersByQuery?userName=${params.userName}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)
+    return axios.get(`?userName=${params.userName}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)
     .then(res => {
       return res.data;
     }, (err) => {
@@ -30,7 +30,7 @@ export const getUserList = (params)=> {
 
 //新增用户
 export const addNewUserField = (params)=> {
-    return axios.post('/finance/ocr/user/add', Qs.stringify({
+    return axios.post('', Qs.stringify({
         'userId': params.userId, //登录者
         'name': params.name, //新增用户：姓名
         'phoneNum': params.phoneNum, //新增用户：手机号
@@ -46,7 +46,7 @@ export const addNewUserField = (params)=> {
 
 //变更用户
 export const updateAccountField = (params)=> {
-    return axios.post('/estate/estatePaymentRequestOrderController/checkPaymentRequestOrder', Qs.stringify({
+    return axios.post('', Qs.stringify({
         'userId': params.userId, //登录者
         'id': params.id,
         'name': params.name, //新增用户：姓名
