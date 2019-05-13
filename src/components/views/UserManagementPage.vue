@@ -44,7 +44,7 @@
           <el-table-column prop="username" label="姓名" show-overflow-tooltip></el-table-column>
           <el-table-column prop="phoneNum" label="手机号" show-overflow-tooltip></el-table-column>
           <el-table-column prop="department" label="部门" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="authority.name" label="权限" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="authority[0].name" label="权限" show-overflow-tooltip></el-table-column>
           <el-table-column prop="createUser" label="创建人" show-overflow-tooltip></el-table-column>
           <el-table-column prop="lastUpdateUser" label="变更人" show-overflow-tooltip></el-table-column>
           <el-table-column prop="lastUpdateTime" label="修改时间" show-overflow-tooltip></el-table-column>
@@ -75,7 +75,7 @@
         </el-form-item>
         <el-form-item label="权限" :label-width="formLabelWidth" prop="authority">
           <el-checkbox-group v-model="addUserform.authority">
-            <el-checkbox v-for="item in authorityList" :key="item.id" :label="item.id">{{item.name}}</el-checkbox>
+            <el-checkbox v-for="item in authorityList" :key="item.key" :label="item.id">{{item.value}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
@@ -109,11 +109,13 @@ export default {
   data() {
     return {
       authorityList:[
-        {id:1, name: '地产承兑'},
-        {id:2, name: '其他承兑'},
-        {id:3, name: '贴现'},
-        {id:4, name: '征信查询'}
+        {1: '地产承兑'}
+        //{id:2, name: '其他承兑'},
+        //{id:3, name: '贴现'},
+       // {id:4, name: '征信查询'}
       ],
+      test: [],
+      //selectedAuthority: [{id:1, name: '地产承兑'}],
       selectedAuthority: [1],
       isDialogVisible: false,
       confirmDialogVisiable: false,
@@ -126,7 +128,15 @@ export default {
       pageSizes: [PAGE_SIZE],
       departmentList: ["全部", "未审核", "已审核", "审核中"
       ],
-      tableData: [],
+      tableData: [
+        {
+        username: '信命',
+        phoneNum: '19998333333',
+        department: 'bumen',
+        authority: [{id:1, name: '地产承兑'}]
+        }
+
+      ],
       serchUsername: '',
       serchPhoneNum: '',
       addUserform: {
@@ -135,9 +145,7 @@ export default {
         phoneNum: '',
         department: '',
         //默认选中
-        authority: [
-          {id:1, name: '地产承兑'}
-          ],
+        authority: [1],
         createUser: '',
         lastUpdateUser: '',
         lastUpdateTime: ''
@@ -164,6 +172,7 @@ export default {
     
     //查询
     search() {
+      console.log("什么鬼", this.selectedAuthority, this.selectedAuthority[0])
       this.fetchUserCount();
     },
     //新增用户
@@ -173,11 +182,17 @@ export default {
       this.buttonTitle = '新增';
       //权限默认选中
        this.addUserform = {
-          authority: this.selectedAuthority
+          //authority: this.selectedAuthority
+          authority: [1]
        }
     },
     //变更用户
     updateAccount(index, row) {
+      console.log("quanxian", row.authority)
+      
+      this.test.push(row.authority)
+
+      console.log("测试结果", this.test)
       this.isDialogVisible = true;
       this.dialogTitle = '用户变更';
       this.buttonTitle = '变更';
@@ -186,9 +201,11 @@ export default {
         id: row.id,
         username: row.username,
         phoneNum: row.phoneNum,
-        department: row.department,
-        authority: row.authority
+        authority: this.test,
+        department: row.department
       }
+      
+      console.log(this.addUserform.authority)
     },
     //对话框: 确定按钮
     handleSubmitClick(index) {
@@ -275,7 +292,7 @@ export default {
     },
     //获取用户列表
     fetchUserCount() { 
-      console.log(this.selectedAuthority)
+      console.log("你干什么", this.selectedAuthority)
       const params = {
         userName: this.serchUsername,
         authority: this.selectedAuthority,
