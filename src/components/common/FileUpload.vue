@@ -6,7 +6,8 @@
     element-loading-background="rgba(0, 0, 0, 0.8)"
     :options="options"
     :autoStart="autoStart"
-    class="uploader-example"
+    :progress="progress"
+    class="uploader-box"
     ref="uploader"
     :fileStatusText="fileStatusText"
     @change="fileChange"
@@ -16,7 +17,7 @@
       <uploader-btn>
         <img src="../../assets/imgs/upload-icon.png" alt="">
         <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
-        <div class="accept-type">支持.pdf/.jpg/.png/.tif/.zip/.rar格式</div>
+        <div class="accept-type">支持.zip/.rar/.7z格式</div>
       </uploader-btn>
     </uploader-drop>
     <uploader-list></uploader-list>
@@ -31,8 +32,6 @@ let uploader_file = null
 export default {
   data() {
     return {
-      // file_md5: null,
-      // uploader_file: null,
       load: false,
       autoStart: false,
       fileStatusText: {
@@ -70,6 +69,9 @@ export default {
     };
   },
   methods: {
+    progress(e) {
+      console.log(e);
+    },
     fileChange(e) {
       let that = this
       that.loadingText = '文件解析中...'
@@ -153,8 +155,8 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped>
-.uploader-example {
+<style lang="scss">
+.uploader-box {
   .uploader-drop {
     padding: 0;
     background: #FAFAFA;
@@ -187,35 +189,25 @@ export default {
     .uploader-file[status=success] .uploader-file-remove {
       display: block;
     }
-    .uploader-file {
-      
+    .uploader-file[status] {
+      .uploader-file-progress {
+        display: none;
+      }
       .uploader-file-info {
-        background-color: red;
-        i {
-          &::before {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            margin-right: 8px;
-            background: url('../../assets/imgs/file-icon.png') no-repeat;
-            background-size: cover;
+        display: inline;
+        .uploader-file-name {
+          .uploader-file-icon{
+            &::before {
+              content: '';
+              display: inline-block;
+              width: 14px;
+              height: 14px;
+              margin-right: 8px;
+              background: url('../../assets/imgs/file-icon.png') no-repeat;
+              background-size: cover;
+            }
           }
         }
-        // .uploader-file-name {
-        //   .uploader-file-icon{
-        //     display: none;
-        //     &::before {
-        //       content: '';
-        //       display: inline-block;
-        //       width: 14px;
-        //       height: 14px;
-        //       margin-right: 8px;
-        //       background: url('../../assets/imgs/file-icon.png') no-repeat;
-        //       background-size: cover;
-        //     }
-        //   }
-        // }
       }
     }
   }
