@@ -92,6 +92,16 @@
           </el-table-column>
           <el-table-column
             align="center"
+            label="审核状态"
+            prop="audit_status">
+            <template slot-scope="scope">
+              <span v-if="scope.row.audit_status === 0">未审核</span>
+              <span v-else-if="scope.row.audit_status === 1" style="color: #4A90E2;">已审核</span>
+              <span v-else-if="scope.row.audit_status === 2" style="color: #D0021B;">驳回</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            align="center"
             label="上传日期"
             prop="uploadTime">
           </el-table-column>
@@ -223,9 +233,10 @@ export default {
     fetchHistoryList() {
       const params = {
         businessTypeId: '',
-        userId: 1,
+        relatedUserId: 1,
         pageSize: this.pageSize,
-        pageNum: this.currentPage
+        pageNum: this.currentPage,
+        type: 1
       }
       getUploadHistory(params)
       .then((res) => {

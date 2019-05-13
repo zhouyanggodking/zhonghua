@@ -38,7 +38,7 @@ export const uploadFile = (param) => {
 }
 
 export const getUploadHistory = (params) => {
-  return axios.get(`/uploader/hostory?businessTypeId=${params.businessTypeId}&userId=${params.userId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)
+  return axios.get(`/uploader/hostory?businessTypeId=${params.businessTypeId}&relatedUserId=${params.relatedUserId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}&type=${params.type}`)
   .then(res => {
         return res.data;
     }, (err) => {

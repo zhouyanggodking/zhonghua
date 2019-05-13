@@ -9,8 +9,8 @@ html, body{
   font-size: 16px;
   box-sizing: border-box;
 }
-.el-input.is-active .el-input__inner, .el-input__inner:focus, .el-select .el-input.is-focus .el-input__inner, .el-select .el-input__inner:focus {
-  border: 2px solid rgba(193,176,113,0.47);
+.el-input.is-active .el-input__inner, .el-input__inner:focus, .el-select .el-input.is-focus .el-input__inner, .el-select .el-input__inner:focus, .el-textarea__inner:focus {
+  border: 1px solid rgba(193,176,113,0.47);
   outline: 0;
 }
 // 复选框样式
