@@ -6,7 +6,6 @@
     element-loading-background="rgba(0, 0, 0, 0.8)"
     :options="options"
     :autoStart="autoStart"
-    :progress="progress"
     class="uploader-box"
     ref="uploader"
     :fileStatusText="fileStatusText"
@@ -20,20 +19,21 @@
         <div class="accept-type">支持.zip/.rar/.7z格式</div>
       </uploader-btn>
     </uploader-drop>
-    <uploader-list></uploader-list>
+    <uploader-list :fileList="list"></uploader-list>
   </uploader>
 </template>
 <script>
 import {calculateMd5} from '@/utils/fileUpload.js';
 
-let file_md5 = null
-let uploader_file = null
 
 export default {
   data() {
     return {
+      file_md5: null,
+      uploader_file: null,
       load: false,
       autoStart: false,
+      list: 'asd',
       fileStatusText: {
         success: '上传成功',
         error: '出错了',
@@ -63,15 +63,12 @@ export default {
           }
         },
         initFileFn: function (file) {
-          uploader_file = file
+          this.uploader_file = file
         },
       }
     };
   },
   methods: {
-    progress(e) {
-      console.log(e);
-    },
     fileChange(e) {
       let that = this
       that.loadingText = '文件解析中...'
@@ -81,7 +78,7 @@ export default {
         let completeFiile = e.target.files[0]
         that.load = true
         calculateMd5(completeFiile, function (val) {
-          file_md5 = val;
+          that.file_md5 = val;
           that.loadingText = '文件解析成功'
           that.load = false
           // fileIsExist({md5: val}).then(res => {

@@ -26,8 +26,8 @@
           </div>
           <div class="search-condition_input_item">
             <div class="text">审核状态</div>
-            <el-select v-model="reviewStatus" placeholder="请选择">
-              <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+            <el-select v-model="auditState" placeholder="请选择">
+              <el-option v-for="(item, index) in reviewStatusList" :key="index" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item second">
@@ -63,7 +63,13 @@
           <el-table-column prop="acountPayable" label="本次应付金额" show-overflow-tooltip></el-table-column>
           <el-table-column prop="invoiceTotalPrice" label="票据总金额" show-overflow-tooltip></el-table-column>
           <el-table-column prop="invoiceNum" label="票据数量" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="state" label="状态" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="auditState" label="状态" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.auditState === 0">驳回</span>
+              <span v-else-if="scope.row.auditState === 1" style="color: #417505;">已审核</span>
+              <span v-else-if="scope.row.auditState === 2" style="color: #F5A623;">未审核</span>
+            </template>
+          </el-table-column>
           <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
               <el-button
@@ -155,7 +161,7 @@ export default {
       contractNo:'',
       payer: "",
       receiver:'',
-      auditState:1,
+      auditState: '',
       rejectId: null,
       userId:1,
       pageNum:1,
@@ -167,7 +173,6 @@ export default {
       collector: "",
       dialogTitle: "填写驳回意见",
       dialogVisible: false,
-      reviewStatus: "全部",
       multipleSelection: [],
       currentPage: 1,
       totalCount: 0,
@@ -175,7 +180,24 @@ export default {
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
-      reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
+      reviewStatusList: [
+        {
+          name: '全部',
+          id: ''
+        },
+        {
+          name: '驳回',
+          id: 0
+        },
+        {
+          name: '已审核',
+          id: 1
+        },
+        {
+          name: '未审核',
+          id: 2
+        },
+      ],
       tableData: [],
     };
   },

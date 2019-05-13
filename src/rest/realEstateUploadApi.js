@@ -73,33 +73,33 @@ export const checkPaymentRequestOrders = (params) => {
 }
 
 //下载table数据
-export const openPostWindow = (url, name, params) => {
-  const tempForm = document.createElement("form");
-  tempForm.id = "tempForm";
-  tempForm.method = "post";
-  // tempForm.enctype = "multipart/form-data";
-  tempForm.action = url;
-  tempForm.target = name;
-  const keys = Object.keys(params);
-  const values = Object.values(params);
-  keys.forEach((item, index) => {
-      let hideInput = document.createElement("input");
-      hideInput.type = "hidden";
-      hideInput.name= item;
-      hideInput.value = values[index];
-      tempForm.appendChild(hideInput);
-  });
-  if(document.all){
-      tempForm.attachEvent("onsubmit",function(){});        //IE
-  }else{
-      const subObj = tempForm.addEventListener("submit",function(){},false);    //firefox
-  }
-  document.body.appendChild(tempForm);
-  if(document.all){
-      tempForm.fireEvent("onsubmit");
-  }else{
-      tempForm.dispatchEvent(new Event("submit"));
-  }
-  tempForm.submit();
-  document.body.removeChild(tempForm);
-}
+// export const openPostWindow = (url, name, params) => {
+//   const tempForm = document.createElement("form");
+//   tempForm.id = "tempForm";
+//   tempForm.method = "post";
+//   // tempForm.enctype = "multipart/form-data";
+//   tempForm.action = url;
+//   tempForm.target = name;
+//   const keys = Object.keys(params);
+//   const values = Object.values(params);
+//   keys.forEach((item, index) => {
+//       let hideInput = document.createElement("input");
+//       hideInput.type = "hidden";
+//       hideInput.name= item;
+//       hideInput.value = values[index];
+//       tempForm.appendChild(hideInput);
+//   });
+//   if(document.all){
+//       tempForm.attachEvent("onsubmit",function(){});        //IE
+//   }else{
+//       const subObj = tempForm.addEventListener("submit",function(){},false);    //firefox
+//   }
+//   document.body.appendChild(tempForm);
+//   if(document.all){
+//       tempForm.fireEvent("onsubmit");
+//   }else{
+//       tempForm.dispatchEvent(new Event("submit"));
+//   }
+//   tempForm.submit();
+//   document.body.removeChild(tempForm);
+// }

@@ -99,12 +99,22 @@
             <el-table-column prop="buyyerName" label="购买方" show-overflow-tooltip></el-table-column>
             <el-table-column prop="salerName" label="销售方" show-overflow-tooltip></el-table-column>
             <el-table-column prop="createTime" label="开票日期" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="金额" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="finalPrice" label="金额" show-overflow-tooltip></el-table-column>
             <el-table-column prop="address" label="已用金额" show-overflow-tooltip></el-table-column>
             <el-table-column prop="address" label="本次使用金额" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="stamped" label="是否盖章" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="stamped" label="是否盖章" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span v-if="scope.row.stamped === 0">否</span>
+                <span v-else-if="scope.row.stamped === 1">是</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="invoiceType" label="凭证联" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="verification" label="发票验真" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="verification" label="发票验真" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span v-if="scope.row.verification === 0">未通过</span>
+                <span v-else-if="scope.row.verification === 1">通过</span>
+              </template>
+            </el-table-column>
             <el-table-column fixed="right" label="操作">
               <template slot-scope="scope">
                 <el-button
