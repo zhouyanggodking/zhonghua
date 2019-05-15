@@ -27,8 +27,8 @@
       <el-carousel ref="restPwdContainer" :autoplay="false" indicator-position="none" arrow="nerver">
         <el-carousel-item class="verify-message" name="signinTag" :key="1">
           <el-form class="signin-form" ref="signinForm" :rules="rules" :model="signinForm" label-width="80px">
-            <el-form-item label="手机号" prop="name">
-              <el-input v-model="signinForm.name"></el-input>
+            <el-form-item label="手机号" prop="telephone">
+              <el-input v-model="signinForm.telephone"></el-input>
             </el-form-item>
             <el-form-item class="identify-code" label="图形验证码" prop="identifyCode">
               <el-input v-model="signinForm.identifyCode"></el-input>
@@ -49,7 +49,7 @@
             <el-form-item label="输入新密码" prop="password">
               <el-input v-model="resetPwdForm.password"></el-input>
             </el-form-item>
-            <el-form-item label="验证旧密码" prop="identifyPassword">
+            <el-form-item label="验证新密码" prop="identifyPassword">
               <el-input v-model="resetPwdForm.identifyPassword"></el-input>
             </el-form-item>
             <el-form-item class="sign-in-btn">
@@ -70,6 +70,7 @@
 <script>
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { clearInterval } from 'timers';
+import { getPhoneVerifyCode, resetPassword} from "@/rest/userManagmentPageApi";
 
 export default {
   data() {
@@ -94,33 +95,44 @@ export default {
         callback();
       }
     };
+    const phoneIdentifyCodeMatch = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入验证码'));
+      } else if (value != this.phoneVerifyCode) {
+        callback(new Error('请输入正确验证码'));
+      } else {
+        callback();
+      }
+    };
     const passwordMatch = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请再次输入密码'));
-      } else if (value !== this.resetPwdForm.identifyPassword) {
+      } else if (value !== this.resetPwdForm.password) {
         callback(new Error('两次输入密码不一致'));
       } else {
         callback();
       }
     };
     return {
+      phoneVerifyCode: '',
       activeTag: 'signinTag',
       count: 0,
       timer: null,
       // 验证信息
       signinForm: {
-        name: '',
+        telephone: '',
         phoneIentifyCode: '',
         identifyCode: ''
       },
       rules: {
-        name: [
+        telephone: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
           { validator: phoneMatch, trigger: 'blur' }
         ],
         phoneIentifyCode: [
           { required: true, message: '请输入手机验证码', trigger: 'blur' },
-          { pattern: /^\d{4}$/, message: '请输入正确验证码', trigger: 'blur' }
+          { pattern: /^\d{4}$/, message: '请输入正确验证码', trigger: 'blur' },
+          { validator: phoneIdentifyCodeMatch, trigger: 'blur' }
         ],
         identifyCode: [
           { required: true, message: '请输入图形验证码', trigger: 'blur' },
@@ -137,7 +149,7 @@ export default {
       },
       pwdrules: {
         password: [
-          { password: true, message: '请输入新密码', trigger: 'blur' },
+          { required: true, message: '请输入新密码', trigger: 'blur' },
           { pattern: /^\d{6}$/, message: '密码为0~6位数字', trigger: 'blur' }
         ],
         identifyPassword: [
@@ -164,12 +176,27 @@ export default {
       }
     },
     handleSigninClick() {
-      this.$refs.restPwdContainer.setActiveItem('successTag');
-      this.activeTag = 'successTag';
+      this.$refs.resetPwdForm.validate((valid) => {
+        if(valid) {
+          const params = {
+            telephone: this.signinForm.telephone,
+            newPassword: this.resetPwdForm.password
+          }
+          resetPassword(params)
+          .than((res) => {
+            this.$refs.restPwdContainer.setActiveItem('successTag');
+            this.activeTag = 'successTag';
+          })
+        }
+      })
     },
     handleNextStepClick() {
-      this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
-      this.activeTag = 'resetPwdTag';
+      this.$refs.signinForm.validate((valid) => {
+        if(valid) {
+          this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
+          this.activeTag = 'resetPwdTag';
+        }
+      })
     },
     interval() {
       this.count = 60;
@@ -186,6 +213,12 @@ export default {
     },
     getPhoneIdentifyCode() {
       this.interval();
+      //获取手机验证码
+      getPhoneVerifyCode()
+      .than((res) => {
+        this.phoneVerifyCode = res.data.code;
+        return;
+      })
     },
     toLoginPage() {
       this.$router.push('/login');

@@ -4,28 +4,27 @@
       <div class="search-conditions">
         <div class="search-box search-name">
           <div class="text">姓名</div>
-          <el-input></el-input>
+          <el-input v-model="searchUsername"></el-input>
         </div>
         <div class="search-box search-phonenumber">
           <div class="text">手机号</div>
-          <el-input></el-input>
+          <el-input v-model="searchPhoneNum"></el-input>
         </div>
         <div class="search-box search-department">
           <div class="text">部门</div>
-          <el-select v-model="reviewStatus" placeholder="请选择">
-            <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+          <el-select v-model="departmentDefault" placeholder="请选择">
+            <el-option v-for="(item, index) in departmentList" :key="index" :label="item" :value="item"></el-option>
           </el-select>
+        </div>
+        <div class="search-box search-options">
+          <el-button class="search-btn" @click="search">查询</el-button>
+          <div class="export-excel" @click="exportExcel">导出excel</div>
         </div>
         <div class="search-box search-authority">
           <div class="text">权限</div>
-          <el-checkbox-group v-model="selectedAuthority">
-            <el-checkbox v-for="(item, index) in checkList" :key="index" :label="item"></el-checkbox>
+          <el-checkbox-group v-model="searchAuthority">
+            <el-checkbox v-for="(item, index) in authorityList" :key="index" :label="item">{{item}}</el-checkbox>
           </el-checkbox-group>
-        </div>
-        <div class="search-box search-options">
-          <div class="text"></div>
-          <el-button>查询</el-button>
-          <div class="export-excle">导出excle</div>
         </div>
       </div>
     </div>
@@ -39,21 +38,15 @@
           :data="tableData"
           tooltip-effect="dark"
           style="width: 100%"
-          @selection-change="handleSelectionChange"
         >
-          <el-table-column fixed width="30"></el-table-column>
-          <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column label="付款主题" width="120">
-            <template slot-scope="scope">{{ scope.row.date }}</template>
-          </el-table-column>
-          <el-table-column prop="name" label="序号" width="120"></el-table-column>
-          <el-table-column prop="address" label="姓名" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="手机号" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="部门" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="权限" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="创建人" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="变更人" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="修改时间" show-overflow-tooltip></el-table-column>
+          <el-table-column fixed type="index" label="序号" width="50px"></el-table-column>
+          <el-table-column prop="username" label="姓名" width="80px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="phoneNum" label="手机号" width="115px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="department" label="部门" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="authority" label="权限" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="createUser" label="创建人" width="80px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="lastUpdateUser" label="变更人" width="80px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="lastUpdateTime" label="修改时间" show-overflow-tooltip></el-table-column>
           <el-table-column label="操作" width="120" fixed="right">
             <template slot-scope="scope">
               <span class="option-btn" @click="freezeAccount(scope.$index, scope.row)">冻结</span>
@@ -63,31 +56,31 @@
         </el-table>
       </div>
       <div class="table-footer">
-        <Pagination></Pagination>
+        <Pagination @change="onUserPageNumChange" :totalCount="totalCount"></Pagination>
       </div>
     </div>
-    <el-dialog class="dialog-form user-dialog" :title="dialogTitle" :visible.sync="isDialogVisible">
+    <el-dialog class="dialog-form user-dialog" :title="dialogTitle" :visible.sync="isDialogVisible" :before-close="cancelEditFileds">
       <el-form :model="addUserform" :rules="rules" ref="addUserform">
-        <el-form-item label="姓名" :label-width="formLabelWidth" prop="name">
-          <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.name" autocomplete="off"></el-input>
+        <el-form-item label="姓名" :label-width="formLabelWidth" prop="username">
+          <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="手机号" :label-width="formLabelWidth" prop="phoneNum">
           <el-input placeholder="请输入提取字段(必填)" v-model="addUserform.phoneNum" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="部门" :label-width="formLabelWidth" prop="department">
           <el-select v-model="addUserform.department" placeholder="请选择">
-            <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+            <el-option v-for="(item, index) in departmentList" :key="index" :label="item" :value="item"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="权限" :label-width="formLabelWidth" prop="authority">
           <el-checkbox-group v-model="addUserform.authority">
-            <el-checkbox v-for="(item, index) in checkList" :key="index" :label="item"></el-checkbox>
+            <el-checkbox v-for="(item, index) in authorityList" :key="index" :label="item">{{item}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button class="cancle-btn" @click="isDialogVisible = false">取 消</el-button>
-        <el-button class="submit-btn" type="primary" @click="handleSubmitClick('sureBtn')">确 定</el-button>
+        <el-button class="cancle-btn" @click="cancelEditFileds(addUserform)">取消</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleSubmitClick(addUserform.index)">{{buttonTitle}}</el-button>
       </div>
     </el-dialog>
     <el-dialog
@@ -99,76 +92,65 @@
       <div class="icon"></div>
       <div class="text">请确认是否冻结该用户</div>
       <span slot="footer" class="dialog-footer">
-        <el-button class="cancle-btn" @click="confirmDialogVisiable = false">取 消</el-button>
-        <el-button class="submit-btn" type="primary" @click="handleFreezeClick">确 定</el-button>
+        <el-button class="cancle-btn" @click="confirmDialogVisiable = false">取消</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleFreezeClick">冻结</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
 import Pagination from "@/components/common/Pagination";
+import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount, exportUserToExcel} from "@/rest/userManagmentPageApi";
 
 const PAGE_SIZE = 10;
 
 export default {
   data() {
     return {
-      checkList: ['地产承兑', '其他承兑', '贴现', '征信查询'],
-      selectedAuthority: [],
+      //检索条件
+      searchUsername: '',
+      searchPhoneNum: '',
+      //权限多选框
+      authorityList:['地产承兑', '其他承兑', '贴现', '征信查询'],
+      //权限多选框默认选中
+      searchAuthority: ['地产承兑'],
+      //部门下拉框
+      departmentList: ['全部', '财务公司信贷部','其他'],
+      //部门下拉列表默认为空
+      departmentDefault: "",
       isDialogVisible: false,
       confirmDialogVisiable: false,
-      reviewStatus: "全部",
-      multipleSelection: [],
+      buttonTitle: "确定",
       currentPage: 1,
       totalCount: 0,
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
-      reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
       tableData: [
         {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
+        username: '地产承兑',
+        phoneNum: '19998333333',
+        department: 'bumen',
+        authority:["地产承兑",'其他承兑','贴现'],
+        createUser: '王晓蓉',
+        lastUpdateUser: '王晓蓉',
+        lastUpdateTime: '2029-09-09 30:34:43'
         }
       ],
+      excelData: [],
+      //对话框表单数据
       addUserform: {
-        name: '',
+        id: "",
+        username: '',
         phoneNum: '',
         department: '',
-        authority: []
+        //默认选中
+        authority: ['地产承兑'],
+        createUser: '',
+        lastUpdateUser: '',
+        lastUpdateTime: ''
       },
       rules: {
-        name: [
+        username: [
           { required: true, message: '请输入姓名(必填)', trigger: 'blur' }
         ],
         phoneNum: [
@@ -186,53 +168,148 @@ export default {
     };
   },
   methods: {
-    search() {},
-    batchReview() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否批量通过";
-      this.dialogHintOperate = "批量通过";
+    //查询
+    search() {
+      this.fetchUserCount();
     },
+    //新增用户
     addNewUser() {
       this.isDialogVisible = true;
-      this.dialogTitle = '新增用户'
+      this.dialogTitle = '新增用户';
+      this.buttonTitle = '新增';
+      //权限默认选中
+       this.addUserform = {
+          authority: ['地产承兑']
+       }
     },
-    handleSubmitClick() {
-
+    //变更用户
+    updateAccount(index, row) {
+      this.isDialogVisible = true;
+      this.dialogTitle = '用户变更';
+      this.buttonTitle = '变更';
+      this.addUserform = {
+        index: index,
+        id: row.id,
+        username: row.username,
+        phoneNum: row.phoneNum,
+        authority: row.authority,
+        department: row.department
+      }
     },
-    freezeAccount() {
+    //对话框: 确定按钮
+    handleSubmitClick(index) {
+      this.$refs.addUserform.validate((vaild) => {
+        if (vaild) {
+          const params = {
+            //userId: localStorageHelper.getItem("userName"), // 登陆者id
+            username: this.addUserform.username,
+            phoneNum: this.addUserform.phoneNum,
+            department: this.addUserform.department,
+            authority: this.addUserform.authority
+          }
+          console.log("quanxian", params.authority)
+          if (this.dialogTitle === '用户变更'){
+            this.selected = index; // 修改的位置
+            this.$set(this.tableData, this.selected, this.addUserform);
+            //待修改用户id表示
+            params.push = {
+              id: this.addUserform.id
+            }
+            // //后台修改
+            // updateUserAccount(params)
+            // .then((res) => {
+            //   this.fetchUserCount(); //检索用户
+            // })
+          }else{
+            //新增用户
+            console.log("cehsii", this.addUserform.authority)
+            this.tableData.push(this.addUserform);
+            // //后台插入
+            // addNewUserField(params)
+            // .then((res) => {
+            //   this.fetchUserCount(); //检索用户
+            // })
+          }
+          //关闭并清空对话框中的表单
+          this.clearAddUserform();
+        }
+      })
+    },
+    //对话框：取消按钮
+    cancelEditFileds(addUserform) {
+      this.$refs['addUserform'].resetFields();
+      this.clearAddUserform();
+    },
+    //关闭并清空对话框中的表单
+    clearAddUserform() {
+      this.isDialogVisible = false;
+      this.addUserform = {
+        username: '',
+        phoneNum: '',
+        authority: ['地产承兑']
+      }
+    },
+    //冻结用户
+    freezeAccount(index, row) {
       this.confirmDialogVisiable = true;
     },
     handleFreezeClick() {
+      const params = {
+        userId: localStorageHelper.getItem("userId"), //登陆者id
+        id: row.id
+      }
+      freezeUserAccount(params)
+      .then((res) => {
+        console.log("冻结成功")
+      })
       this.confirmDialogVisiable = false;
     },
-    updateAccount() {
-      this.isDialogVisible = true;
-      this.dialogTitle = '用户变更';
+    //翻页
+    onUserPageNumChange(res) {
+      this.pageSize = res.pageSize;
+      this.currentPage = res.pageNum;
+      this.fetchUserCount();
     },
-    batchReviewPass() {},
-    tableItemDetails() {
-      // this.$router.push({ name: "indentify-result-details", query: { id: 1 } });
+    //获取用户列表
+    fetchUserCount() { 
+      const params = {
+        userName: this.searchUsername, //姓名
+        phoneNum: this.searchPhoneNum, //手机号
+        department: this.departmentDefault, //部门
+        authority: this.searchAuthority, //权限
+        pageSize: this.pageSize,
+        pageNum: this.currentPage
+      }
+      console.log("获取用户列表参数", params)
+      getUserList(params)
+      .then((res) => {
+        console.log("返回的数据", res.data.id)
+        this.tableData = res.data.data; 
+        this.totalCount = res.data.total;//数据的总条数
+      })
     },
-    exportExcel() {},
-    reviewPass() {
-      this.isDialogVisible = false;
-    },
-    rejectOpinion() {
-      this.isDialogVisible = false;
-      this.dialogVisible = true;
-    },
-    handleClose() {
-      this.dialogVisible = false;
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
-    },
-    handleSizeChange(pageSize) {
-      this.pageSize = pageSize;
-    },
-    handleCurrentChange(currPage) {
-      this.currentPage = currPage;
+    //导出excel
+    exportExcel() {
+      const params = {
+        username: this.username,
+        phoneNum: this.phoneNum,
+        department: this.department,
+        authority: this.authority,
+        fileName: ''
+      }
+      exportUserToExcel(params)
+      .then((res) => {
+        this.excelData = res.data.data; 
+        console.log("导出成功");
+        this.fetchUserCount();
+        return;
+      })
     }
+  },
+  //初始化函数
+  mounted() {
+    //获取用户列表
+    this.fetchUserCount();
   },
   components: {
     Pagination
@@ -243,15 +320,14 @@ export default {
 .usermanagement-page {
   .usermanagement-page-search {
     background: #fff;
-    margin-top: 20px;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
     .search-conditions {
       display: flex;
       flex-wrap: wrap;
       /deep/ {
         .el-input {
           .el-input__inner {
-            width: 200px;
+            width:160px;
             height: 40px;
           }
         }
@@ -261,7 +337,7 @@ export default {
         margin-top: 20px;
         align-items: center;
         .text {
-          width: 60px;
+          width: 55px;
           margin-right: 10px;
           text-align: right;
           flex-shrink: 0;
@@ -270,11 +346,16 @@ export default {
           color: #666666;
         }
         &.search-options {
-          .export-excle {
+          .search-btn {
+            margin-left: 20px;
+            font-family: "PingFangSC-Semibold";
+          }
+          .export-excel {
             margin-left: 30px;
             font-weight: bold;
             font-size: 14px;
             color: #C1B071;
+            cursor: pointer;
           }
         }
       }
@@ -302,7 +383,7 @@ export default {
               background: #fafafa !important;
             }
             th {
-              border-color: rgba(0, 0, 0, 0.09);
+              border-color: rgba(48, 224, 142, 0.09);
               .cell {
                 font-family: PingFangSC-Medium;
                 font-size: 14px;
@@ -315,8 +396,9 @@ export default {
             }
           }
         }
-        .el-table__fixed-body-wrapper {
-          .el-table__body {
+        .el-table__fixed-right {
+          th {
+            text-align: center;
           }
         }
         .el-table__header-wrapper {
@@ -327,6 +409,7 @@ export default {
               th {
                 background: #fafafa !important;
                 border-color: rgba(0, 0, 0, 0.09);
+                text-align: center;
                 .cell {
                   font-family: PingFangSC-Medium;
                   font-size: 14px;
@@ -334,31 +417,10 @@ export default {
                   line-height: 22px;
                 }
               }
-              // .el-table_1_column_1{
-              //   .cell{
-              //     display: none;
-              //   }
-              // }
-              // .el-table_1_column_2{
-              //   position: relative;
-
-              // }
             }
           }
         }
-        .el-table__body-wrapper {
-          .el-table__body {
-            .el-table__row {
-              .el-table_1_column_1 {
-              }
-              .el-table_1_column_13 {
-                .cell {
-                  // display: flex;
-                }
-              }
-            }
-          }
-        }
+        
       }
       /deep/ .option-btn {
         width: 28px;
@@ -390,6 +452,9 @@ export default {
             cursor: default;
           }
         }
+      }
+      .el-select {
+        width: 100%;
       }
     }
   }

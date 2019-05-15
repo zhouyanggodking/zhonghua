@@ -1,59 +1,40 @@
 import axios from 'axios';
 import localStorageHelper from '@/helpers/localStorageHelper';
 
-const AUTH_TOKEN_KEY = 'AUTH_TOKEN';
-const USER_NAME = 'USER_NAME';
-const USER_AUTH_INFO_KEY = 'USER_AUTH_INFO';
-const USER_ID = 'USER_ID';
-
-export default class AuthQuery {
-  static login(username, password) {
-    return axios
-      .post(
-        '/api/login',
-        {
-          username,
-          password
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      )
-      .then(
-        success => {
-          // write token into local storage (or cookie)
-          localStorageHelper.setItem(AUTH_TOKEN_KEY, success.data.token);
-          localStorageHelper.setItem(USER_NAME, username);
-          localStorageHelper.setItem(USER_ID, success.data.userId);
-          return Promise.resolve(success);
-        },
-        error => {
-          localStorageHelper.removeItem(AUTH_TOKEN_KEY);
-          localStorageHelper.removeItem(USER_NAME);
-          localStorageHelper.removeItem(USER_ID);
-
-          return Promise.reject(error);
-        }
-      );
-  }
-
-  static logout() {
-    return axios.delete('/api/logout').then(
-      success => {
-        // write token into local storage (or cookie)
-        localStorageHelper.removeItem(AUTH_TOKEN_KEY);
-        localStorageHelper.removeItem(USER_NAME);
-        localStorageHelper.removeItem(USER_AUTH_INFO_KEY); // clear auth info to prevent next auto login
-        return Promise.resolve(success);
-      },
-      error => {
-        localStorageHelper.removeItem(AUTH_TOKEN_KEY);
-        localStorageHelper.removeItem(USER_NAME);
-        localStorageHelper.removeItem(USER_AUTH_INFO_KEY); // clear auth info to prevent next auto login
-        return Promise.reject(error);
-      }
-    );
-  }
+//登录
+export const login = (params)=> {
+  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/login?telephone=${params.telephone}&password=${params.password}`)
+  //return axios.get(`finance/ocr/user/login?userName=${params.telephone}&passWord=${params.password}`)
+  .then( res=> {
+    var flag = false;
+    if(res.data.status == '200'){
+      const data = res.data.data;
+      localStorageHelper.setItem("userId", data.id);
+      localStorageHelper.setItem("userName", data.username);
+      localStorageHelper.setItem("telephone", data.telephone);
+      localStorageHelper.setItem("userStatus", data.status);
+        flag =true;
+    }
+    return flag;
+  }, (err) => {
+    localStorageHelper.removeItem("userId");
+    localStorageHelper.removeItem("userName");
+    localStorageHelper.removeItem("userStatus");
+    return Promise.reject(err)
+  })
+}
+//退出登陆
+export const logout = ()=> {
+  return axios.get(`/`)
+  .then( res=> {
+    localStorageHelper.removeItem("userId");
+    localStorageHelper.removeItem("userName");
+    localStorageHelper.removeItem("userStatus");
+    return res.data;
+  }, (err) => {
+    localStorageHelper.removeItem("userId");
+    localStorageHelper.removeItem("userName");
+    localStorageHelper.removeItem("userStatus");
+    return Promise.reject(err)
+  })
 }
