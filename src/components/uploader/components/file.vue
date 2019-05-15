@@ -28,6 +28,7 @@
       <div class="uploader-file-info">
         <div class="uploader-file-name"><i class="uploader-file-icon" :icon="fileCategory"></i>{{file.name}}</div>
         <div class="uploader-file-size">{{formatedSize}}</div>
+        <!-- <div class="uploader-file-size">{{parseFloat(formatedSize)*progressStyle.progress/100}}</div> -->
         <div class="uploader-file-meta"></div>
         <div class="uploader-file-status">
           <span v-if="status !== 'uploading'" :class="{'success': statusText === '上传成功', 'paused': statusText === '暂停中', 'failed': statusText === '上传失败'}">{{statusText}}</span>

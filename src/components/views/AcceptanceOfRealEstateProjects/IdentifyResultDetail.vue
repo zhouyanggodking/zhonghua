@@ -87,8 +87,8 @@
       <div class="invoice-table">
         <div class="invoice-table_header">
           <div class="title">发票信息</div>
-          <div class="invoice-details">本次使用金额：</div>
-          <div class="invoice-num red-text">发票数量：</div>
+          <div class="invoice-details">本次使用金额：{{data.invoiceTotalPrice}}</div>
+          <!-- <div class="invoice-num red-text">发票数量：</div> -->
         </div>
         <div class="invoice-table_content">
           <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
@@ -100,8 +100,12 @@
             <el-table-column prop="salerName" label="销售方" show-overflow-tooltip></el-table-column>
             <el-table-column prop="createTime" label="开票日期" show-overflow-tooltip></el-table-column>
             <el-table-column prop="finalPrice" label="金额" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="已用金额" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="address" label="本次使用金额" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="usedPrice" label="已用金额" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="usePrice" label="本次使用金额" show-overflow-tooltip width="120">
+              <template slot-scope="scope">
+                <el-input v-model="scope.row.finalPrice"></el-input>
+              </template>
+            </el-table-column>
             <el-table-column prop="stamped" label="是否盖章" show-overflow-tooltip>
               <template slot-scope="scope">
                 <span v-if="scope.row.stamped === 0">否</span>
@@ -120,7 +124,7 @@
                 <el-button
                   class="table-btn"
                   size="mini"
-                  @click="tableItemDetails(scope.$index, scope.row)"
+                  @click="checkInvoiceInfo(scope.row)"
                 >查看原件</el-button>
               </template>
             </el-table-column>
@@ -133,7 +137,7 @@
           <div class="title">付款申请</div>
         </div>
         <div class="review-opinion_content">
-          <el-input type="textarea" :rows="4" placeholder="请输入内容" v-model="textarea"></el-input>
+          <el-input type="textarea" :rows="4" placeholder="请输入内容" v-model="data.rejectReason"></el-input>
         </div>
       </div>
       <div class="divide-line"></div>
@@ -172,10 +176,13 @@
   </div>
 </template>
 <script>
-
+import {checkPaymentRequestOrder} from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import resourceWrapper from "@/rest/resourceWrapper";
 import {global_} from '@/global/global';
+
+const CHECK = 1;
+const REJECT = 0;
 
 export default {
   data() {
@@ -191,13 +198,14 @@ export default {
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
       rejectContent:'',
-      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
-      currentTitle: "付款公司名称-合同编号-付款主题"
+      breadCrumbList: ["首页", "资产识别比对", "识别结果"],
+      currentTitle: "付款公司名称-合同编号-付款主题",
+      paymentOrderId: ''
     };
   },
   methods: {
-    tableItemDetails() {
-      this.$router.push({ name: "identify-invoice-origin" });
+    checkInvoiceInfo(row) {
+      this.$router.push({ name: "identify-invoice-origin", query: { id: row.id}});
     },
     exportExcel(){
       window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
@@ -214,11 +222,46 @@ export default {
     },
     rejectOpinionOperate(){
       this.data.state = 0;
-      this.isDialogVisible = false;
+      const params = {
+        id: this.data.id,
+        state: REJECT,
+        userId: 1,
+        rejectReason: this.data.rejectReason
+      };
+      checkPaymentRequestOrder(params).then(() => {
+        this.$message({
+          message: '驳回成功',
+          type: 'success'
+        });
+        this.isDialogVisible = false;
+      },() => {
+        this.$message({
+          message: '驳回失败',
+          type: 'warning'
+        })
+      });
     },
     reviewPassOpearte(){
       this.data.state = 1;
-      this.isDialogVisible = false;
+      const params = {
+        id: this.data.id,
+        state: CHECK,
+        userId: 1,
+        rejectReason: ''
+      };
+      checkPaymentRequestOrder(params).then(() => {
+        this.$message({
+          message: '审批成功',
+          type: 'success'
+        });
+        this.isDialogVisible = false;
+        this.data.rejectReason = '';
+      },() => {
+        this.$message({
+          message: '审批失败',
+          type: 'warning'
+        })
+      });
     },
     handleClose() {
       this.dialogVisible = false;
@@ -227,18 +270,18 @@ export default {
       this.$router.back(-1);
     },
     lookPayRequestOrigin() {
-      this.$router.push({ name: "identify-payment-request-origin" });
+      this.$router.push({ name: "identify-payment-request-origin", query: { id: this.paymentOrderId} });
     },
     getPaymentDetailData(userId,id){
-        resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
-            this.data=res.data;
-            this.tableData=res.data.estateInvoices;
-        })
+      resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
+          this.data=res.data;
+          this.tableData=res.data.estateInvoices;
+      })
     }
   },
   mounted(){
-      this.id=this.$route.query.id;
-      this.getPaymentDetailData(1, this.id);
+    this.paymentOrderId=this.$route.query.id;
+    this.getPaymentDetailData(1, this.paymentOrderId);
   },
   components: {
     BreadCrumb

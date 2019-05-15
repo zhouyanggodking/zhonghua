@@ -145,7 +145,7 @@ export default {
       contractNum: "",
       payer: "",
       questionDescrible: "",
-      questionClassificationList: ["1", "2"],
+      questionClassificationList: ["无", "缺少公章", "公章与申请方名称不符", "公章不清", "缺少法人章", "法人章与实际法人名称不符", "法人章不清", "授权书无签署日期", "授权书已过期", "其他"],
       question: "",
       isDialogVisible: false,
       rejectContent: "",

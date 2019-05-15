@@ -44,6 +44,7 @@ export default {
 
 <style lang="scss" scoped>
   body > .el-container {
+    // position: relative
     height: 100%;
     .content{
       // width: calc( 100% -236px);

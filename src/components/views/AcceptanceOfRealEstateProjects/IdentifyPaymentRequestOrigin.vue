@@ -23,14 +23,42 @@
           <div class="container">
             <div class="title">识别结果</div>
             <div class="result">
-              <el-row class="item" v-for="(item,index) in itemResult" :key="index" :gutter="10">
-                <el-col :span="10" class="item_title col-6">{{item}}</el-col>
-                <el-col :span="14" class="item_num col-18"></el-col>
-              </el-row>
+              <el-form label-position="right" label-width="150px" :model="paymentOrderForm">
+                <el-form-item label="合同名称:">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractName"></el-input>
+                </el-form-item>
+                <el-form-item label="合同编号:">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractNo"></el-input>
+                </el-form-item>
+                <el-form-item label="付款主题:">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.paymentTitle"></el-input>
+                </el-form-item>
+                <el-form-item label="申请日期:">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.requestDate"></el-input>
+                </el-form-item>
+                <el-form-item label="付款单位:">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.payer"></el-input>
+                </el-form-item>
+                <el-form-item label="收款单位:">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.receiver"></el-input>
+                </el-form-item>
+                <el-form-item label="本次应付金额(大写):">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.acountPayable"></el-input>
+                </el-form-item>
+                <el-form-item label="合同动态金额(¥):">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractDynamicAmount"></el-input>
+                </el-form-item>
+                <el-form-item label="累计已付金额(¥):">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.paidAmount"></el-input>
+                </el-form-item>
+                <el-form-item label="应付未付金额(¥):">
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.unpaidAmount"></el-input>
+                </el-form-item>
+              </el-form>
             </div>
             <div class="btn-group">
               <el-button class="cancel-btn" @click="previous">返回</el-button>
-              <el-button v-if="!isSaveBtn" class="modify-btn" @click="modifyFile">修改</el-button>
+              <el-button v-if="isFiledFormEdit" class="modify-btn" @click="modifyFile">修改</el-button>
               <el-button v-else class="modify-btn" @click="saveFile">保存</el-button>
             </div>
           </div>
@@ -43,28 +71,19 @@
 <script>
 import Viewer from "viewerjs";
 import BreadCrumb from "@/components/common/BreadCrumb";
+import resourceWrapper from "@/rest/resourceWrapper";
 
 export default {
   data() {
     return {
+      isFiledFormEdit: true,
       tableData: [],
       imagesSrc: 
         "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
       ,
       textarea: "",
       isSaveBtn: false,
-      itemResult: [
-        "合同名称：",
-        "合同编号：",
-        "付款主题：",
-        "申请日期：",
-        "付款单位：",
-        "收款单位：",
-        "本次应付金额（大写）：",
-        "合同动态金额（¥）：",
-        "累计已付金额（¥）：",
-        "应付未付金额（¥）："
-      ],
+      paymentOrderForm: {},
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       currentTitle: "付款公司名称-合同编号-付款主题"
     };
@@ -74,13 +93,20 @@ export default {
       this.$router.go(-1);
     },
     modifyFile() {
-      this.isSaveBtn = true;
+      this.isFiledFormEdit = !this.isFiledFormEdit;
     },
     saveFile() {
-      this.isSaveBtn = false;
+      this.isFiledFormEdit = !this.isFiledFormEdit;
+    },
+    getPaymentDetailData(userId,id){
+      resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
+        this.paymentOrderForm=res.data;
+      })
     }
   },
   mounted() {
+    this.id=this.$route.query.id;
+    this.getPaymentDetailData(1, this.id);
     const viewer = new Viewer(document.getElementById("image"), {
       inline: true,
       button: false, //右上角按钮
@@ -154,12 +180,56 @@ export default {
           border: 1px solid #ebebeb;
           .result {
             overflow: auto;
-            height: 540px;
+            height: 500px;
             padding-top: 30px;
             padding-bottom: 20px;
             margin-top: 10px;
             border-top: 1px solid #ebebeb;
-
+            /deep/ {
+              .el-form {
+                margin-top: 6px;
+                padding:  0 20px;
+                // z-index: 1999;
+                .goods-list {
+                  border: 1px dashed #EBEBEB;
+                }
+                .el-form-item {
+                  .el-form-item__label {
+                    line-height: 30px;
+                    font-size: 14px;
+                    color: #333333;
+                    font-weight: bold;
+                  }
+                  .el-form-item__content {
+                    line-height: 30px;
+                    .el-input {
+                      height: 30px;
+                      .el-input__inner {
+                        height: 30px;
+                      }
+                    &.is-disabled {
+                        .el-input__inner {
+                          border: none;
+                          color: #333333;
+                          background-color: #FAFAFA;
+                          cursor: default;
+                        }
+                      }
+                    }
+                    .el-select {
+                      width: 100%;
+                      .el-input--suffix {
+                        .el-input__suffix {
+                          .el-input__icon {
+                            line-height: 30px;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
             .item {
               margin-bottom: 20px;
               .item_title {
@@ -175,6 +245,7 @@ export default {
             }
           }
           .btn-group {
+            padding: 30px 0px;
             display: flex;
             justify-content: flex-end;
             height: 40px;

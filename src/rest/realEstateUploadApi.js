@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Qs from 'qs';
+// import Qs from 'qs';
 
 export const getOcrExtractTemplateFields = (businessTypeId, userId, id)=> {
   return axios.get(`/OcrExtractTemplateFields/OcrExtractTemplateFields?businessTypeId=${businessTypeId}&userId=${userId}&id=${id}`)
@@ -48,12 +48,12 @@ export const getUploadHistory = (params) => {
 
 //单个付款申请单审核和驳回
 export const checkPaymentRequestOrder = (params) => {
-  return axios.post('/estate/estatePaymentRequestOrderController/checkPaymentRequestOrder', Qs.stringify({
+  return axios.post('/estate/estatePaymentRequestOrderController/checkPaymentRequestOrder', {
     'id': params.id,
     'state': params.state,
     'userId': params.userId,
     'rejectReason': params.rejectReason
-  }))
+  })
   .then((res) => {
     return Promise.resolve(res);
   }, err => {
@@ -65,6 +65,17 @@ export const checkPaymentRequestOrder = (params) => {
 
 export const checkPaymentRequestOrders = (params) => {
   return axios.post('/estate/estatePaymentRequestOrderController/checkPaymentRequestOrders', params)
+  .then((res) => {
+    return Promise.resolve(res);
+  }, err => {
+    return Promise.reject(err);
+  })
+}
+
+// 发票原件
+
+export const getInvoiceInfo = (params) => {
+  return axios.get(`/estate/estateInvoiceController/getInvoiceInfo?userId=${params.userId}&id=${params.id}`)
   .then((res) => {
     return Promise.resolve(res);
   }, err => {
