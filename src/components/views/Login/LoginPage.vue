@@ -15,8 +15,8 @@
           </div>
         </div>
         <el-form ref="signinForm" :rules="rules" :model="signinForm" label-width="60px">
-          <el-form-item label="手机号" prop="name">
-            <el-input v-model="signinForm.name"></el-input>
+          <el-form-item label="手机号" prop="telephone">
+            <el-input v-model="signinForm.telephone"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password">
             <el-input type="password" v-model="signinForm.password"></el-input>
@@ -29,9 +29,23 @@
             <span @click="toResetPwdPage">忘记密码?</span>
           </div>
           <el-form-item class="sign-in-btn">
-            <el-button @click="handleLoginClick">登录</el-button>
+            <el-button @click="handleLoginClick">登 录</el-button>
           </el-form-item>
         </el-form>
+        <el-dialog
+          :visible.sync="isErrorDialogVisible"
+          :show-close="false"
+          class="confirmDialog"
+          width="520px"
+          center>
+          <div class="icon"></div>
+          <div class="text">用户名或密码输入错误{{loginErrorCount}}次</div>
+          <div class="prompt-text">累计错误输入6次，本日将无法登录</div>
+          <span slot="footer" class="dialog-footer">
+            <el-button class="cancle-btn" @click="isErrorDialogVisible = false">取 消</el-button>
+            <el-button class="submit-btn" type="primary" @click="handleForgetPwdClick">忘记密码</el-button>
+          </span>
+        </el-dialog>
       </div>
     </div>
     <Footer></Footer>
@@ -41,6 +55,7 @@
 import '../../../assets/iconfont/iconfont.css';
 import Footer from '@/components/common/Footer';
 import IdentifyCode from '@/components/common/IdentifyCode';
+import {login} from "@/rest/authQuery";
 
 export default {
   data() {
@@ -66,13 +81,15 @@ export default {
       }
     };
     return {
+      loginErrorCount: 0,
+      isErrorDialogVisible: false,
       signinForm: {
-        name: '',
+        telephone: '',
         password: '',
         identifyCode: ''
       },
       rules: {
-        name: [
+        telephone: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
           { validator: phoneMatch, trigger: 'blur' }
         ],
@@ -105,11 +122,36 @@ export default {
       }
     },
     handleLoginClick() {
-      // this.$refs.signinForm.validate((valid) => {
-      //   if(valid) {
-      //     return
-      //   } else {}
-      // })
+      this.$refs.signinForm.validate((valid) => {
+        if(valid) {
+          const params = {
+            telephone: this.signinForm.telephone,
+            password: this.signinForm.password
+          }
+          if(this.loginErrorCount < 6){
+            login(params)
+            .then((res) => {
+              if(res){
+                this.$router.push('/'); //页面跳转
+              }else{
+                this.loginErrorCount ++,
+                this.isErrorDialogVisible = true;
+              }
+            }, (err) => {
+              console.log("登陆失败")
+              this.errorMsg = "登陆失败";
+              this.loginErrorCount ++,
+              this.isErrorDialogVisible = true;
+            })
+          }else{
+            console.log("今日已经输入错误6次")
+          }
+        }
+      })
+    },
+    handleForgetPwdClick() {
+      this.isErrorDialogVisible = false;
+      this.$router.push('/retrievePassword');
     },
     toResetPwdPage() {
       this.$router.push('/retrievePassword');
@@ -231,6 +273,14 @@ export default {
             }
           }
         }
+      }
+    }
+    .el-dialog {
+      .prompt-text {
+        width: 470px;
+        font-size: 16px;
+        text-align: center;
+        margin-top: 10px;
       }
     }
   }

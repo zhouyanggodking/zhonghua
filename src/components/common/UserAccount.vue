@@ -1,7 +1,7 @@
 <template>
   <div class="user-account-container">
     <el-dropdown trigger="hover" placement="bottom" @command="handleCommand">
-      <div>{{userName}} <span class="el-icon-arrow-down"></span></div>
+      <div>{{userName}} <span style="font-size:35px" class="el-icon-user"></span></div>
       <el-dropdown-menu class="user-account" slot="dropdown">
         <el-dropdown-item class="logout" command="resetPassword"><span class="name">修改密码</span></el-dropdown-item>
         <el-dropdown-item class="logout" command="logout"><span class="name">退出登录</span></el-dropdown-item>
@@ -13,10 +13,10 @@
           <el-input v-model="resetPwdForm.oldPassword" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="新密码" :label-width="formLabelWidth" prop="newPassword">
-          <el-input v-model="resetPwdForm.newPassword" autocomplete="off"></el-input>
+          <el-input  v-model="resetPwdForm.newPassword" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" :label-width="formLabelWidth" prop="confirmPassword">
-          <el-input v-model="resetPwdForm.confirmPassword" autocomplete="off"></el-input>
+          <el-input  v-model="resetPwdForm.confirmPassword" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -28,8 +28,10 @@
 </template>
 
 <script>
-// import authQuery from '@/rest/authQuery';
+import {logout} from '@/rest/authQuery';
 // import authService from '@/services/authService';
+import {changePassword} from "@/rest/userManagmentPageApi";
+import localStorageHelper from '@/helpers/localStorageHelper';
 
 export default {
   name: 'userAccount',
@@ -72,22 +74,36 @@ export default {
   methods: {
     handleCommand(command) {
       if (command === 'logout') {
-        // send request to delete token on server        
-        // clear localstorage token
-        // authQuery.logout().finally(() => {
-        //   this.$router.push({
-        //     path: '/login'
-        //   });
-        // });
+        logout().finally(() => {
+          this.$router.push({
+            path: '/login'
+          });
+        });
       } else if (command === 'resetPassword') {
         this.dialogFormVisible = true;
       }
     },
-    handleSubmitClick() {}
+    handleSubmitClick() {
+      this.$refs.resetPwdForm.validate((valid) => {
+        if(valid) {
+          const params = {
+            oldPassword: this.resetPwdForm.oldPassword,
+            newPassword: this.resetPwdForm.newPassword,
+            userId: localStorageHelper.getItem("userId")
+          }
+          console.log("修改密码参数", params)
+        //修改密码
+        changePassword(params)
+          .then((res) => {
+            console.log(res.data)
+          })
+        }
+      })
+    }
   },
   mounted() {
     // this.userName = authService.getLoggedUserName();
-    this.userName = 'Zh';
+    this.userName = localStorageHelper.getItem("userName");
   }
 };
 </script>
