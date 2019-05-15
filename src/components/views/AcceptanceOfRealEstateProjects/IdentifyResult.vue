@@ -88,7 +88,7 @@
         </el-table>
       </div>
       <div class="table-footer">
-        <Pagination :totalCount="totalCount"></Pagination>
+        <Pagination :totalCount="totalCount" @change="onPageNumberChange"></Pagination>
       </div>
     </div>
     <el-dialog
@@ -177,7 +177,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "识别结果",
-      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
+      breadCrumbList: ["首页", "资产识别比对", "识别结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: [
@@ -325,11 +325,11 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val.map(item => item.id);
     },
-    handleSizeChange(pageSize) {
-      this.pageSize = pageSize;
-    },
-    handleCurrentChange(currPage) {
-      this.currentPage = currPage;
+    // 分页
+    onPageNumberChange(res) {
+      this.pageSize = res.pageSize;
+      this.currentPage = res.pageNum;
+      this.getPaymentOrderInfos();
     },
     getPaymentOrderInfos(){
       this.tableData = [];
