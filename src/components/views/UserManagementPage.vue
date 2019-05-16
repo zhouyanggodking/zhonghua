@@ -61,7 +61,7 @@
     </div>
     <el-dialog class="dialog-form user-dialog" :title="dialogTitle" :visible.sync="isDialogVisible" :before-close="cancelEditFileds">
       <el-form :model="addUserform" :rules="rules" ref="addUserform">
-        <el-form-item label="姓名" :label-width="formLabelWidth" prop="username">
+        <el-form-item class="input-text-color" label="姓名" :label-width="formLabelWidth" prop="username">
           <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="手机号" :label-width="formLabelWidth" prop="phoneNum">
@@ -456,6 +456,9 @@ export default {
       .el-select {
         width: 100%;
       }
+    }
+    .input-text-color {
+      color: #666666 !important;
     }
   }
 }

@@ -89,7 +89,7 @@ export default {
           const params = {
             oldPassword: this.resetPwdForm.oldPassword,
             newPassword: this.resetPwdForm.newPassword,
-            userId: localStorageHelper.getItem("userId")
+            userId: localStorageHelper.getItem("USERID")
           }
           console.log("修改密码参数", params)
         //修改密码
@@ -103,7 +103,7 @@ export default {
   },
   mounted() {
     // this.userName = authService.getLoggedUserName();
-    this.userName = localStorageHelper.getItem("userName");
+    this.userName = localStorageHelper.getItem("USERNAME");
   }
 };
 </script>

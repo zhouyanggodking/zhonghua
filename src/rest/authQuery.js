@@ -1,5 +1,9 @@
 import axios from 'axios';
 import localStorageHelper from '@/helpers/localStorageHelper';
+const USERID = 'USERID'
+const USERNAME = 'USERNAME'
+const TELEPHONE = 'TELEPHONE'
+const USERSTATUS = 'USERSTATUS' //用户是否冻结
 
 //登录
 export const login = (params)=> {
@@ -9,17 +13,18 @@ export const login = (params)=> {
     var flag = false;
     if(res.data.status == '200'){
       const data = res.data.data;
-      localStorageHelper.setItem("userId", data.id);
-      localStorageHelper.setItem("userName", data.username);
-      localStorageHelper.setItem("telephone", data.telephone);
-      localStorageHelper.setItem("userStatus", data.status);
+      localStorageHelper.setItem("USERID", data.id);
+      localStorageHelper.setItem("USERNAME", data.username);
+      localStorageHelper.setItem("TELEPHONE", data.telephone);
+      localStorageHelper.setItem("USERSTATUS", data.status);
         flag =true;
     }
     return flag;
   }, (err) => {
-    localStorageHelper.removeItem("userId");
-    localStorageHelper.removeItem("userName");
-    localStorageHelper.removeItem("userStatus");
+    localStorageHelper.removeItem("USERID");
+    localStorageHelper.removeItem("USERNAME");
+    localStorageHelper.removeItem("TELEPHONE");
+    localStorageHelper.removeItem("USERSTATUS");
     return Promise.reject(err)
   })
 }
@@ -27,14 +32,16 @@ export const login = (params)=> {
 export const logout = ()=> {
   return axios.get(`/`)
   .then( res=> {
-    localStorageHelper.removeItem("userId");
-    localStorageHelper.removeItem("userName");
-    localStorageHelper.removeItem("userStatus");
+    localStorageHelper.removeItem("USERID");
+    localStorageHelper.removeItem("USERNAME");
+    localStorageHelper.removeItem("TELEPHONE");
+    localStorageHelper.removeItem("USERSTATUS");
     return res.data;
   }, (err) => {
-    localStorageHelper.removeItem("userId");
-    localStorageHelper.removeItem("userName");
-    localStorageHelper.removeItem("userStatus");
+    localStorageHelper.removeItem("USERID");
+    localStorageHelper.removeItem("USERNAME");
+    localStorageHelper.removeItem("TELEPHONE");
+    localStorageHelper.removeItem("USERSTATUS");
     return Promise.reject(err)
   })
 }
