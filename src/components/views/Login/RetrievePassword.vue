@@ -82,7 +82,7 @@
 <script>
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { clearInterval } from 'timers';
-import { getPhoneVerifyCode, resetPassword} from "@/rest/userManagmentPageApi";
+//import { getPhoneVerifyCode, resetPassword} from "@/rest/userManagmentPageApi";
 
 export default {
   data() {
@@ -181,23 +181,21 @@ export default {
     handleSigninClick() {
       this.$refs.resetPwdForm.validate((valid) => {
         if(valid) {
-          const params = {
-            telephone: this.signinForm.telephone,
-            newPassword: this.resetPwdForm.password
-          }
-          resetPassword(params)
-          .than((res) => {
+          // const params = {
+          //   telephone: this.signinForm.telephone,
+          //   newPassword: this.resetPwdForm.password
+          // }
+          // resetPassword(params)
+          // .than((res) => {
             this.$refs.restPwdContainer.setActiveItem('successTag');
             this.activeTag = 'successTag';
-          })
+          // })
         }
       })
     },
     handleNextStepClick() {
       this.$refs.signinForm.validate((valid) => {
         if(valid) {
-          
-           console.log("验证")
           if(this.signinForm.phoneIentifyCode != this.phoneVerifyCode) {
             this.isErrorDialogVisible = true;
           }else{
@@ -222,12 +220,12 @@ export default {
     },
     getPhoneIdentifyCode() {
       this.interval();
-      //获取手机验证码
-      getPhoneVerifyCode()
-      .than((res) => {
-        this.phoneVerifyCode = res.data.code;
-        return;
-      })
+      // //获取手机验证码
+      // getPhoneVerifyCode()
+      // .than((res) => {
+      //   this.phoneVerifyCode = res.data.code;
+      //   return;
+      // })
     },
     toLoginPage() {
       this.$router.push('/login');

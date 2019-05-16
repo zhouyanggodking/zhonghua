@@ -61,7 +61,7 @@
     </div>
     <el-dialog class="dialog-form user-dialog" :title="dialogTitle" :visible.sync="isDialogVisible" :before-close="cancelEditFileds">
       <el-form :model="addUserform" :rules="rules" ref="addUserform">
-        <el-form-item class="input-text-color" label="姓名" :label-width="formLabelWidth" prop="username">
+        <el-form-item  label="姓名" :label-width="formLabelWidth" prop="username">
           <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="手机号" :label-width="formLabelWidth" prop="phoneNum">
@@ -79,7 +79,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button class="cancle-btn" @click="cancelEditFileds(addUserform)">取消</el-button>
+        <el-button class="cancle-btn" @click="cancelEditFileds">取消</el-button>
         <el-button class="submit-btn" type="primary" @click="handleSubmitClick(addUserform.index)">{{buttonTitle}}</el-button>
       </div>
     </el-dialog>
@@ -93,14 +93,14 @@
       <div class="text">请确认是否冻结该用户</div>
       <span slot="footer" class="dialog-footer">
         <el-button class="cancle-btn" @click="confirmDialogVisiable = false">取消</el-button>
-        <el-button class="submit-btn" type="primary" @click="handleFreezeClick">冻结</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleFreezeClick(addUserform.index)">冻结</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
 import Pagination from "@/components/common/Pagination";
-import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount, exportUserToExcel} from "@/rest/userManagmentPageApi";
+//import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount, exportUserToExcel} from "@/rest/userManagmentPageApi";
 
 const PAGE_SIZE = 10;
 
@@ -112,8 +112,7 @@ export default {
       searchPhoneNum: '',
       //权限多选框
       authorityList:['地产承兑', '其他承兑', '贴现', '征信查询'],
-      //权限多选框默认选中
-      searchAuthority: ['地产承兑'],
+      searchAuthority: [],
       //部门下拉框
       departmentList: ['全部', '财务公司信贷部','其他'],
       //部门下拉列表默认为空
@@ -143,8 +142,7 @@ export default {
         username: '',
         phoneNum: '',
         department: '',
-        //默认选中
-        authority: ['地产承兑'],
+        authority: [],
         createUser: '',
         lastUpdateUser: '',
         lastUpdateTime: ''
@@ -170,17 +168,13 @@ export default {
   methods: {
     //查询
     search() {
-      this.fetchUserCount();
+      //this.fetchUserCount();
     },
     //新增用户
     addNewUser() {
       this.isDialogVisible = true;
       this.dialogTitle = '新增用户';
       this.buttonTitle = '新增';
-      //权限默认选中
-       this.addUserform = {
-          authority: ['地产承兑']
-       }
     },
     //变更用户
     updateAccount(index, row) {
@@ -201,13 +195,12 @@ export default {
       this.$refs.addUserform.validate((vaild) => {
         if (vaild) {
           const params = {
-            //userId: localStorageHelper.getItem("userName"), // 登陆者id
+            //userId: localStorageHelper.getItem("USERNAME"), // 登陆者id
             username: this.addUserform.username,
             phoneNum: this.addUserform.phoneNum,
             department: this.addUserform.department,
             authority: this.addUserform.authority
           }
-          console.log("quanxian", params.authority)
           if (this.dialogTitle === '用户变更'){
             this.selected = index; // 修改的位置
             this.$set(this.tableData, this.selected, this.addUserform);
@@ -222,11 +215,10 @@ export default {
             // })
           }else{
             //新增用户
-            console.log("cehsii", this.addUserform.authority)
             this.tableData.push(this.addUserform);
             // //后台插入
             // addNewUserField(params)
-            // .then((res) => {
+            // .then(() => {
             //   this.fetchUserCount(); //检索用户
             // })
           }
@@ -236,7 +228,7 @@ export default {
       })
     },
     //对话框：取消按钮
-    cancelEditFileds(addUserform) {
+    cancelEditFileds() {
       this.$refs['addUserform'].resetFields();
       this.clearAddUserform();
     },
@@ -246,70 +238,67 @@ export default {
       this.addUserform = {
         username: '',
         phoneNum: '',
-        authority: ['地产承兑']
+        authority: []
       }
     },
     //冻结用户
-    freezeAccount(index, row) {
+    freezeAccount() {
       this.confirmDialogVisiable = true;
     },
     handleFreezeClick() {
-      const params = {
-        userId: localStorageHelper.getItem("userId"), //登陆者id
-        id: row.id
-      }
-      freezeUserAccount(params)
-      .then((res) => {
-        console.log("冻结成功")
-      })
+      // const params = {
+      //   //userId: localStorageHelper.getItem("USERNAME"), //登陆者id
+      //   id: index
+      // }
+      // freezeUserAccount(params)
+      // .then((res) => {
+      //   return res;
+      // })
       this.confirmDialogVisiable = false;
     },
     //翻页
     onUserPageNumChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
-      this.fetchUserCount();
+      //this.fetchUserCount();
     },
     //获取用户列表
     fetchUserCount() { 
-      const params = {
-        userName: this.searchUsername, //姓名
-        phoneNum: this.searchPhoneNum, //手机号
-        department: this.departmentDefault, //部门
-        authority: this.searchAuthority, //权限
-        pageSize: this.pageSize,
-        pageNum: this.currentPage
-      }
-      console.log("获取用户列表参数", params)
-      getUserList(params)
-      .then((res) => {
-        console.log("返回的数据", res.data.id)
-        this.tableData = res.data.data; 
-        this.totalCount = res.data.total;//数据的总条数
-      })
+      // const params = {
+      //   userName: this.searchUsername, //姓名
+      //   phoneNum: this.searchPhoneNum, //手机号
+      //   department: this.departmentDefault, //部门
+      //   authority: this.searchAuthority, //权限
+      //   pageSize: this.pageSize,
+      //   pageNum: this.currentPage
+      // }
+      // getUserList(params)
+      // .then((res) => {
+      //   this.tableData = res.data.data; 
+      //   this.totalCount = res.data.total;//数据的总条数
+      // })
     },
     //导出excel
     exportExcel() {
-      const params = {
-        username: this.username,
-        phoneNum: this.phoneNum,
-        department: this.department,
-        authority: this.authority,
-        fileName: ''
-      }
-      exportUserToExcel(params)
-      .then((res) => {
-        this.excelData = res.data.data; 
-        console.log("导出成功");
-        this.fetchUserCount();
-        return;
-      })
+      // const params = {
+      //   username: this.username,
+      //   phoneNum: this.phoneNum,
+      //   department: this.department,
+      //   authority: this.authority,
+      //   fileName: ''
+      // }
+      // exportUserToExcel(params)
+      // .then((res) => {
+      //   this.excelData = res.data.data; 
+      //   this.fetchUserCount();
+      //   return;
+      // })
     }
   },
   //初始化函数
   mounted() {
     //获取用户列表
-    this.fetchUserCount();
+    //this.fetchUserCount();
   },
   components: {
     Pagination
@@ -448,6 +437,7 @@ export default {
         &.update-account {
           .el-input__inner {
             background-color: #ffffff;
+            color: #606266;
             border: none;
             cursor: default;
           }
@@ -456,9 +446,6 @@ export default {
       .el-select {
         width: 100%;
       }
-    }
-    .input-text-color {
-      color: #666666 !important;
     }
   }
 }
