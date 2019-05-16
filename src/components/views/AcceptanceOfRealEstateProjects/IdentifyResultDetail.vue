@@ -199,13 +199,13 @@ export default {
       dialogHintOperate: "驳回",
       rejectContent:'',
       breadCrumbList: ["首页", "资产识别比对", "识别结果"],
-      currentTitle: "付款公司名称-合同编号-付款主题",
+      currentTitle: "",
       paymentOrderId: ''
     };
   },
   methods: {
     checkInvoiceInfo(row) {
-      this.$router.push({ name: "identify-invoice-origin", query: { id: row.id}});
+      this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo}});
     },
     exportExcel(){
       window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
@@ -270,12 +270,13 @@ export default {
       this.$router.back(-1);
     },
     lookPayRequestOrigin() {
-      this.$router.push({ name: "identify-payment-request-origin", query: { id: this.paymentOrderId} });
+      this.$router.push({ name: "identify-payment-request-origin", query: { id: this.paymentOrderId }});
     },
     getPaymentDetailData(userId,id){
       resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
           this.data=res.data;
           this.tableData=res.data.estateInvoices;
+          this.currentTitle = `${res.data.payer}-${res.data.contractNo}-${res.data.paymentTitle}`;
       })
     }
   },

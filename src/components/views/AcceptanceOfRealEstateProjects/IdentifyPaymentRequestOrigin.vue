@@ -79,7 +79,7 @@ export default {
       isFiledFormEdit: true,
       tableData: [],
       imagesSrc: 
-        "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
+        "http://10.17.17.151:8080/test/test.png"
       ,
       textarea: "",
       isSaveBtn: false,
