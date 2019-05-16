@@ -20,7 +20,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button class="cancle-btn" @click="dialogFormVisible = false">取 消</el-button>
+        <el-button class="cancle-btn" @click="cancelEditFileds">取 消</el-button>
         <el-button class="submit-btn" type="primary" @click="handleSubmitClick">确 定</el-button>
       </div>
     </el-dialog>
@@ -29,9 +29,8 @@
 
 <script>
 import {logout} from '@/rest/authQuery';
-// import authService from '@/services/authService';
-import {changePassword} from "@/rest/userManagmentPageApi";
-import localStorageHelper from '@/helpers/localStorageHelper';
+//import {changePassword} from "@/rest/userManagmentPageApi";
+//import localStorageHelper from '@/helpers/localStorageHelper';
 
 export default {
   name: 'userAccount',
@@ -86,24 +85,37 @@ export default {
     handleSubmitClick() {
       this.$refs.resetPwdForm.validate((valid) => {
         if(valid) {
-          const params = {
-            oldPassword: this.resetPwdForm.oldPassword,
-            newPassword: this.resetPwdForm.newPassword,
-            userId: localStorageHelper.getItem("userId")
-          }
-          console.log("修改密码参数", params)
-        //修改密码
-        changePassword(params)
-          .then((res) => {
-            console.log(res.data)
-          })
+          // const params = {
+          //   oldPassword: this.resetPwdForm.oldPassword,
+          //   newPassword: this.resetPwdForm.newPassword,
+          //   userId: localStorageHelper.getItem("USERID")
+          // }
+          // //修改密码
+          // changePassword(params)
+          //   .then(() => {
+          //     return;
+          //   })
+          this.clearResetPwdForm();
         }
       })
-    }
+    },
+    //对话框：取消按钮
+    cancelEditFileds() {
+      this.$refs['resetPwdForm'].resetFields();
+      this.clearResetPwdForm();
+    },
+    //关闭并清空对话框中的表单
+    clearResetPwdForm() {
+      this.dialogFormVisible = false;
+      this.resetPwdForm = {
+        oldPassword: '',
+        newPassword: '',
+        comfirmPassword: ''
+      }
+    },
   },
   mounted() {
-    // this.userName = authService.getLoggedUserName();
-    this.userName = localStorageHelper.getItem("userName");
+    //this.userName = localStorageHelper.getItem("USERNAME");
   }
 };
 </script>

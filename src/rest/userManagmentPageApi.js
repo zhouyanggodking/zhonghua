@@ -3,14 +3,10 @@ import Qs from 'qs';
 
 //获取手机验证码
 export const getPhoneVerifyCode = (params)=> {
-  return axios.get(``)
+  return axios.get(`?telephone=${params.telephone}`)
   .then(res => {
-    const data = res.data.data;
-    //保存验证码
-    console.log("验证码正确返回", res)
     return res.data;
   }, (err) => {
-    console.log("验证码错误返回")
     return Promise.reject(err)
   })
 }
@@ -19,10 +15,8 @@ export const getPhoneVerifyCode = (params)=> {
 export const resetPassword = (params)=> {
   return axios.get(`/finance/ocr/user/updatePassword?password=${params.newPassword}&telephone=${params.telephone}`)
   .then(res => {
-    console.log("忘记密码正确返回", res)
     return res.data;
   }, (err) => {
-    console.log("忘记密码错误返回")
     return Promise.reject(err)
   })
 }
@@ -32,10 +26,8 @@ export const changePassword = (params)=> {
   //return axios.get(`/finance/ocr/user/updatePassword?pwd=${params.oldPassword}&newpwd=${params.newPassword}&id=${params.userId}`)
   return axios.get(`/finance/ocr/user/updatePassword?oldPassword=${params.oldPassword}&password=${params.newPassword}&id=${params.userId}`)
   .then(res => {
-    console.log("修改密码正确返回", res)
     return res.data;
   }, (err) => {
-    console.log("修改密码错误返回")
     return Promise.reject(err)
   })
 }

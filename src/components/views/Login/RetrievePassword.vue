@@ -64,13 +64,25 @@
           </div>
         </el-carousel-item>
       </el-carousel>
+      <el-dialog
+          :visible.sync="isErrorDialogVisible"
+          :show-close="false"
+          class="confirmDialog"
+          width="520px"
+          center>
+          <div class="icon"></div>
+          <div class="text">验证码输入错误，请重新输入</div>
+          <span slot="footer" class="dialog-footer">
+            <el-button class="submit-btn"  type="primary" @click="isErrorDialogVisible = false">确定</el-button>
+          </span>
+        </el-dialog>
     </div>
   </div>
 </template>
 <script>
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { clearInterval } from 'timers';
-import { getPhoneVerifyCode, resetPassword} from "@/rest/userManagmentPageApi";
+//import { getPhoneVerifyCode, resetPassword} from "@/rest/userManagmentPageApi";
 
 export default {
   data() {
@@ -95,15 +107,6 @@ export default {
         callback();
       }
     };
-    const phoneIdentifyCodeMatch = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请输入验证码'));
-      } else if (value != this.phoneVerifyCode) {
-        callback(new Error('请输入正确验证码'));
-      } else {
-        callback();
-      }
-    };
     const passwordMatch = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请再次输入密码'));
@@ -114,7 +117,8 @@ export default {
       }
     };
     return {
-      phoneVerifyCode: '',
+      phoneVerifyCode: '1111',
+      isErrorDialogVisible: false,
       activeTag: 'signinTag',
       count: 0,
       timer: null,
@@ -131,8 +135,7 @@ export default {
         ],
         phoneIentifyCode: [
           { required: true, message: '请输入手机验证码', trigger: 'blur' },
-          { pattern: /^\d{4}$/, message: '请输入正确验证码', trigger: 'blur' },
-          { validator: phoneIdentifyCodeMatch, trigger: 'blur' }
+          { pattern: /^\d{4}$/, message: '请输入正确验证码', trigger: 'blur' }
         ],
         identifyCode: [
           { required: true, message: '请输入图形验证码', trigger: 'blur' },
@@ -178,23 +181,27 @@ export default {
     handleSigninClick() {
       this.$refs.resetPwdForm.validate((valid) => {
         if(valid) {
-          const params = {
-            telephone: this.signinForm.telephone,
-            newPassword: this.resetPwdForm.password
-          }
-          resetPassword(params)
-          .than((res) => {
+          // const params = {
+          //   telephone: this.signinForm.telephone,
+          //   newPassword: this.resetPwdForm.password
+          // }
+          // resetPassword(params)
+          // .than((res) => {
             this.$refs.restPwdContainer.setActiveItem('successTag');
             this.activeTag = 'successTag';
-          })
+          // })
         }
       })
     },
     handleNextStepClick() {
       this.$refs.signinForm.validate((valid) => {
         if(valid) {
-          this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
-          this.activeTag = 'resetPwdTag';
+          if(this.signinForm.phoneIentifyCode != this.phoneVerifyCode) {
+            this.isErrorDialogVisible = true;
+          }else{
+            this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
+            this.activeTag = 'resetPwdTag';
+          }
         }
       })
     },
@@ -213,12 +220,12 @@ export default {
     },
     getPhoneIdentifyCode() {
       this.interval();
-      //获取手机验证码
-      getPhoneVerifyCode()
-      .than((res) => {
-        this.phoneVerifyCode = res.data.code;
-        return;
-      })
+      // //获取手机验证码
+      // getPhoneVerifyCode()
+      // .than((res) => {
+      //   this.phoneVerifyCode = res.data.code;
+      //   return;
+      // })
     },
     toLoginPage() {
       this.$router.push('/login');

@@ -29,7 +29,7 @@
             <span @click="toResetPwdPage">忘记密码?</span>
           </div>
           <el-form-item class="sign-in-btn">
-            <el-button @click="handleLoginClick">登 录</el-button>
+            <el-button :disabled="isLoginDisabled" @click="handleLoginClick">登 录</el-button>
           </el-form-item>
         </el-form>
         <el-dialog
@@ -81,6 +81,7 @@ export default {
       }
     };
     return {
+      isLoginDisabled: false,
       loginErrorCount: 0,
       isErrorDialogVisible: false,
       signinForm: {
@@ -110,7 +111,7 @@ export default {
     randomNum(min, max) {
       return Math.floor(Math.random() * (max - min) + min);
     },
-    refreshCode() {
+    refreshCode() { 
       this.identifyCode = "";
       this.initCode(this.identifyCodes, 4);
     },
@@ -137,14 +138,12 @@ export default {
                 this.loginErrorCount ++,
                 this.isErrorDialogVisible = true;
               }
-            }, (err) => {
-              console.log("登陆失败")
-              this.errorMsg = "登陆失败";
+            }, () => {
               this.loginErrorCount ++,
               this.isErrorDialogVisible = true;
             })
           }else{
-            console.log("今日已经输入错误6次")
+            this.isLoginDisabled = true;
           }
         }
       })
