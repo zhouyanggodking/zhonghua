@@ -2,7 +2,7 @@
   <div class="top-pagination">
     <div class="title">{{title}}</div>
     <div class="pagination">
-      <div class="count">{{String(currentPageNum).padStart(2, 0)}}/03</div>
+      <div class="count">{{String(currentPageNum).padStart(2, 0)}}/{{total}}</div>
       <div>前往第
         <el-input v-model="currentPageNum" @blur="onInputBlur"></el-input>
         页</div>
@@ -23,6 +23,9 @@ export default {
     currentPage: {
       type: Number,
       default: 1
+    },
+    total: {
+      type: Number
     }
   },
   methods: {

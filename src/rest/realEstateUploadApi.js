@@ -45,7 +45,42 @@ export const getUploadHistory = (params) => {
         return Promise.reject(err)
     })
 }
-
+// 一个付款申请单下的所有发票
+export const getTotalInvoices = (params) => {
+  return axios.get(`/estate/estateInvoiceController/getInvoiceInfosWithPosition?userId=${params.userId}&paymentRequestId=${params.paymentRequestId}`)
+  .then((res) => {
+    return Promise.resolve(res);
+  }, err => {
+    return Promise.reject(err);
+  })
+}
+// 发票关联付款主题
+export const getSimpleInfos = (userid) => {
+  return axios.get(`/estate/estatePaymentRequestOrderController/getAllPaymentRequestSimpleInfos?userId=${userid}`)
+  .then((res) => {
+    return Promise.resolve(res);
+  }, err => {
+    return Promise.reject(err);
+  })
+}
+//修改发票
+export const modifyInvoice = (params) => {
+  return axios.post('/estate/estateInvoiceController/modifyInvoice', params)
+  .then(res => {
+    return res.data;
+  }, err => {
+    return Promise.reject(err);
+  })
+}
+// 发票补录
+export const supplyInvoice = (params) => {
+  return axios.post('/estate/estateInvoiceController/addOneInvoice', params)
+  .then(res => {
+    return res.data;
+  }, err => {
+    return Promise.reject(err);
+  })
+}
 //单个付款申请单审核和驳回
 export const checkPaymentRequestOrder = (params) => {
   return axios.post('/estate/estatePaymentRequestOrderController/checkPaymentRequestOrder', {
