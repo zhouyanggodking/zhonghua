@@ -6,127 +6,38 @@
     <div class="original-invoice">
       <div class="result">
         <div class="left-img">
-          <identify-result-top-banner title="发票图像" :currentPage="currentPage" @change="onImgPageChange"></identify-result-top-banner>
+          <identify-result-top-banner title="发票图像" :currentPage="currentPage" :total="invoicesMessage.length" @change="onImgPageChange"></identify-result-top-banner>
           <div class="img-group">
-            <el-carousel ref="carousel" height="350px" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
-              <el-carousel-item v-for="item in 3" :key="item">
+            <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
+              <el-carousel-item v-for="item in invoicesMessage.length" :key="item">
                 <img
-                  id="image"
+                  :id="`img${item}`"
+                  ref="image"
                   class="img-src"
                   :src="imagesSrc"
                   height="633"
                   width="494"
                 >
+                <!-- <img
+                  id="img1"
+                  ref="image"
+                  class="img-src"
+                  :src="imagesSrc"
+                  height="633"
+                  width="494"
+                > -->
               </el-carousel-item>
             </el-carousel>
           </div>
         </div>
         <div class="right-filed">
-          <identify-result-top-banner title="识别结果" @change="onImgPageChange" :currentPage="currentPage"></identify-result-top-banner>
-          <div class="contract-box" v-if="isShowContractMsg">
-            <div class="payment-order-theme">
-              <label>关联付款主题:</label>
-              <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.name" placeholder="">
-                <el-option label="专票" value="专票"></el-option>
-                <el-option label="普票" value="普票"></el-option>
-              </el-select>
-              <el-input v-else :disabled="isFiledFormEdit" v-model="paymentOrderTheme"></el-input>
-            </div>
-            <el-form label-position="right" label-width="120px" :model="filedResultForm">
-              <el-form-item label="发票类型:">
-                <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.name" placeholder="">
-                  <el-option label="专票" value="专票"></el-option>
-                  <el-option label="普票" value="普票"></el-option>
-                </el-select>
-                <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType"></el-input>
-              </el-form-item>
-              <el-form-item label="验真状态:">
-                <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.verification" placeholder="">
-                  <el-option v-for="(item, index) in this.verification" :key="index" :label="item" :value="index"></el-option>
-                </el-select>
-                <el-input v-else :disabled="isFiledFormEdit" v-model="this.verification[filedResultForm.verification]"></el-input>
-              </el-form-item>
-              <el-form-item label="是否盖章:">
-                <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.stamped" placeholder="">
-                  <el-option v-for="(item, index) in this.stamped" :key="index" :label="item" :value="index"></el-option>
-                </el-select>
-                <el-input v-else :disabled="isFiledFormEdit" v-model="this.stamped[filedResultForm.stamped]"></el-input>
-              </el-form-item>
-              <el-form-item label="发票号码:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceNo"></el-input>
-              </el-form-item>
-              <el-form-item label="发票代码:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceCode"></el-input>
-              </el-form-item>
-              <el-form-item label="开票日期:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceTime"></el-input>
-              </el-form-item>
-              <el-form-item label="购买方:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.buyyerName"></el-input>
-              </el-form-item>
-              <el-form-item label="购买方税号:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.salerIndentification"></el-input>
-              </el-form-item>
-              <el-form-item label="销售方:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.salerName"></el-input>
-              </el-form-item>
-              <el-form-item label="销售方税号:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.salerIndentification"></el-input>
-              </el-form-item>
-              <div class="goods-list" v-for="(item, index) in goodsList" :key="index">
-                <el-form-item label="货物或服务名称:">
-                  <el-input :disabled="isFiledFormEdit" v-model="item.itemName"></el-input>
-                </el-form-item>
-                <el-form-item label="规格型号:">
-                  <el-input :disabled="isFiledFormEdit" v-model="item.spec"></el-input>
-                </el-form-item>
-                <el-form-item label="单位:">
-                  <el-input :disabled="isFiledFormEdit" v-model="item.unit"></el-input>
-                </el-form-item>
-                <el-form-item label="数量:">
-                  <el-input :disabled="isFiledFormEdit" v-model="item.counts"></el-input>
-                </el-form-item>
-                <el-form-item label="单价:">
-                  <el-input :disabled="isFiledFormEdit" v-model="item.unitPrice"></el-input>
-                </el-form-item>
-                <el-form-item label="金额:">
-                  <el-input :disabled="isFiledFormEdit" v-model="item.totalPrice"></el-input>
-                </el-form-item>
-                <el-form-item label="税率:">
-                  <el-input :disabled="isFiledFormEdit" v-model="item.taxRate"></el-input>
-                </el-form-item>
-                <el-form-item label="税额:">
-                  <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.taxPrice"></el-input>
-                </el-form-item>
-              </div>
-              <el-form-item label="价税合计:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.finalPriceUpcase"></el-input>
-              </el-form-item>
-              <el-form-item label="累积已用金额:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.usedPrice"></el-input>
-              </el-form-item>
-              <el-form-item label="本次使用金额:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.usePrice"></el-input>
-              </el-form-item>
-              <el-form-item label="凭证联:">
-                <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.certification" placeholder="">
-                  <el-option label="发票联" value="a"></el-option>
-                  <el-option label="抵扣联" value="b"></el-option>
-                  <el-option label="记账联" value="c"></el-option>
-                </el-select>
-                <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.certification"></el-input>
-              </el-form-item>
-              <el-form-item label="备注信息:">
-                <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.remarkInfo"></el-input>
-              </el-form-item>
-            </el-form>
-            <div class="btn-list">
-              <el-button class="back-btn">返回</el-button>
-              <el-button v-if="isFiledFormEdit" class="submit-btn" type="primary" @click="handleClickModify">修改</el-button>
-              <el-button v-else class="submit-btn" type="primary" @click="handleClickSave">保存</el-button>
-            </div>
-          </div>
-         <contract-supplyment v-else></contract-supplyment>
+          <identify-result-top-banner title="识别结果" @change="onImgPageChange" :total="invoicesMessage.length" :currentPage="currentPage"></identify-result-top-banner>
+          <el-carousel ref="invoiceCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
+            <el-carousel-item v-for="(item, index) in invoicesMessage" :key="index">
+              <contract-message v-if="isShowContractMsg" :titleInfos="simpleInfos" :contractData="item" @change="toggleInvoice"></contract-message>
+              <contract-supplyment v-else :titleInfos="simpleInfos" @change="toggleInvoice"></contract-supplyment>
+            </el-carousel-item>
+          </el-carousel>
         </div>
       </div>
       <div class="footer-btn">
@@ -136,36 +47,42 @@
   </div>
 </template>
 <script>
+import {USERID} from '@/global/global';
 import Viewer from "viewerjs";
-import {getInvoiceInfo} from "@/rest/realEstateUploadApi";
+import {global_} from "@/global/global";
+import { getTotalInvoices, getSimpleInfos } from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import ContractSupplyment from "@/components/views/AcceptanceOfRealEstateProjects/ContractSupplyment";
+import ContractMessage from "@/components/views/AcceptanceOfRealEstateProjects/ContractMessage";
 import IdentifyResultTopBanner from '@/components/common/IdentifyResultTopBanner';
 
 export default {
   data() {
     return {
-      isShowContractMsg: false,
+      isShowContractMsg: true,
       // imagesSrc: "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg",
       paymentOrderTheme: '',
       imagesSrc: "http://10.17.17.151:8080/opt/output/test.png",
-      invoiceId: null,
+      paymentRequestId: null,
       stamped: ['否', '是'],
-      verification: ['未通过', '通过', '未验真'],
-      isFiledFormEdit: true,
-      goodsList: [],
-      filedResultForm: {},
       currentPage: 1,
       imgAutoPlay: false,
       tableData: [],
       textarea: "",
       breadCrumbList: ["首页", "资产识别比对", "识别结果"],
-      currentTitle: "付款公司名称-合同编号-付款主题"
+      currentTitle: "付款公司名称-合同编号-付款主题",
+      invoicesMessage: [],
+      infos: [],
+      simpleInfos: []
     };
   },
   methods: {
+    toggleInvoice(res) {
+      this.isShowContractMsg = res;
+    },
     onImgPageChange(pageNum) {
-      this.$refs.carousel.setActiveItem(pageNum-1);
+      this.$refs.invoiceCarousel.setActiveItem(pageNum-1);
+      this.$refs.imgCarousel.setActiveItem(pageNum-1);
     },
     handleClickModify() {
       this.isFiledFormEdit = !this.isFiledFormEdit;
@@ -174,47 +91,88 @@ export default {
       this.isFiledFormEdit = !this.isFiledFormEdit;
     },
     carouselChange(index) {
+      this.$refs.imgCarousel.setActiveItem(index);
+      this.$refs.invoiceCarousel.setActiveItem(index);
       this.currentPage = index + 1;
+      if (this.invoicesMessage.length) {
+        this.imagesSrc = `${global_}${this.invoicesMessage[index].outputLocation}`;
+      }
+      // this.initInvoiceViewer();
     },
-    fetchInvoiceInfo() {
+    fetchTotalInvoices() {
       const params = {
-        id: this.invoiceId,
+        paymentRequestId: this.paymentRequestId,
         userId: 1
-      };
-      getInvoiceInfo(params).then((res) => {
-        this.filedResultForm = res.data.data;
-        this.goodsList = res.data.data.estateInvoiceItems;
-      });
+      }
+      getTotalInvoices(params).then(res => {
+        this.invoicesMessage = res.data.data.invoices;
+        this.infos = res.data.data.infos;
+        this.initInvoiceViewer();
+      })
+    },
+    // 获取付款主题
+    getSimpleInfos() {
+      getSimpleInfos(USERID).then(res => {
+        this.simpleInfos = res.data.data;
+      })
+    },
+    initInvoiceViewer() {
+      this.invoicesMessage.map((item, index) => {
+        console.log(index);
+        console.log(document.getElementById("img1"));
+        const viewer = new Viewer(document.getElementById(`img${index+1}`), {
+        // const viewer = new Viewer(document.getElementById("image"), {
+          inline: true,
+          button: false, //右上角按钮
+          navbar: false, //底部缩略图
+          title: false, //当前图片标题
+          toolbar: false, //底部工具栏
+          tooltip: true, //显示缩放百分比
+          movable: true, //是否可以移动
+          zoomable: true, //是否可以缩放
+          rotatable: true, //是否可旋转
+          scalable: true, //是否可翻转
+          transition: true, //使用 CSS3 过度
+          fullscreen: false, //播放时是否全屏
+          keyboard: true, //是否支持键盘
+          viewed() {
+            viewer.zoomTo(1);
+          }
+        });
+      })
     }
   },
   mounted() {
-    this.invoiceId = this.$route.query.id;
-    this.paymentOrderTheme = this.$route.query.contractNo;
-    this.currentTitle = `${this.$route.query.payer}-${this.$route.query.contractNo}-${this.$route.query.contractNo}`
-    this.fetchInvoiceInfo();
-    const viewer = new Viewer(document.getElementById("image"), {
-      inline: true,
-      button: false, //右上角按钮
-      navbar: false, //底部缩略图
-      title: false, //当前图片标题
-      toolbar: false, //底部工具栏
-      tooltip: true, //显示缩放百分比
-      movable: true, //是否可以移动
-      zoomable: true, //是否可以缩放
-      rotatable: true, //是否可旋转
-      scalable: true, //是否可翻转
-      transition: true, //使用 CSS3 过度
-      fullscreen: false, //播放时是否全屏
-      keyboard: true, //是否支持键盘
-      viewed() {
-        viewer.zoomTo(1);
-      }
-    });
+    this.paymentRequestId = this.$route.query.paymentOrderId;
+    this.paymentOrderTheme = this.$route.query.title;
+    this.currentTitle = `${this.$route.query.payer}-${this.$route.query.contractNo}-${this.$route.query.title}`;
+    this.fetchTotalInvoices();
+    this.getSimpleInfos();
+    // this.initInvoiceViewer();
+    // const viewer = new Viewer(document.getElementById("image"), {
+    //   inline: true,
+    //   button: false, //右上角按钮
+    //   navbar: false, //底部缩略图
+    //   title: false, //当前图片标题
+    //   toolbar: false, //底部工具栏
+    //   tooltip: true, //显示缩放百分比
+    //   movable: true, //是否可以移动
+    //   zoomable: true, //是否可以缩放
+    //   rotatable: true, //是否可旋转
+    //   scalable: true, //是否可翻转
+    //   transition: true, //使用 CSS3 过度
+    //   fullscreen: false, //播放时是否全屏
+    //   keyboard: true, //是否支持键盘
+    //   viewed() {
+    //     viewer.zoomTo(1);
+    //   }
+    // });
   },
   components: {
     BreadCrumb,
     IdentifyResultTopBanner,
-    ContractSupplyment
+    ContractSupplyment,
+    ContractMessage
   }
 };
 </script>
@@ -234,6 +192,7 @@ export default {
     }
   }
   .original-invoice {
+    min-height: 1000px;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -242,6 +201,7 @@ export default {
     background-color: #ffffff;
     .result {
       display: flex;
+      height: 100%;
       justify-content: center;
       margin-bottom: 30px;
       .left-img {
@@ -250,9 +210,11 @@ export default {
         margin-right: 10px;
         border: 1px solid #EBEBEB;
         .img-group {
+          height: 100%;
           margin-top: 6px;
           /deep/ {
             .el-carousel {
+              height: 100%;
               border: 1px solid #ededed;
             }
           }
@@ -269,107 +231,11 @@ export default {
           padding-bottom: 6px;
           border-bottom: 1px solid #eee;
         }
-        .payment-order-theme {
-          display: flex;
-          align-items: center;
-          padding: 20px 20px;
-          margin-top: 6px;
-          background: #EFEFEF;
-          border-radius: 4px;
-          /deep/ {
-            .el-input {
-              height: 30px;
-              .el-input__inner {
-                height: 30px;
-              }
-              &.is-disabled {
-                .el-input__inner {
-                  border: none;
-                  color: #333333;
-                  background-color: #FAFAFA;
-                  cursor: default;
-                }
-              }
-            }
-            .el-select {
-              width: 100%;
-              .el-input--suffix {
-                .el-input__suffix {
-                  .el-input__icon {
-                    line-height: 30px;
-                  }
-                }
-              }
-            }
-          }
-          label {
-            flex-shrink: 0;
-            width: 108px;
-            padding-right: 12px;
-            text-align: right;
-            font-size: 14px;
-            color: #333333;
-            font-weight: bold;
-          }
-        }
         /deep/ {
-          .el-form {
-            height: 300px;
-            overflow-y: scroll;
-            padding:  20px 20px 0 20px;
-            .goods-list {
-              border: 1px dashed #EBEBEB;
-            }
-            .el-form-item {
-              .el-form-item__label {
-                line-height: 30px;
-                font-size: 14px;
-                color: #333333;
-                font-weight: bold;
-              }
-              .el-form-item__content {
-                line-height: 30px;
-                .el-input {
-                  height: 30px;
-                  .el-input__inner {
-                    height: 30px;
-                  }
-                  &.is-disabled {
-                    .el-input__inner {
-                      border: none;
-                      color: #333333;
-                      background-color: #FAFAFA;
-                      cursor: default;
-                    }
-                  }
-                }
-                .el-select {
-                  width: 100%;
-                  .el-input--suffix {
-                    .el-input__suffix {
-                      .el-input__icon {
-                        line-height: 30px;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        .btn-list {
-          display: flex;
-          justify-content: space-around;
-          margin-top: 34px;
-          .el-button {
-            width: 136px;
-            &.back-btn {
-              @include cancleBtnStyle;
-              margin: 0;
-            }
-            &.submit-btn {
-              @include buttonStyle;
-              margin: 0;
+          .el-carousel {
+            height: 100%;
+            .el-carousel__container {
+              height: 100%;
             }
           }
         }

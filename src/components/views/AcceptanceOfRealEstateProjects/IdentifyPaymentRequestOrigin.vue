@@ -72,18 +72,23 @@
 import Viewer from "viewerjs";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import resourceWrapper from "@/rest/resourceWrapper";
+import {dateFormat} from '@/helpers/dateHelper';
 
 export default {
   data() {
     return {
       isFiledFormEdit: true,
+      paymentOrderId: null,
       tableData: [],
       imagesSrc: 
         "http://10.17.17.151:8080/test/test.png"
       ,
       textarea: "",
       isSaveBtn: false,
-      paymentOrderForm: {},
+      paymentOrderForm: {
+        id: '',
+        contractName: ''
+      },
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       currentTitle: "付款公司名称-合同编号-付款主题"
     };
@@ -97,16 +102,49 @@ export default {
     },
     saveFile() {
       this.isFiledFormEdit = !this.isFiledFormEdit;
+      const mapData = {
+        id: this.paymentOrderForm.id,
+        contractName: this.paymentOrderForm.contractName,
+        contractNo: this.paymentOrderForm.contractNo,
+        paymentTitle: this.paymentOrderForm.paymentTitle,
+        payer: this.paymentOrderForm.payer,
+        receiver: this.paymentOrderForm.receiver,
+        acountPayable: this.paymentOrderForm.acountPayable,
+        contractDynamicAmount: this.paymentOrderForm.contractDynamicAmount,
+        paidAmount: this.paymentOrderForm.paidAmount,
+        unpaidAmount: this.paymentOrderForm.unpaidAmount,
+        requestDate: dateFormat(this.paymentOrderForm.requestDate)
+      };
+      const params = {
+        order: mapData,
+        userId: 1
+      }
+      resourceWrapper.modifyPaymentOrder(params).then(() => {
+        this.$message({
+          message: '修改成功',
+          type: 'success'
+        })
+      }, () => {
+        this.$message({
+          message: '修改失败',
+          type: 'failed'
+        })
+      })
     },
-    getPaymentDetailData(userId,id){
-      resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
-        this.paymentOrderForm=res.data;
+    getPaymentDetailData(){
+      const params = {
+        userId: 1,
+        id: this.paymentOrderId
+      }
+      resourceWrapper.getPaymentOrderDetail(params).then(res => {
+          this.paymentOrderForm=res.data.order;
+          this.currentTitle = `${res.data.order.payer}-${res.data.order.contractNo}-${res.data.order.paymentTitle}`;
       })
     }
   },
   mounted() {
-    this.id=this.$route.query.id;
-    this.getPaymentDetailData(1, this.id);
+    this.paymentOrderId=this.$route.query.id;
+    this.getPaymentDetailData();
     const viewer = new Viewer(document.getElementById("image"), {
       inline: true,
       button: false, //右上角按钮

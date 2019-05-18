@@ -129,6 +129,7 @@
               </template>
             </el-table-column>
           </el-table>
+          <Pagination class="invoices-pager" :totalCount="totalCount" @change="onPageNumberChange"></Pagination>
         </div>
       </div>
       <div class="divide-line"></div>
@@ -178,16 +179,21 @@
 <script>
 import {checkPaymentRequestOrder} from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
+import Pagination from "@/components/common/Pagination";
 import resourceWrapper from "@/rest/resourceWrapper";
 import {global_} from '@/global/global';
 
 const CHECK = 1;
 const REJECT = 0;
+const PAGESIZE = 10;
 
 export default {
   data() {
     return {
       checkBtnToggle: false,
+      pageSize: PAGESIZE,
+      currentPage: 1,
+      totalCount: 0,
       tableData: [],
       id:1,
       data:{},
@@ -205,7 +211,7 @@ export default {
   },
   methods: {
     checkInvoiceInfo(row) {
-      this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo}});
+      this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, paymentOrderId: this.paymentOrderId, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo}});
     },
     exportExcel(){
       window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
@@ -272,20 +278,43 @@ export default {
     lookPayRequestOrigin() {
       this.$router.push({ name: "identify-payment-request-origin", query: { id: this.paymentOrderId }});
     },
-    getPaymentDetailData(userId,id){
-      resourceWrapper.getPaymentDetailsPage(userId,id).then(res=>{
-          this.data=res.data;
+    getPaymentDetailData(){
+      const params = {
+        userId: 1,
+        id: this.paymentOrderId
+      }
+      resourceWrapper.getPaymentOrderDetail(params).then(res => {
+          this.data=res.data.order;
           this.tableData=res.data.estateInvoices;
-          this.currentTitle = `${res.data.payer}-${res.data.contractNo}-${res.data.paymentTitle}`;
+          this.currentTitle = `${res.data.order.payer}-${res.data.order.contractNo}-${res.data.order.paymentTitle}`;
       })
-    }
+    },
+    getInvoicesTableData() {
+      const params = {
+        pageSize: this.pageSize,
+        pageNum: this.currentPage,
+        paymentRequestOrderId: this.paymentOrderId,
+        userId: 1
+      }
+      resourceWrapper.getInvoicesByPaymentOrder(params).then(res => {
+        this.tableData = res.data.data;
+        this.totalCount = res.data.total;
+      })
+    },
+    onPageNumberChange(res) {
+      this.pageSize = res.pageSize;
+      this.currentPage = res.pageNum;
+      this.getInvoicesTableData();
+    },
   },
   mounted(){
     this.paymentOrderId=this.$route.query.id;
-    this.getPaymentDetailData(1, this.paymentOrderId);
+    this.getPaymentDetailData();
+    this.getInvoicesTableData();
   },
   components: {
-    BreadCrumb
+    BreadCrumb,
+    Pagination
   }
 };
 </script>
@@ -375,6 +404,9 @@ export default {
       }
       .invoice-table_content {
         margin-top: 10px;
+        .invoices-pager {
+          margin-top: 25px;
+        }
         /deep/ .el-table {
           .el-table__header-wrapper {
             .el-table__header {
