@@ -24,9 +24,13 @@ export const resetPassword = (params)=> {
 //修改密码
 export const changePassword = (params)=> {
   //return axios.get(`/finance/ocr/user/updatePassword?pwd=${params.oldPassword}&newpwd=${params.newPassword}&id=${params.userId}`)
-  return axios.get(`/finance/ocr/user/updatePassword?oldPassword=${params.oldPassword}&password=${params.newPassword}&id=${params.userId}`)
+  return axios.get(`http://10.17.20.121:8080/sys/ocr/changePassword?password=${params.oldPassword}&newpassword=${params.newPassword}&telephone=${params.telephone}`)
   .then(res => {
-    return res.data;
+    var flag = false;
+    if(res.data.status == '200'){
+      flag = true;
+    }
+    return flag;
   }, (err) => {
     return Promise.reject(err)
   })
@@ -34,9 +38,14 @@ export const changePassword = (params)=> {
 
 //查询用户列表
 export const getUserList = (params)=> {
-    return axios.get(`?userName=${params.userName}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)
+    //return axios.get(`http://10.17.20.121:8080/sys/ocr/user/query?username=${params.userName}&telephone=${params.phoneNum}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)
+    return axios.get(`http://10.17.20.121:8080/sys/ocr/user/query?username=${params.userName}&telephone=${params.phoneNum}&deptId=${params.department}&aclId=${params.authority}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)    
     .then(res => {
-      return res.data;
+      console.log("函数返回的结果", res)
+      if(res.data.data.data.length > 0){
+        
+      }
+      return res.data.data.data;
     }, (err) => {
       return Promise.reject(err)
     })

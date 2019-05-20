@@ -12,8 +12,8 @@
         </div>
         <div class="search-box search-department">
           <div class="text">部门</div>
-          <el-select v-model="departmentDefault" placeholder="请选择">
-            <el-option v-for="(item, index) in departmentList" :key="index" :label="item" :value="item"></el-option>
+          <el-select v-model="searchDepartment" clearable placeholder="请选择">
+            <el-option v-for="item in departmentList" :key="item.id" :value="item.id" :label="item.departmentName"></el-option>
           </el-select>
         </div>
         <div class="search-box search-options">
@@ -23,7 +23,7 @@
         <div class="search-box search-authority">
           <div class="text">权限</div>
           <el-checkbox-group v-model="searchAuthority">
-            <el-checkbox v-for="(item, index) in authorityList" :key="index" :label="item">{{item}}</el-checkbox>
+            <el-checkbox v-for="item in authorityList" :key="item.id" :label="item.id">{{item.authorityName}}</el-checkbox>
           </el-checkbox-group>
         </div>
       </div>
@@ -41,12 +41,12 @@
         >
           <el-table-column fixed type="index" label="序号" width="50px"></el-table-column>
           <el-table-column prop="username" label="姓名" width="80px" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="phoneNum" label="手机号" width="115px" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="department" label="部门" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="authority" label="权限" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="telephone" label="手机号" width="115px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="deptName" label="部门" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="authorityName" label="权限" show-overflow-tooltip></el-table-column>
           <el-table-column prop="createUser" label="创建人" width="80px" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="lastUpdateUser" label="变更人" width="80px" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="lastUpdateTime" label="修改时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="changeUser" label="变更人" width="80px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="changeTime" label="修改时间" show-overflow-tooltip></el-table-column>
           <el-table-column label="操作" width="120" fixed="right">
             <template slot-scope="scope">
               <span class="option-btn" @click="freezeAccount(scope.$index, scope.row)">冻结</span>
@@ -64,17 +64,17 @@
         <el-form-item  label="姓名" :label-width="formLabelWidth" prop="username">
           <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.username" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="手机号" :label-width="formLabelWidth" prop="phoneNum">
-          <el-input placeholder="请输入提取字段(必填)" v-model="addUserform.phoneNum" autocomplete="off"></el-input>
+        <el-form-item label="手机号" :label-width="formLabelWidth" prop="telephone">
+          <el-input placeholder="请输入提取字段(必填)" v-model="addUserform.telephone" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="部门" :label-width="formLabelWidth" prop="department">
-          <el-select v-model="addUserform.department" placeholder="请选择">
-            <el-option v-for="(item, index) in departmentList" :key="index" :label="item" :value="item"></el-option>
+          <el-select v-model="addUserform.department" clearable  placeholder="请选择">
+            <el-option v-for="item in departmentList" :key="item.id" :value="item.id" :label="item.departmentName"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="权限" :label-width="formLabelWidth" prop="authority">
           <el-checkbox-group v-model="addUserform.authority">
-            <el-checkbox v-for="(item, index) in authorityList" :key="index" :label="item">{{item}}</el-checkbox>
+            <el-checkbox v-for="item in authorityList" :key="item.id" :label="item.id">{{item.authorityName}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
@@ -90,17 +90,17 @@
       width="520px"
       center>
       <div class="icon"></div>
-      <div class="text">请确认是否冻结该用户</div>
+      <div class="text"> 请确认是否冻结该用户</div>
       <span slot="footer" class="dialog-footer">
         <el-button class="cancle-btn" @click="confirmDialogVisiable = false">取消</el-button>
-        <el-button class="submit-btn" type="primary" @click="handleFreezeClick(addUserform.index)">冻结</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleFreezeClick">冻结</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
 import Pagination from "@/components/common/Pagination";
-//import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount, exportUserToExcel} from "@/rest/userManagmentPageApi";
+import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount, exportUserToExcel} from "@/rest/userManagmentPageApi";
 
 const PAGE_SIZE = 10;
 
@@ -111,36 +111,51 @@ export default {
       searchUsername: '',
       searchPhoneNum: '',
       //权限多选框
-      authorityList:['地产承兑', '其他承兑', '贴现', '征信查询'],
+      //authorityList:['地产承兑', '其他承兑', '贴现', '征信查询'],
+      authorityList: [
+        {id: 1, authorityName: '地产承兑'},
+        {id: 2, authorityName: '其他承兑'},
+        {id: 3, authorityName: '贴现'},
+        {id: 4, authorityName: '征信查询'},
+      ],
       searchAuthority: [],
       //部门下拉框
-      departmentList: ['全部', '财务公司信贷部','其他'],
-      //部门下拉列表默认为空
-      departmentDefault: "",
+      //departmentList: ['全部', '财务公司信贷部','其他'],
+      departmentList: [
+        {id: 1, departmentName: '开发部'},
+        {id: 2, departmentName: '测试部'},
+        {id: 3, departmentName: '销售部'}
+      ],
+      //部门下拉列表默认为空 searchDepartment
+      searchDepartment: '',
+
       isDialogVisible: false,
       confirmDialogVisiable: false,
       buttonTitle: "确定",
+      //要冻结的用户id
+      freezeUserId: '',
       currentPage: 1,
       totalCount: 0,
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       tableData: [
-        {
-        username: '地产承兑',
-        phoneNum: '19998333333',
-        department: 'bumen',
-        authority:["地产承兑",'其他承兑','贴现'],
-        createUser: '王晓蓉',
-        lastUpdateUser: '王晓蓉',
-        lastUpdateTime: '2029-09-09 30:34:43'
-        }
+        // {
+        // id: '',
+        // username: '',
+        // phoneNum: '19998333333',
+        // department: 'bumen',
+        // authority:["地产承兑",'其他承兑','贴现'],
+        // createUser: '王晓蓉',
+        // lastUpdateUser: '王晓蓉',
+        // lastUpdateTime: '2029-09-09 30:34:43'
+        // }
       ],
       excelData: [],
       //对话框表单数据
       addUserform: {
         id: "",
         username: '',
-        phoneNum: '',
+        telephone: '',
         department: '',
         authority: [],
         createUser: '',
@@ -151,7 +166,7 @@ export default {
         username: [
           { required: true, message: '请输入姓名(必填)', trigger: 'blur' }
         ],
-        phoneNum: [
+        telephone: [
           { required: true, message: '请输入手机号(必填)', trigger: 'blur' }
         ],
         department: [
@@ -168,7 +183,7 @@ export default {
   methods: {
     //查询
     search() {
-      //this.fetchUserCount();
+      this.fetchUserCount();
     },
     //新增用户
     addNewUser() {
@@ -178,6 +193,7 @@ export default {
     },
     //变更用户
     updateAccount(index, row) {
+      console.log("变更用户信息", row)
       this.isDialogVisible = true;
       this.dialogTitle = '用户变更';
       this.buttonTitle = '变更';
@@ -185,9 +201,10 @@ export default {
         index: index,
         id: row.id,
         username: row.username,
-        phoneNum: row.phoneNum,
-        authority: row.authority,
-        department: row.department
+        telephone: row.telephone,
+        authority: row.authorityId,
+        department: row.deptId
+        //department: row.deptName
       }
     },
     //对话框: 确定按钮
@@ -197,7 +214,7 @@ export default {
           const params = {
             //userId: localStorageHelper.getItem("USERNAME"), // 登陆者id
             username: this.addUserform.username,
-            phoneNum: this.addUserform.phoneNum,
+            phoneNum: this.addUserform.telephone,
             department: this.addUserform.department,
             authority: this.addUserform.authority
           }
@@ -237,15 +254,16 @@ export default {
       this.isDialogVisible = false;
       this.addUserform = {
         username: '',
-        phoneNum: '',
+        telephone: '',
         authority: []
       }
     },
     //冻结用户
-    freezeAccount() {
+    freezeAccount(index, row) {
       this.confirmDialogVisiable = true;
+      this.freezeUserId = row.id;
     },
-    handleFreezeClick() {
+    handleFreezeClick() { 
       // const params = {
       //   //userId: localStorageHelper.getItem("USERNAME"), //登陆者id
       //   id: index
@@ -264,19 +282,31 @@ export default {
     },
     //获取用户列表
     fetchUserCount() { 
-      // const params = {
-      //   userName: this.searchUsername, //姓名
-      //   phoneNum: this.searchPhoneNum, //手机号
-      //   department: this.departmentDefault, //部门
-      //   authority: this.searchAuthority, //权限
-      //   pageSize: this.pageSize,
-      //   pageNum: this.currentPage
-      // }
-      // getUserList(params)
-      // .then((res) => {
-      //   this.tableData = res.data.data; 
-      //   this.totalCount = res.data.total;//数据的总条数
-      // })
+      const params = {
+        userName: this.searchUsername, //姓名
+        phoneNum: this.searchPhoneNum, //手机号
+        department: this.searchDepartment, //部门
+        authority: this.searchAuthority, //权限
+        pageSize: this.pageSize,
+        pageNum: this.currentPage
+      }
+      console.log("查询参数",params);
+      getUserList(params)
+      .then((data) => {
+        for(let i =0; i< data.length; i++){
+          var authorityIdTemp = new Array()
+          var authorityNameTemp = new Array()
+          for(let j =0; j< data[i].sysOcrAcls.length; j++){
+            authorityIdTemp.push(data[i].sysOcrAcls[j].id);
+            authorityNameTemp.push(data[i].sysOcrAcls[j].aclName);
+          }
+          data[i].authorityId = authorityIdTemp;
+          data[i].authorityName  =  authorityNameTemp.join('  ');
+        }
+        console.log("teste2的数据", authorityNameTemp.length)
+        this.tableData = data; 
+        this.totalCount = data.total;//数据的总条数
+      })
     },
     //导出excel
     exportExcel() {
@@ -298,7 +328,8 @@ export default {
   //初始化函数
   mounted() {
     //获取用户列表
-    //this.fetchUserCount();
+    this.fetchUserCount();
+    console.log(this.searchDepartment);
   },
   components: {
     Pagination

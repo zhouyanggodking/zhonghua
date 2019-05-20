@@ -71,7 +71,10 @@
           width="520px"
           center>
           <div class="icon"></div>
-          <div class="text">验证码输入错误，请重新输入</div>
+          <div class="dialog-content">
+            <div class="text-alert">提示</div>
+            <div class="text-massage">验证码输入错误，请重新输入</div>
+          </div>
           <span slot="footer" class="dialog-footer">
             <el-button class="submit-btn"  type="primary" @click="isErrorDialogVisible = false">确定</el-button>
           </span>
@@ -186,9 +189,9 @@ export default {
           //   newPassword: this.resetPwdForm.password
           // }
           // resetPassword(params)
-          // .than((res) => {
-            this.$refs.restPwdContainer.setActiveItem('successTag');
-            this.activeTag = 'successTag';
+          // .than(() => {
+                this.$refs.restPwdContainer.setActiveItem('successTag');
+                this.activeTag = 'successTag';
           // })
         }
       })
@@ -442,6 +445,29 @@ export default {
         }
       }
     }
+    .el-dialog{
+      .dialog-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .text-alert {
+        width: 40px;
+        font-size: 20px;
+        color: #9A8B7B;
+        margin-top: 15px;
+        margin-bottom: 6px;
+      }
+      .text-massage {
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+        color: #666666;
+        text-align: center;
+      }
+    }
+    
   }
 }
 </style>

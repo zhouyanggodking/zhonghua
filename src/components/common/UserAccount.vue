@@ -10,13 +10,13 @@
     <el-dialog class="dialog-form" title="修改密码" :visible.sync="dialogFormVisible">
       <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm">
         <el-form-item label="原始密码" :label-width="formLabelWidth" prop="oldPassword">
-          <el-input v-model="resetPwdForm.oldPassword" autocomplete="off"></el-input>
+          <el-input type="password" v-model="resetPwdForm.oldPassword" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="新密码" :label-width="formLabelWidth" prop="newPassword">
-          <el-input  v-model="resetPwdForm.newPassword" autocomplete="off"></el-input>
+          <el-input type="password" v-model="resetPwdForm.newPassword" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" :label-width="formLabelWidth" prop="confirmPassword">
-          <el-input  v-model="resetPwdForm.confirmPassword" autocomplete="off"></el-input>
+          <el-input type="password" v-model="resetPwdForm.confirmPassword" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -24,12 +24,27 @@
         <el-button class="submit-btn" type="primary" @click="handleSubmitClick">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+          :visible.sync="isDialogMsgVisible"
+          :show-close="false"
+          class="confirmDialog"
+          width="520px"
+          center>
+          <div class="dialog-content">
+            <div :class="{'icon':dialogMassage==='原始密码错误，请重新输入','review-icon ':dialogMassage==='密码修改成功'}"></div>
+            <div v-if="dialogMassage==='原始密码错误，请重新输入'" class="text-alert">提示</div>
+          </div>
+          <div class="text">{{dialogMassage}}</div>
+          <span slot="footer" class="dialog-footer">
+            <el-button class="submit-btn" type="primary" @click="isDialogMsgVisible = false">确定</el-button>
+          </span>
+        </el-dialog>
   </div>
 </template>
 
 <script>
 import {logout} from '@/rest/authQuery';
-//import {changePassword} from "@/rest/userManagmentPageApi";
+import {changePassword} from "@/rest/userManagmentPageApi";
 //import localStorageHelper from '@/helpers/localStorageHelper';
 
 export default {
@@ -47,6 +62,8 @@ export default {
     return {
       userName: '',
       dialogFormVisible: false,
+      dialogMassage: '密码修改成功',
+      isDialogMsgVisible: false,
       formLabelWidth: '80px',
       resetPwdForm: {
         oldPassword: '',
@@ -85,17 +102,24 @@ export default {
     handleSubmitClick() {
       this.$refs.resetPwdForm.validate((valid) => {
         if(valid) {
-          // const params = {
-          //   oldPassword: this.resetPwdForm.oldPassword,
-          //   newPassword: this.resetPwdForm.newPassword,
-          //   userId: localStorageHelper.getItem("USERID")
-          // }
-          // //修改密码
-          // changePassword(params)
-          //   .then(() => {
-          //     return;
-          //   })
-          this.clearResetPwdForm();
+          const params = {
+            oldPassword: this.resetPwdForm.oldPassword,
+            newPassword: this.resetPwdForm.newPassword,
+            telephone: '13211112222'
+            //telephone: localStorageHelper.getItem("TELEPHONE")
+          }
+          //修改密码
+          changePassword(params)
+            .then((res) => {
+              if(res) {
+                this.clearResetPwdForm();
+                this.dialogMassage = '密码修改成功'
+                this.isDialogMsgVisible = true;
+              }else {
+                this.dialogMassage = '原始密码错误，请重新输入'
+                this.isDialogMsgVisible = true;
+              }
+            })
         }
       })
     },
@@ -143,6 +167,27 @@ export default {
         @include buttonStyle;
         margin: 0 16px;
       }
+    }
+  }
+  .el-dialog{
+    .dialog-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .text-alert {
+      width: 40px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #9A8B7B;
+      margin-top: 15px;
+    }
+    .review-icon{
+      width: 36px;
+      height: 37px;
+      background: url("../../assets/imgs/9.png") no-repeat;
+      background-size: cover;
     }
   }
 }
