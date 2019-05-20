@@ -1,0 +1,2 @@
+/*! Built with http://stenciljs.com */
+const{h:e}=window.App;class t{render(){return e("div",null,"Emiya Lee Ham")}static get is(){return"my-component2"}static get style(){return"my-component2{display:block;-webkit-box-sizing:border-box;box-sizing:border-box;contain:layout style size;border:3px solid red;overflow:hidden;height:20px}"}}export{t as MyComponent2};

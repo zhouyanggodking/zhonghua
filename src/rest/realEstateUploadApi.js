@@ -38,7 +38,7 @@ export const uploadFile = (param) => {
 }
 
 export const getUploadHistory = (params) => {
-  return axios.get(`/uploader/hostory?businessTypeId=${params.businessTypeId}&relatedUserId=${params.relatedUserId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}&type=${params.type}`)
+  return axios.get(`/uploader/hostory?businessTypeId=${params.businessTypeId}&relatedUserId=${params.relatedUserId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}&type=${params.type}&userId=${params.userId}`)
   .then(res => {
         return res.data;
     }, (err) => {
@@ -66,6 +66,15 @@ export const getSimpleInfos = (userid) => {
 //修改发票
 export const modifyInvoice = (params) => {
   return axios.post('/estate/estateInvoiceController/modifyInvoice', params)
+  .then(res => {
+    return res.data;
+  }, err => {
+    return Promise.reject(err);
+  })
+}
+//修改发票已用金额 
+export const modifyInvoiceUsedprice = (params) => {
+  return axios.post('/estate/estateInvoiceController/modifyInvoiceUsedPrice', params)
   .then(res => {
     return res.data;
   }, err => {

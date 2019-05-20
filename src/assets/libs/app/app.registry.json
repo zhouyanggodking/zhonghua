@@ -1,0 +1,16 @@
+{
+  "namespace": "App",
+  "fsNamespace": "app",
+  "loader": "../app.js",
+  "global": "app.global.js",
+  "core": "app.iqjpnrrj.js",
+  "corePolyfilled": "app.eeqcbigw.js",
+  "components": {
+    "encircle-image": {
+      "$": "iaemuugg"
+    },
+    "my-component2": {
+      "$": "dveagh96"
+    }
+  }
+}

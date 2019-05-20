@@ -58,8 +58,9 @@ export default {
           let fileName = file.name.split('.')[0]
           return {
             identifier: file.size + '_' + fileName,
-            relatedUserId: localStorage.getItem('userId'),
-            type: 'zc'
+            type: 'zc',
+            userId: 1,
+            businessTypeId: 1
           }
         },
         initFileFn: function (file) {

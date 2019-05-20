@@ -103,7 +103,7 @@
             <el-table-column prop="usedPrice" label="已用金额" show-overflow-tooltip></el-table-column>
             <el-table-column prop="usePrice" label="本次使用金额" show-overflow-tooltip width="120">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.finalPrice"></el-input>
+                <el-input v-model="scope.row.usePrice" @blur="onFinalPriceChange(scope.row)"></el-input>
               </template>
             </el-table-column>
             <el-table-column prop="stamped" label="是否盖章" show-overflow-tooltip>
@@ -177,11 +177,11 @@
   </div>
 </template>
 <script>
-import {checkPaymentRequestOrder} from "@/rest/realEstateUploadApi";
+import {checkPaymentRequestOrder, modifyInvoiceUsedprice} from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import resourceWrapper from "@/rest/resourceWrapper";
-import {global_} from '@/global/global';
+import {global_, USERID} from '@/global/global';
 
 const CHECK = 1;
 const REJECT = 0;
@@ -213,11 +213,33 @@ export default {
     checkInvoiceInfo(row) {
       this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, paymentOrderId: this.paymentOrderId, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo}});
     },
+    onFinalPriceChange(row) {
+      const params = {
+        // paramMap: {
+          userId: USERID,
+          paymentRequestOrderId: this.paymentOrderId,
+          id: row.id,
+          usePrice: row.usePrice
+        // }
+      }
+      modifyInvoiceUsedprice(params)
+      .then(() => {
+        this.$message({
+          message: '修改成功',
+          type: 'success'
+        })
+      }, () => {
+        this.$message({
+          message: '修改失败',
+          type: 'failed'
+        })
+      })
+    },
     exportExcel(){
       window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
     },
     reviewPass(){
-        this.isDialogVisible = true;
+      this.isDialogVisible = true;
       this.dialogHintText = "请确认是否审核通过";
       this.dialogHintOperate = "审核通过";
     },

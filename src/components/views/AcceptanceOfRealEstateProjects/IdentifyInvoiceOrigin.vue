@@ -10,22 +10,7 @@
           <div class="img-group">
             <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
               <el-carousel-item v-for="item in invoicesMessage.length" :key="item">
-                <img
-                  :id="`img${item}`"
-                  ref="image"
-                  class="img-src"
-                  :src="imagesSrc"
-                  height="633"
-                  width="494"
-                >
-                <!-- <img
-                  id="img1"
-                  ref="image"
-                  class="img-src"
-                  :src="imagesSrc"
-                  height="633"
-                  width="494"
-                > -->
+                <zoom-image :id="`img${item}`"></zoom-image>
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -48,21 +33,20 @@
 </template>
 <script>
 import {USERID} from '@/global/global';
-import Viewer from "viewerjs";
-import {global_} from "@/global/global";
 import { getTotalInvoices, getSimpleInfos } from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import ContractSupplyment from "@/components/views/AcceptanceOfRealEstateProjects/ContractSupplyment";
 import ContractMessage from "@/components/views/AcceptanceOfRealEstateProjects/ContractMessage";
 import IdentifyResultTopBanner from '@/components/common/IdentifyResultTopBanner';
+import ZoomImage from '@/components/common/ZoomImage';
 
 export default {
   data() {
     return {
       isShowContractMsg: true,
-      // imagesSrc: "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg",
+      imagesSrc: "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg",
       paymentOrderTheme: '',
-      imagesSrc: "http://10.17.17.151:8080/opt/output/test.png",
+      // imagesSrc: "http://10.17.17.151:8080/opt/output/test.png",
       paymentRequestId: null,
       stamped: ['否', '是'],
       currentPage: 1,
@@ -94,10 +78,9 @@ export default {
       this.$refs.imgCarousel.setActiveItem(index);
       this.$refs.invoiceCarousel.setActiveItem(index);
       this.currentPage = index + 1;
-      if (this.invoicesMessage.length) {
-        this.imagesSrc = `${global_}${this.invoicesMessage[index].outputLocation}`;
-      }
-      // this.initInvoiceViewer();
+      // if (this.invoicesMessage.length) {
+      //   this.imagesSrc = `${global_}${this.invoicesMessage[index].outputLocation}`;
+      // }
     },
     fetchTotalInvoices() {
       const params = {
@@ -107,38 +90,12 @@ export default {
       getTotalInvoices(params).then(res => {
         this.invoicesMessage = res.data.data.invoices;
         this.infos = res.data.data.infos;
-        this.initInvoiceViewer();
       })
     },
     // 获取付款主题
     getSimpleInfos() {
       getSimpleInfos(USERID).then(res => {
         this.simpleInfos = res.data.data;
-      })
-    },
-    initInvoiceViewer() {
-      this.invoicesMessage.map((item, index) => {
-        console.log(index);
-        console.log(document.getElementById("img1"));
-        const viewer = new Viewer(document.getElementById(`img${index+1}`), {
-        // const viewer = new Viewer(document.getElementById("image"), {
-          inline: true,
-          button: false, //右上角按钮
-          navbar: false, //底部缩略图
-          title: false, //当前图片标题
-          toolbar: false, //底部工具栏
-          tooltip: true, //显示缩放百分比
-          movable: true, //是否可以移动
-          zoomable: true, //是否可以缩放
-          rotatable: true, //是否可旋转
-          scalable: true, //是否可翻转
-          transition: true, //使用 CSS3 过度
-          fullscreen: false, //播放时是否全屏
-          keyboard: true, //是否支持键盘
-          viewed() {
-            viewer.zoomTo(1);
-          }
-        });
       })
     }
   },
@@ -148,31 +105,13 @@ export default {
     this.currentTitle = `${this.$route.query.payer}-${this.$route.query.contractNo}-${this.$route.query.title}`;
     this.fetchTotalInvoices();
     this.getSimpleInfos();
-    // this.initInvoiceViewer();
-    // const viewer = new Viewer(document.getElementById("image"), {
-    //   inline: true,
-    //   button: false, //右上角按钮
-    //   navbar: false, //底部缩略图
-    //   title: false, //当前图片标题
-    //   toolbar: false, //底部工具栏
-    //   tooltip: true, //显示缩放百分比
-    //   movable: true, //是否可以移动
-    //   zoomable: true, //是否可以缩放
-    //   rotatable: true, //是否可旋转
-    //   scalable: true, //是否可翻转
-    //   transition: true, //使用 CSS3 过度
-    //   fullscreen: false, //播放时是否全屏
-    //   keyboard: true, //是否支持键盘
-    //   viewed() {
-    //     viewer.zoomTo(1);
-    //   }
-    // });
   },
   components: {
     BreadCrumb,
     IdentifyResultTopBanner,
     ContractSupplyment,
-    ContractMessage
+    ContractMessage,
+    ZoomImage
   }
 };
 </script>
@@ -205,7 +144,9 @@ export default {
       justify-content: center;
       margin-bottom: 30px;
       .left-img {
-        width: 574px;
+        flex-shrink: 0;
+        // width: 574px;
+        width: 50%;
         padding: 10px 30px 76px 30px;
         margin-right: 10px;
         border: 1px solid #EBEBEB;
@@ -216,13 +157,19 @@ export default {
             .el-carousel {
               height: 100%;
               border: 1px solid #ededed;
+              .el-carousel__item {
+                .viewer-backdrop {
+                  background-color: #ffffff;
+                }
+              }
             }
           }
         }
       }
       .right-filed {
         // width: 390px;
-        width: 800px;
+        flex-shrink: 0;
+        width: 50%;
         padding: 10px 30px 34px 30px;
         margin-left: 10px;
         border: 1px solid #EBEBEB;

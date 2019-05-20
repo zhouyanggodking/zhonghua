@@ -6,8 +6,8 @@
         <el-option v-for="(value, key, index) of titleInfos[0]" :key="index" :label="value" :value="key"></el-option>
       </el-select>
     </div>
-    <el-form label-position="right" label-width="120px" :model="contractSupplymentForm">
-      <el-form-item label="发票类型:" prop="name">
+    <el-form label-position="right" :rules="rules" label-width="120px" :model="contractSupplymentForm">
+      <el-form-item label="发票类型:" prop="invoiceType">
         <el-select  v-model="contractSupplymentForm.invoiceType" placeholder="">
           <el-option label="增值税普通发票" value="增值税普通发票"></el-option>
           <el-option label="专票" value="专票"></el-option>
@@ -28,10 +28,10 @@
           placeholder="选择日期">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="金额:" prop="invoiceTime">
+      <el-form-item label="金额:" prop="finalPrice">
         <el-input v-model="contractSupplymentForm.finalPrice"></el-input>
       </el-form-item>
-      <el-form-item label="校验码:">
+      <el-form-item label="校验码:" prop="checkCode">
         <el-input v-model="contractSupplymentForm.checkCode"></el-input>
       </el-form-item>
     </el-form>
@@ -47,18 +47,6 @@ import { supplyInvoice } from '@/rest/realEstateUploadApi';
 
 export default {
   data() {
-    const phoneReg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
-    const phoneMatch = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入手机号码'));
-      } else {
-        if (!value.match(phoneReg)) {
-          callback(new Error('请输入正确手机号码'));
-        } else {
-          callback();
-        }
-      }
-    };
     return {
       paymentRequestOrderId: 1,
       isFiledFormEdit: false,
@@ -74,21 +62,24 @@ export default {
         originalFileId: 1
       },
       rules: {
-        name: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
-          { validator: phoneMatch, trigger: 'blur' }
+        invoiceType: [
+          { required: true, message: '请选择发票类型', trigger: 'blur' }
         ],
         invoiceNo: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
-          { validator: phoneMatch, trigger: 'blur' }
+          { required: true, message: '请输入发票号码', trigger: 'blur' },
+          { pattern: /^\d{8}$/, message: '发票号码为8位数字', trigger: 'blur' }
         ],
         invoiceCode: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
-          { validator: phoneMatch, trigger: 'blur' }
+          { required: true, message: '请输入发票代码', trigger: 'blur' },
+          { pattern: /^\d{10,12}$/, message: '发票代码为10~12位数字', trigger: 'blur' }
         ],
-        invoiceTime: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
-          { validator: phoneMatch, trigger: 'blur' }
+        checkCode: [
+          { required: true, message: '请输入校验码', trigger: 'blur' },
+          { pattern: /^\d{6}$/, message: '校验码位为6位数字', trigger: 'blur' }
+        ],
+        finalPrice: [
+          { required: true, message: '请输入金额', trigger: 'blur' },
+          { pattern: /^\d$/, message: '金额为数字', trigger: 'blur' }
         ]
       }
     }
