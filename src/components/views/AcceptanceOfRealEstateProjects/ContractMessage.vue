@@ -9,7 +9,7 @@
     </div>
     <el-form label-position="right" label-width="120px" :model="filedResultForm">
       <el-form-item label="发票类型:">
-        <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.name" placeholder="">
+        <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType" placeholder="">
           <el-option label="专票" value="专票"></el-option>
           <el-option label="普票" value="普票"></el-option>
         </el-select>
@@ -71,7 +71,7 @@
           <el-input :disabled="isFiledFormEdit" v-model="item.taxRate"></el-input>
         </el-form-item>
         <el-form-item label="税额:">
-          <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.taxPrice"></el-input>
+          <el-input :disabled="isFiledFormEdit" v-model="item.taxPrice"></el-input>
         </el-form-item>
       </div>
       <el-form-item label="价税合计:">
@@ -85,9 +85,9 @@
       </el-form-item>
       <el-form-item label="凭证联:">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.certification" placeholder="">
-          <el-option label="发票联" value="a"></el-option>
-          <el-option label="抵扣联" value="b"></el-option>
-          <el-option label="记账联" value="c"></el-option>
+          <el-option label="发票联" value="0"></el-option>
+          <el-option label="抵扣联" value="1"></el-option>
+          <el-option label="记账联" value="2"></el-option>
         </el-select>
         <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.certification"></el-input>
       </el-form-item>
@@ -153,14 +153,34 @@ export default {
       this.$emit('change', false);
     },
     modifyInvoice() {
-      const mapData = this.contractData;
-      this.contractData.createTime = dateFormat(this.contractData.createTime);
-      this.contractData.invoiceTime = dateFormat(this.contractData.invoiceTime);
+      const mapData = this.filedResultForm;
+      mapData.createTime = dateFormat(mapData.createTime);
+      mapData.invoiceTime = dateFormat(mapData.invoiceTime);
+      mapData.lastUpdateTime = dateFormat(mapData.lastUpdateTime);
+      const invoicesItem = mapData.estateInvoiceItems;
+      this.$delete(mapData, 'estateInvoiceItems');
       const params = {
         invoice: mapData,
         paymentRequestOrderId: this.paymentRequestOrderId,
-        estateInvoiceItems: mapData.estateInvoiceItems
-      }
+        estateInvoiceItems: invoicesItem.map(item => {
+          return {
+            createTime : dateFormat(item.createTime),
+            lastUpdateTime : dateFormat(item.lastUpdateTime),
+            id: item.id,
+            itemName: item.itemName,
+            spec : item.spec,
+            unit : item.unit,
+            counts : item.counts,
+            unitPrice : item.unitPrice,
+            totalPrice : item.totalPrice,
+            taxRate : item.taxRate,
+            taxPrice : item.taxPrice,
+            invoiceId : item.invoiceId,
+            createUser : item.createUser,
+            lastUpdateUser : item.lastUpdateUser
+          }
+        })
+      };
       modifyInvoice(params).then(() => {
         this.$message({
           message: '修改成功',
@@ -177,7 +197,8 @@ export default {
   mounted() {
     this.invoiceId = this.$route.query.id;
     this.paymentOrderTheme = this.$route.query.title;
-    this.filedResultForm = this.contractData;
+    this.filedResultForm = JSON.parse(JSON.stringify(this.contractData));
+    this.paymentRequestOrderId = this.$route.query.paymentOrderId;
   }
 };
 </script>

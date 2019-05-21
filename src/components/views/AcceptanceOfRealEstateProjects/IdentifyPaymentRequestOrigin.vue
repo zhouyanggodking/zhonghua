@@ -9,14 +9,15 @@
       <div class="content">
         <div class="left">
           <div class="title">付款申请原件</div>
-          <div class="result">
+          <div class="result" id="result">
             <img
               id="image"
               class="img-src"
               :src="imagesSrc"
-              height="633"
-              width="494"
+              height="600px"
+              width="100%"
             >
+            <!-- <encircle-image style="height:360px;" :img-src="imagesSrc" ref="img"></encircle-image> -->
           </div>
         </div>
         <div class="right">
@@ -73,6 +74,7 @@ import Viewer from "viewerjs";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import resourceWrapper from "@/rest/resourceWrapper";
 import {dateFormat} from '@/helpers/dateHelper';
+// import {loadEncicleImage} from '@/helpers/zoomImage';
 
 export default {
   data() {
@@ -81,7 +83,7 @@ export default {
       paymentOrderId: null,
       tableData: [],
       imagesSrc: 
-        "http://10.17.17.151:8080/test/test.png"
+        "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
       ,
       textarea: "",
       isSaveBtn: false,
@@ -159,8 +161,14 @@ export default {
       transition: true, //使用 CSS3 过度
       fullscreen: false, //播放时是否全屏
       keyboard: true, //是否支持键盘
-      viewed() {
-        viewer.zoomTo(1);
+      // viewed() {
+      //   viewer.zoomTo(1);
+      // },
+      // zoomed(res) {
+      //   console.log(res);
+      // },
+      viewed(res) {
+        console.log(res);
       }
     });
   },
@@ -187,18 +195,19 @@ export default {
       display: flex;
       justify-content: center;
       .left {
-        width: 494px;
+        // width: 494px;
+        width: 50%;
         height: 670px;
         border: 1px solid #ebebeb;
         padding: 20px 30px;
         .result {
-          width: 494px;
-          height: 633px;
+          // width: 494px;
+          height: 100%;
           margin-top: 10px;
           border: 1px solid #ebebeb;
           .result-img {
             width: 494px;
-            height: 633px;
+            height: 100%;
           }
           .img-src {
             display: none;
@@ -207,12 +216,13 @@ export default {
         }
       }
       .right {
+        // width: 530px;
+        width: 50%;
+        // height: 780px;
         margin-left: 20px;
-        width: 530px;
-        height: 780px;
         .container {
           padding: 20px 30px;
-          width: 470px;
+          // width: 470px;
           height: 670px;
           background: #fafafa;
           border: 1px solid #ebebeb;
@@ -286,7 +296,6 @@ export default {
             padding: 30px 0px;
             display: flex;
             justify-content: flex-end;
-            height: 40px;
             .modify-btn {
               margin-left: 40px;
             }

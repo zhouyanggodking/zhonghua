@@ -232,11 +232,11 @@ export default {
     },
     fetchHistoryList() {
       const params = {
-        businessTypeId: '',
-        relatedUserId: 1,
+        businessTypeId: 1,
         pageSize: this.pageSize,
         pageNum: this.currentPage,
-        type: 1
+        type: 1,
+        userId: 1
       }
       getUploadHistory(params)
       .then((res) => {
