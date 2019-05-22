@@ -137,7 +137,6 @@ export default {
       }
     },
     handleLoginClick() {
-      this.isLoginDisabled = true;
       this.$refs.signinForm.validate((valid) => {
         if(valid) {
           const params = {
@@ -146,11 +145,10 @@ export default {
           }
           login(params)
           .then((res) => {
-            this.isLoginDisabled = false;
-            if(res == '1'){
+            if(res == '0'){
               this.dialogMassage = "用户处于冻结状态，无法登录";
               this.isMassageDialogVisible = true; //冻结状态无法登录
-            }else if(res == '2'){
+            }else if(res == '1'){
               this.$router.push('/'); //页面跳转
             }else{
               if(this.loginErrorCount < 6) {
@@ -160,11 +158,6 @@ export default {
                   this.isLoginDisabled = true; //输错6次无法登录
               }
             }
-          }, () => {
-            //登录失败
-            this.isLoginDisabled = false;
-            this.dialogMassage = "登录失败";
-            this.isMassageDialogVisible = true; //登录失败
           })
         }
       })

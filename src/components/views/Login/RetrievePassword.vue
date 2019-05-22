@@ -47,10 +47,10 @@
         <el-carousel-item class="reset-pwd" name="resetPwdTag" :key="2">
           <el-form class="reset-pwd-form" ref="resetPwdForm" :rules="pwdrules" :model="resetPwdForm" label-width="80px">
             <el-form-item label="输入新密码" prop="password">
-              <el-input v-model="resetPwdForm.password"></el-input>
+              <el-input type="password" v-model="resetPwdForm.password"></el-input>
             </el-form-item>
             <el-form-item label="验证新密码" prop="identifyPassword">
-              <el-input v-model="resetPwdForm.identifyPassword"></el-input>
+              <el-input type="password" v-model="resetPwdForm.identifyPassword"></el-input>
             </el-form-item>
             <el-form-item class="sign-in-btn">
               <el-button @click="handleSigninClick">提交</el-button>
@@ -73,7 +73,7 @@
           <div class="icon"></div>
           <div class="dialog-content">
             <div class="text-alert">提示</div>
-            <div class="text-massage">验证码输入错误，请重新输入</div>
+            <div class="text-massage">手机验证码输入错误，请重新输入</div>
           </div>
           <span slot="footer" class="dialog-footer">
             <el-button class="submit-btn"  type="primary" @click="isErrorDialogVisible = false">确定</el-button>
@@ -85,7 +85,7 @@
 <script>
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { clearInterval } from 'timers';
-//import { getPhoneVerifyCode, resetPassword} from "@/rest/userManagmentPageApi";
+import { getPhoneVerifyCode, verifyTelephoneAndCode, resetPassword} from "@/rest/userManagmentPageApi";
 
 export default {
   data() {
@@ -164,7 +164,7 @@ export default {
           { validator: passwordMatch, trigger: 'blur' }
         ]
       }
-    };
+    }; 
   },
   methods: {
     randomNum(min, max) {
@@ -184,15 +184,22 @@ export default {
     handleSigninClick() {
       this.$refs.resetPwdForm.validate((valid) => {
         if(valid) {
-          // const params = {
-          //   telephone: this.signinForm.telephone,
-          //   newPassword: this.resetPwdForm.password
-          // }
-          // resetPassword(params)
-          // .than(() => {
-                this.$refs.restPwdContainer.setActiveItem('successTag');
-                this.activeTag = 'successTag';
-          // })
+          const params = {
+            telephone: this.signinForm.telephone,
+            newPassword: this.resetPwdForm.password
+          }
+          resetPassword(params)
+          .then((res) => {
+            if(res){
+              this.$refs.restPwdContainer.setActiveItem('successTag');
+              this.activeTag = 'successTag';
+            }else{
+              this.$message({
+                message: '账号不存在!',
+                type: 'error'
+              })
+            }
+          })
         }
       })
     },
@@ -205,6 +212,28 @@ export default {
             this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
             this.activeTag = 'resetPwdTag';
           }
+          //验证手机验证码是否正确，手机号是否存在
+          // const params = {
+          //   code: this.signinForm.phoneIentifyCode,
+          //   telephone: this.signinForm.telephone
+          // }
+          // verifyTelephoneAndCode(params)
+          // .then((res) => {
+          //   if(res == '0'){
+          //     //手机验证码不正确
+          //     this.isErrorDialogVisible = true;
+          //   }else if(res == '1'){
+          //     //账号不存在
+          //     this.$message({
+          //       message: '账号不存在!',
+          //       type: 'error'
+          //     })
+          //   }else{
+          //     //正常下一步
+          //     this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
+          //     this.activeTag = 'resetPwdTag';
+          //   }
+          //})
         }
       })
     },
@@ -212,7 +241,7 @@ export default {
       this.count = 60;
       if (!this.timer) {
         this.timer = setInterval(() => {
-          if (this.count > 0) {
+          if (this.count > 0) { 
             this.count--;
           } else {
             clearInterval(this.timer);
@@ -223,12 +252,15 @@ export default {
     },
     getPhoneIdentifyCode() {
       this.interval();
-      // //获取手机验证码
-      // getPhoneVerifyCode()
-      // .than((res) => {
-      //   this.phoneVerifyCode = res.data.code;
-      //   return;
-      // })
+      //获取手机验证码
+      const params = {
+        telephone: this.signinForm.telephone
+      }
+      getPhoneVerifyCode(params)
+      .than((res) => {
+        this.phoneVerifyCode = res.data.code;
+        return;
+      })
     },
     toLoginPage() {
       this.$router.push('/login');

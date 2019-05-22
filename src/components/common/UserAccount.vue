@@ -24,28 +24,12 @@
         <el-button class="submit-btn" type="primary" @click="handleSubmitClick">确 定</el-button>
       </div>
     </el-dialog>
-    <el-dialog
-          :visible.sync="isDialogMsgVisible"
-          :show-close="false"
-          class="confirmDialog"
-          width="520px"
-          center>
-          <div class="dialog-content">
-            <div class="icon"></div>
-            <div class="text-alert">提示</div>
-          </div>
-          <div class="text">{{dialogMassage}}</div>
-          <span slot="footer" class="dialog-footer">
-            <el-button class="submit-btn" type="primary" @click="isDialogMsgVisible = false">确定</el-button>
-          </span>
-        </el-dialog>
   </div>
 </template>
 
 <script>
 import {logout} from '@/rest/authQuery';
 import {changePassword} from "@/rest/userManagmentPageApi";
-//import localStorageHelper from '@/helpers/localStorageHelper';
 
 export default {
   name: 'userAccount',
@@ -62,8 +46,6 @@ export default {
     return {
       userName: '',
       dialogFormVisible: false,
-      dialogMassage: '',
-      isDialogMsgVisible: false,
       formLabelWidth: '80px',
       resetPwdForm: {
         oldPassword: '',
@@ -103,10 +85,9 @@ export default {
       this.$refs.resetPwdForm.validate((valid) => {
         if(valid) {
           const params = {
-            oldPassword: this.resetPwdForm.oldPassword,
-            newPassword: this.resetPwdForm.newPassword,
-            telephone: '18844546789'
-            //telephone: localStorageHelper.getItem("TELEPHONE")
+            password: this.resetPwdForm.oldPassword,
+            newpassword: this.resetPwdForm.newPassword,
+            telephone: localStorage.getItem("TELEPHONE")
           }
           //修改密码
           changePassword(params)
@@ -118,8 +99,10 @@ export default {
                 })
                 this.clearResetPwdForm();
               }else {
-                this.dialogMassage = '原始密码错误，请重新输入'
-                this.isDialogMsgVisible = true;
+                this.$message({
+                  message: '原始密码错误，请重新输入!',
+                  type: 'error'
+                })
               }
             })
         }
@@ -141,8 +124,7 @@ export default {
     },
   },
   mounted() {
-    //this.userName = localStorageHelper.getItem("USERNAME");
-    this.userName = '张三';
+    this.userName = localStorage.getItem("USERNAME");
   }
 };
 </script>
@@ -170,21 +152,6 @@ export default {
         @include buttonStyle;
         margin: 0 16px;
       }
-    }
-  }
-  .el-dialog{
-    .dialog-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .text-alert {
-      width: 40px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #9A8B7B;
-      margin-top: 15px;
     }
   }
 }

@@ -49,7 +49,8 @@
           <el-table-column prop="changeTime" label="修改时间" show-overflow-tooltip></el-table-column>
           <el-table-column label="操作" width="120" fixed="right">
             <template slot-scope="scope">
-              <span class="option-btn" @click="freezeAccount(scope.$index, scope.row)">冻结</span>
+              <span class="option-btn" @click="freezeAccount(scope.$index, scope.row)" v-if="scope.row.status =='1'">冻结</span>
+              <span class="option-btn" @click="unfreezeAccount(scope.$index, scope.row)" v-if="scope.row.status =='0'">解冻</span>
               <span class="option-btn" @click="updateAccount(scope.$index, scope.row)">变更</span>
             </template>
           </el-table-column>
@@ -61,7 +62,7 @@
     </div>
     <el-dialog class="dialog-form user-dialog" :title="dialogTitle" :visible.sync="isDialogVisible" :before-close="cancelEditFileds">
       <el-form :model="addUserform" :rules="rules" ref="addUserform">
-        <el-form-item  label="姓名" :label-width="formLabelWidth" prop="username">
+        <el-form-item label="姓名" :label-width="formLabelWidth" prop="username">
           <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="手机号" :label-width="formLabelWidth" prop="telephone">
@@ -69,7 +70,7 @@
         </el-form-item>
         <el-form-item label="部门" :label-width="formLabelWidth" prop="department">
           <el-select v-model="addUserform.department" placeholder="请选择">
-            <el-option v-for="item in departmentListAdd" :key="item.id" :value="item.id" :label="item.departmentName"></el-option>
+            <el-option v-for="item in departmentList.filter(item =>item.id!='')" :key="item.id" :value="item.id" :label="item.departmentName"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="权限" :label-width="formLabelWidth" prop="authority">
@@ -80,7 +81,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button class="cancle-btn" @click="cancelEditFileds">取消</el-button>
-        <el-button class="submit-btn" type="primary" @click="handleSubmitClick">{{buttonTitle}}</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleSubmitClick">{{addButtonTitle}}</el-button>
       </div>
     </el-dialog>
     <el-dialog
@@ -90,17 +91,17 @@
       width="520px"
       center>
       <div class="icon"></div>
-      <div class="text"> 请确认是否冻结该用户</div>
+      <div class="text"> 请确认是否{{freezeButtonTitle}}该用户</div>
       <span slot="footer" class="dialog-footer">
         <el-button class="cancle-btn" @click="confirmDialogVisiable = false">取消</el-button>
-        <el-button class="submit-btn" type="primary" @click="handleFreezeClick">冻结</el-button>
+        <el-button class="submit-btn" type="primary" @click="handleFreezeClick">{{freezeButtonTitle}}</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
 import Pagination from "@/components/common/Pagination";
-import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount, exportUserToExcel} from "@/rest/userManagmentPageApi";
+import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount} from "@/rest/userManagmentPageApi";
 
 const PAGE_SIZE = 10;
 
@@ -119,6 +120,7 @@ export default {
       }
     };
     return {
+      loginUserId: localStorage.getItem('USERID'), // 登陆者id
       //检索条件
       searchUsername: '',
       searchPhoneNum: '',
@@ -137,15 +139,11 @@ export default {
         {id: 1, departmentName: '开发部'},
         {id: 2, departmentName: '测试部'},
         {id: 3, departmentName: '销售部'}
-      ], 
-      departmentListAdd: [
-        {id: 1, departmentName: '开发部'},
-        {id: 2, departmentName: '测试部'},
-        {id: 3, departmentName: '销售部'}
-      ], 
+      ],
       isDialogVisible: false,
       confirmDialogVisiable: false,
-      buttonTitle: "确定",
+      addButtonTitle: "确定",
+      freezeButtonTitle: "冻结",
       //要冻结的用户id
       freezeUserId: null,
       currentPage: 1,
@@ -153,7 +151,6 @@ export default {
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       tableData: [],
-      excelData: [],
       //对话框表单数据
       addUserform: {
         id: "",
@@ -190,13 +187,13 @@ export default {
     addNewUser() {
       this.isDialogVisible = true;
       this.dialogTitle = '新增用户';
-      this.buttonTitle = '新增';
+      this.addButtonTitle = '新增';
     },
     //变更用户
     updateAccount(index, row) {
       this.isDialogVisible = true;
       this.dialogTitle = '用户变更';
-      this.buttonTitle = '变更';
+      this.addButtonTitle = '变更';
       this.addUserform = {
         id: row.id,
         username: row.username,
@@ -210,8 +207,7 @@ export default {
       this.$refs.addUserform.validate((vaild) => {
         if (vaild) {
           const params = {
-            //loginUserId: localStorageHelper.getItem("USERNAME"), // 登陆者id
-            loginUserId: 1,
+            loginUserId: this.loginUserId,
             username: this.addUserform.username,
             telephone: this.addUserform.telephone,
             deptId: this.addUserform.department,
@@ -219,26 +215,40 @@ export default {
           }
           if (this.dialogTitle === '用户变更'){
             params.id = this.addUserform.id;
-           console.log("变更用户的参数",params)
-            // updateUserAccount(params)
-            // .then((res) => {
-            //   this.$message({
-            //     message: '用户变更成功!',
-            //     type: 'success'
-            //   })
-            //   this.fetchUserCount();
-            // })
+            updateUserAccount(params)
+            .then((flag) => {
+              if(flag){
+                this.$message({
+                  message: '用户变更成功!',
+                  type: 'success'
+                })
+                this.fetchUserCount();
+                this.clearAddUserform();
+              }else{
+                this.$message({
+                  message: '手机号码已存在!',
+                  type: 'error'
+                })
+              }
+            })
           }else{
             addNewUserAccount(params)
-            .then(() => {
-              this.$message({
-                message: '用户增加成功!',
-                type: 'success'
-              })
-              this.fetchUserCount(); 
-            })
+            .then((res) => {
+              if(res){
+                this.$message({
+                  message: '用户增加成功!',
+                  type: 'success'
+                })
+                this.fetchUserCount();
+                this.clearAddUserform();
+              }else{
+                this.$message({
+                  message: '手机号码已存在!',
+                  type: 'error'
+                })
+              }
+           })
           }
-          this.clearAddUserform();
         }
       })
     },
@@ -261,16 +271,32 @@ export default {
     freezeAccount(index, row) {
       this.confirmDialogVisiable = true;
       this.freezeUserId = row.id;
+      this.freezeButtonTitle = '冻结';
+    },
+    //解冻用户
+    unfreezeAccount(index, row) {
+      this.confirmDialogVisiable = true;
+      this.freezeUserId = row.id;
+      this.freezeButtonTitle = '解冻';
     },
     handleFreezeClick() { 
-      // const params = {
-      //   //userId: localStorageHelper.getItem("USERNAME"), //登陆者id
-      //   id: index
-      // }
-      // freezeUserAccount(params)
-      // .then((res) => {
-      //   return res;
-      // })
+      const params = {
+        loginUserId: this.loginUserId,
+        id: this.freezeUserId
+      }
+      if(this.freezeButtonTitle == '冻结'){
+        params.status = 0; // 执行的操作，0 冻结
+      }else {
+        params.status = 1; // 执行的操作，1：解冻
+      }
+      freezeUserAccount(params)
+      .then(() => {
+        this.$message({
+          message: '用户' + this.freezeButtonTitle +'成功!',
+          type: 'success'
+        })
+        this.fetchUserCount();
+      })
       this.confirmDialogVisiable = false;
     },
     //翻页
@@ -282,10 +308,10 @@ export default {
     //获取用户列表
     fetchUserCount() { 
       const params = {
-        userName: this.searchUsername, //姓名
-        phoneNum: this.searchPhoneNum, //手机号
-        department: this.searchDepartment, //部门
-        authority: this.searchAuthority, //权限
+        username: this.searchUsername, //姓名
+        telephone: this.searchPhoneNum, //手机号
+        deptId: this.searchDepartment, //部门
+        aclId: this.searchAuthority, //权限
         pageSize: this.pageSize,
         pageNum: this.currentPage
       }
@@ -299,7 +325,7 @@ export default {
             authorityNameTemp.push(res.data[i].sysOcrAcls[j].aclName);
           }
           res.data[i].authorityId = authorityIdTemp;
-          res.data[i].authorityName  =  authorityNameTemp.join('  ');
+          res.data[i].authorityName  =  authorityNameTemp.join('，');
         }
         this.tableData = res.data; 
         this.totalCount = res.total;
@@ -307,19 +333,18 @@ export default {
     },
     //导出excel
     exportExcel() {
-      // const params = {
-      //   username: this.username,
-      //   phoneNum: this.phoneNum,
-      //   department: this.department,
-      //   authority: this.authority,
-      //   fileName: ''
-      // }
-      //window.open(`${global_}/?userId=${params.userId}&ids=${params.ids}`,'_parent')
+      const params = {
+        username: this.searchUsername, //姓名
+        telephone: this.searchPhoneNum, //手机号
+        deptId: this.searchDepartment, //部门
+        aclId: this.searchAuthority, //权限
+        loginUserId: this.loginUserId,
+        fileName: ''
+      }
+      window.open(`${global_}/?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}`,'_parent')
     }
   },
-  //初始化函数
   mounted() {
-    //获取用户列表
     this.fetchUserCount();
   },
   components: {
