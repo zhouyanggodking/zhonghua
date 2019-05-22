@@ -1,7 +1,7 @@
 <template>
   <div class="user-account-container">
     <el-dropdown trigger="hover" placement="bottom" @command="handleCommand">
-      <div>{{userName}} <span style="font-size:35px" class="el-icon-user"></span></div>
+      <div>{{userName}}<span class="el-icon-arrow-down"></span></div>
       <el-dropdown-menu class="user-account" slot="dropdown">
         <el-dropdown-item class="logout" command="resetPassword"><span class="name">修改密码</span></el-dropdown-item>
         <el-dropdown-item class="logout" command="logout"><span class="name">退出登录</span></el-dropdown-item>
@@ -31,8 +31,8 @@
           width="520px"
           center>
           <div class="dialog-content">
-            <div :class="{'icon':dialogMassage==='原始密码错误，请重新输入','review-icon ':dialogMassage==='密码修改成功'}"></div>
-            <div v-if="dialogMassage==='原始密码错误，请重新输入'" class="text-alert">提示</div>
+            <div class="icon"></div>
+            <div class="text-alert">提示</div>
           </div>
           <div class="text">{{dialogMassage}}</div>
           <span slot="footer" class="dialog-footer">
@@ -62,7 +62,7 @@ export default {
     return {
       userName: '',
       dialogFormVisible: false,
-      dialogMassage: '密码修改成功',
+      dialogMassage: '',
       isDialogMsgVisible: false,
       formLabelWidth: '80px',
       resetPwdForm: {
@@ -105,16 +105,18 @@ export default {
           const params = {
             oldPassword: this.resetPwdForm.oldPassword,
             newPassword: this.resetPwdForm.newPassword,
-            telephone: '13211112222'
+            telephone: '18844546789'
             //telephone: localStorageHelper.getItem("TELEPHONE")
           }
           //修改密码
           changePassword(params)
             .then((res) => {
               if(res) {
+                this.$message({
+                  message: '密码修改成功!',
+                  type: 'success'
+                })
                 this.clearResetPwdForm();
-                this.dialogMassage = '密码修改成功'
-                this.isDialogMsgVisible = true;
               }else {
                 this.dialogMassage = '原始密码错误，请重新输入'
                 this.isDialogMsgVisible = true;
@@ -140,6 +142,7 @@ export default {
   },
   mounted() {
     //this.userName = localStorageHelper.getItem("USERNAME");
+    this.userName = '张三';
   }
 };
 </script>
@@ -182,12 +185,6 @@ export default {
       font-weight: bold;
       color: #9A8B7B;
       margin-top: 15px;
-    }
-    .review-icon{
-      width: 36px;
-      height: 37px;
-      background: url("../../assets/imgs/9.png") no-repeat;
-      background-size: cover;
     }
   }
 }

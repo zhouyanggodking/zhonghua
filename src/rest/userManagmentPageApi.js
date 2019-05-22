@@ -30,6 +30,7 @@ export const changePassword = (params)=> {
     if(res.data.status == '200'){
       flag = true;
     }
+    console.log("修改密码返回的数据", res.data)
     return flag;
   }, (err) => {
     return Promise.reject(err)
@@ -38,14 +39,9 @@ export const changePassword = (params)=> {
 
 //查询用户列表
 export const getUserList = (params)=> {
-    //return axios.get(`http://10.17.20.121:8080/sys/ocr/user/query?username=${params.userName}&telephone=${params.phoneNum}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)
-    return axios.get(`http://10.17.20.121:8080/sys/ocr/user/query?username=${params.userName}&telephone=${params.phoneNum}&deptId=${params.department}&aclId=${params.authority}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)    
+    return axios.get(`http://10.17.20.121:8080/sys/ocr/user/queryUser?username=${params.userName}&telephone=${params.phoneNum}&deptId=${params.department}&aclId=${params.authority}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)    
     .then(res => {
-      console.log("函数返回的结果", res)
-      if(res.data.data.data.length > 0){
-        
-      }
-      return res.data.data.data;
+      return res.data.data;
     }, (err) => {
       return Promise.reject(err)
     })
@@ -53,14 +49,11 @@ export const getUserList = (params)=> {
 
 //新增用户
 export const addNewUserAccount = (params)=> {
-    return axios.post('', Qs.stringify({
-        'userId': params.userId, //登录者
-        'name': params.name, //姓名
-        'phoneNum': params.phoneNum, //手机号
-        'department': params.department, //部门
-        'authority': params.authority, //权限
-    }))
+  
+    //return axios.post('http://10.17.20.121:8080/sys/ocr/user/addUser', params)
+    return axios.get(`http://10.17.20.121:8080/sys/ocr/user/addUser?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}&loginUserId=${params.loginUserId}`)
     .then(res => {
+      console.log("新增用户返回的数据", res)
       return res.data;
     }, (err) => {
       return Promise.reject(err)
