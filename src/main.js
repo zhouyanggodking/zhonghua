@@ -16,6 +16,9 @@ Vue.use(ElementUI);
 Vue.use(Viewer);
 Vue.use(uploader)
 
+// axios.defaults.baseURL = 'http://49.4.79.11:8181';
+// axios.defaults.baseURL = 'http://10.145.6.121:8080';
+
 // axios.interceptors.request.use(config => {
 //   if (config.url.indexOf('/api/login') === -1) {
 //     const authToken = authService.getAuthToken();

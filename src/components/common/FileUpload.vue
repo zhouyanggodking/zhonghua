@@ -24,7 +24,7 @@
 </template>
 <script>
 import {calculateMd5} from '@/utils/fileUpload.js';
-
+import {relocateFile} from '@/rest/realEstateUploadApi';
 
 export default {
   data() {
@@ -43,7 +43,7 @@ export default {
       },
       loadingText: '文件解析中...',
       options: {
-        target: 'http://10.17.16.91:8080/uploader/chunk',
+        target: 'http://10.17.17.151:8080/uploader/chunk',
         testChunks: false,
         singleFile: true,
         simultaneousUploads: 1, // 文件个数
@@ -80,14 +80,14 @@ export default {
         that.load = true
         calculateMd5(completeFiile, function (val) {
           that.file_md5 = val;
-          that.loadingText = '文件解析成功'
-          that.load = false
+          that.loadingText = '文件解析成功';
+          that.load = false;
           // fileIsExist({md5: val}).then(res => {
           //   if (res.status === 200) {
           //     if (res.data === true) {
           //       // 文件没上传过 就上传
-          //       if (uploader_file) {
-          //         uploader_file.resume()
+          //       if (this.uploader_file) {
+          //         this.uploader_file.resume()
           //       }
           //     } else {
           //       this.$message({
@@ -117,39 +117,44 @@ export default {
         })
       }
     },
-    fileComplete() {}
-    // fileComplete() {
-    //   // 合并文件
-    //   let obg = {
-    //     md5: file_md5,
-    //     filename: file.name,
-    //     identifier: _identifier,
-    //     totalSize: file.size,
-    //     type: 'zc',
-    //     location: '',
-    //     serviceFilePath: servicePath,
-    //     relatedUserId: localStorage.getItem('userId')
-    //   }
-    //   mergeFile(obg).then(res => {
-    //     if (res.status === 200) {
-    //       this.$message({
-    //         message: '文件上传成功',
-    //         type: 'success'
-    //       })
-    //       this.getFileList()
-    //     } else {
-    //       this.$message({
-    //         message: '文件上传失败',
-    //         type: 'error'
-    //       })
-    //     }
-    //   }).catch(() => {
-    //     this.$message({
-    //       message: '文件上传失败',
-    //       type: 'error'
-    //     })
-    //   })
-    // },
+    fileComplete() {
+      // 先把File对象转换成Blob 然后转换成buffer进行加密
+      let file = arguments[0].file
+      let _fileName = file.name.split('.')[0]
+      let _identifier = file.size + '_' + _fileName
+      let servicePath = ''
+      // 合并文件
+      let obg = {
+        userId: 1,
+        businessTypeId: 1,
+        md5: this.file_md5,
+        filename: file.name,
+        identifier: _identifier,
+        totalSize: file.size,
+        type: 'zc',
+        location: '',
+        serviceFilePath: servicePath,
+      }
+      relocateFile(obg).then(res => {
+        if (res.status === 200) {
+          this.$message({
+            message: '文件上传成功',
+            type: 'success'
+          })
+          this.getFileList()
+        } else {
+          this.$message({
+            message: '文件上传失败',
+            type: 'error'
+          })
+        }
+      }).catch(() => {
+        this.$message({
+          message: '文件上传失败',
+          type: 'error'
+        })
+      })
+    },
   }
 }
 </script>

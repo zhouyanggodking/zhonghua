@@ -1,5 +1,5 @@
 import axios from 'axios';
-// import Qs from 'qs';
+import Qs from 'qs';
 
 export const getOcrExtractTemplateFields = (businessTypeId, userId, id)=> {
   return axios.get(`/OcrExtractTemplateFields/OcrExtractTemplateFields?businessTypeId=${businessTypeId}&userId=${userId}&id=${id}`)
@@ -27,7 +27,7 @@ export const deleteTemplateField = (id) => {
     return Promise.reject(err)
   })
 }
-
+// 文件上传
 export const uploadFile = (param) => {
   return axios.post('/uploader/chunk', param)
   .then(res => {
@@ -36,7 +36,25 @@ export const uploadFile = (param) => {
     return Promise.reject(err)
   })
 }
+// 查询文件是否已经存在
+export const fileIsExist = (params) => {
+  return axios.get(`/uploader/selectMd5?md5?=${params}`)
+  .then(res => {
+    return Promise.resolve(res);
+  }, err => {
+    return Promise.reject(err);
+  })
+}
 
+// 合并文件
+export const relocateFile = (params) => {
+  return axios.post('/uploader/relocate', Qs.stringify(params))
+  .then(res => {
+    return Promise.resolve(res);
+  }, err => {
+    return Promise.reject(err);
+  })
+}
 export const getUploadHistory = (params) => {
   return axios.get(`/uploader/hostory?businessTypeId=${params.businessTypeId}&relatedUserId=${params.relatedUserId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}&type=${params.type}&userId=${params.userId}`)
   .then(res => {
@@ -92,12 +110,7 @@ export const supplyInvoice = (params) => {
 }
 //单个付款申请单审核和驳回
 export const checkPaymentRequestOrder = (params) => {
-  return axios.post('/estate/estatePaymentRequestOrderController/checkPaymentRequestOrder', {
-    'id': params.id,
-    'state': params.state,
-    'userId': params.userId,
-    'rejectReason': params.rejectReason
-  })
+  return axios.post('/estate/estatePaymentRequestOrderController/checkPaymentRequestOrder', params)
   .then((res) => {
     return Promise.resolve(res);
   }, err => {

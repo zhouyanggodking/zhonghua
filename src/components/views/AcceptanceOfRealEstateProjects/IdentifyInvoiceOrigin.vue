@@ -10,7 +10,7 @@
           <div class="img-group">
             <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
               <el-carousel-item v-for="item in invoicesMessage.length" :key="item">
-                <zoom-image :id="`img${item}`"></zoom-image>
+                <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="String(rotateAngleList[item])" ref="img"></zoom-image>
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -19,7 +19,7 @@
           <identify-result-top-banner title="识别结果" @change="onImgPageChange" :total="invoicesMessage.length" :currentPage="currentPage"></identify-result-top-banner>
           <el-carousel ref="invoiceCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
             <el-carousel-item v-for="(item, index) in invoicesMessage" :key="index">
-              <contract-message v-if="isShowContractMsg" :titleInfos="simpleInfos" :contractData="item" @change="toggleInvoice"></contract-message>
+              <contract-message v-if="isShowContractMsg" :titleInfos="simpleInfos" :contractData="item" :index="index" :positionInfos="infos"  @change="toggleInvoice"></contract-message>
               <contract-supplyment v-else :titleInfos="simpleInfos" @change="toggleInvoice"></contract-supplyment>
             </el-carousel-item>
           </el-carousel>
@@ -43,6 +43,9 @@ import ZoomImage from '@/components/common/ZoomImage';
 export default {
   data() {
     return {
+      singleImagePosition: null,
+      rotateAngle: null,
+      locationInfos: null,
       isShowContractMsg: true,
       imagesSrc: "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg",
       paymentOrderTheme: '',
@@ -62,7 +65,8 @@ export default {
   },
   methods: {
     toggleInvoice(res) {
-      this.isShowContractMsg = res;
+      this.isShowContractMsg = res.isShowContractMsg;
+      this.singleImagePosition = res.singleImagePosition;
     },
     onImgPageChange(pageNum) {
       this.$refs.invoiceCarousel.setActiveItem(pageNum-1);
@@ -78,6 +82,7 @@ export default {
       this.$refs.imgCarousel.setActiveItem(index);
       this.$refs.invoiceCarousel.setActiveItem(index);
       this.currentPage = index + 1;
+      this.singleImagePosition = [];
       // if (this.invoicesMessage.length) {
       //   this.imagesSrc = `${global_}${this.invoicesMessage[index].outputLocation}`;
       // }
@@ -90,6 +95,10 @@ export default {
       getTotalInvoices(params).then(res => {
         this.invoicesMessage = res.data.data.invoices;
         this.infos = res.data.data.infos;
+        const rotateAngleList = res.data.data.infos.map(item => {
+          return JSON.parse(item).rotation_angle
+        });
+        this.rotateAngleList = rotateAngleList;
       })
     },
     // 获取付款主题

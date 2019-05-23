@@ -59,7 +59,7 @@
               <el-button
                 class="table-btn"
                 size="mini"
-                @click="tableItemDetails(scope.$index, scope.row)"
+                @click="tableItemDetails(scope.row)"
               >详情</el-button>
             </template>
           </el-table-column>
@@ -72,11 +72,12 @@
   </div>
 </template>
 <script>
-import {getEstateElecAuthorizationSummaryInfos} from "@/rest/letterOfAuthorizationApi";
+import {getEstateElecAuthorizationSummaryInfos} from "@/rest/letterOfAuthorizationElecApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import DateRange from "@/components/common/DateRange";
 import Pagination from "@/components/common/Pagination";
 import {global_} from "@/global/global";
+import {formatQuery} from '@/helpers/formatGetParams';
 
 const PAGE_SIZE = 10;
 
@@ -142,7 +143,7 @@ export default {
           elecOrFile: this.elecOrFile
         };
         window.open(`${global_}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
-?userId=${params.userId}&ids=${params.ids}&elecOrFile=${params.elecOrFile}`,'_parent');
+${formatQuery(params)}`,'_parent');
       } else {
         this.$message({
           message: '请勾选要下载的对象!',
@@ -156,8 +157,8 @@ export default {
       this.dialogHintOperate = "批量通过";
     },
     batchReviewPass() {},
-    tableItemDetails() {
-      this.$router.push({ name: "credit-auth-elect-result-details", query: { id: 1 } });
+    tableItemDetails(row) {
+      this.$router.push({ name: "credit-auth-elect-result-details", query: { id: row.id } });
     },
     exportExcel() {
       const params = {
@@ -168,7 +169,7 @@ export default {
         elecOrFile: this.elecOrFile
       }
       window.open(`${global_}/auth/estateAuthorizationSummaryController/exportToExcel
-?startTime=${params.startTime}&endTime=${params.endTime}&state=${params.state}&userId=${params.userId}&elecOrFile=${params.elecOrFile}`,'_parent');
+${formatQuery(params)}`,'_parent');
     },
     reviewPass() {
       this.isDialogVisible = false;

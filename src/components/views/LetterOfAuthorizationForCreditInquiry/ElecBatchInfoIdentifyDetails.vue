@@ -11,13 +11,13 @@
           <div class="elect-batch-row_item_header">
             <div class="title">Excel提取信息</div>
           </div>
-          <div class="content">
+          <div class="content" v-if="excelMsg">
             <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
               <el-col class="item-title" :span="10">
-                <div>{{item}}</div>
+                <div>{{item.value}}</div>
               </el-col>
               <el-col class="item_num" :span="14">
-                <div class="bg-purple"></div>
+                <div class="bg-purple">{{excelMsg[item.key]}}</div>
               </el-col>
             </el-row>
           </div>
@@ -27,16 +27,35 @@
             <div class="title">电子文件识别结果</div>
             <div class="look-origin" @click="lookOriginElect">查看原件</div>
           </div>
-
           <div class="content">
-            <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
-              <el-col class="item-title" :span="10">
-                <div>{{item}}</div>
-              </el-col>
-              <el-col class="item_num" :span="14">
-                <div class="bg-purple"></div>
-              </el-col>
-            </el-row>
+            <el-form label-position="right" label-width="40%" :model="elecFileForm">
+              <el-form-item label="公司章:">
+                <el-input disabled v-model="elecFileForm.companySeal"></el-input>
+              </el-form-item>
+              <el-form-item label="人名章:">
+                <el-input disabled v-model="elecFileForm.personSeal"></el-input>
+              </el-form-item>
+              <el-form-item label="签署时间:">
+                <el-date-picker
+                  v-if="!isEleFiledFormEdit"
+                  v-model="elecFileForm.signTime"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
+                <el-input disabled v-else v-model="elecFileForm.signTime"></el-input>
+              </el-form-item>
+              <el-form-item label="是否法人签章:">
+                <el-input disabled v-model="elecFileForm.corporateStamp"></el-input>
+              </el-form-item>
+              <el-form-item label="授权有效期:">
+                <el-input disabled v-model="elecFileForm.authorizationValidDate"></el-input>
+              </el-form-item>
+            </el-form>
+            <div class="btn-group">
+              <el-button v-if="isEleFiledFormEdit" class="modify-btn" @click="eleModifyFile">修改</el-button>
+              <el-button v-else class="modify-btn" @click="eleSaveFile">保存</el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -47,12 +66,12 @@
             <div class="look-origin" @click="lookCompanyInfo">查看企业详细信息</div>
           </div>
           <div class="content">
-            <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
+            <el-row class="item" :gutter="10" v-for="(item,index) in dataBusInfoItems" :key="index">
               <el-col class="item-title" :span="10">
-                <div>{{item}}</div>
+                <div>{{item.value}}</div>
               </el-col>
               <el-col class="item_num" :span="14">
-                <div class="bg-purple"></div>
+                <div class="bg-purple">{{dataBusData[item.key]}}</div>
               </el-col>
             </el-row>
           </div>
@@ -63,14 +82,18 @@
             <div class="look-origin" @click="lookOriginPaper">查看原件</div>
           </div>
           <div class="content">
-            <el-row class="item" :gutter="10" v-for="(item,index) in excelInfoItems" :key="index">
-              <el-col class="item-title" :span="10">
-                <div>{{item}}</div>
-              </el-col>
-              <el-col class="item_num" :span="14">
-                <div class="bg-purple"></div>
-              </el-col>
-            </el-row>
+             <el-form label-position="right" label-width="40%" :model="paperFileForm">
+              <el-form-item label="文件提交时间:">
+                <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.signTime"></el-input>
+              </el-form-item>
+              <el-form-item label="档案编号:">
+                <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.fileNo"></el-input>
+              </el-form-item>
+            </el-form>
+            <div class="btn-group">
+              <el-button v-if="isPaperFiledFormEdit" class="modify-btn" @click="paperModifyFile">修改</el-button>
+              <el-button v-else class="modify-btn" @click="paperSaveFile">保存</el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -79,23 +102,23 @@
         <div class="review-opinion_content">
           <div class="question-classify">
             <div class="text">问题分类:</div>
-            <el-select v-model="question" placeholder="请选择">
+            <el-select v-model="elecFileForm.problemType" placeholder="请选择">
               <el-option
-                v-for="item in questionClassificationList"
-                :key="item"
-                :label="item"
-                :value="item"
+                v-for="(item, index) in questionClassificationList"
+                :key="index"
+                :label="item.name"
+                :value="item.id"
               ></el-option>
             </el-select>
           </div>
           <div class="question-describe">
             <div class="text">其他问题描述:</div>
-            <el-input type="textarea" placeholder="请输入内容" v-model="questionDescrible" :rows="5"></el-input>
+            <el-input type="textarea" placeholder="请输入内容" v-model="elecFileForm.problemDescription" :rows="5"></el-input>
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button @click="reviewPass">审核通过</el-button>
-            <el-button @click="reviewReject">驳回</el-button>
+            <el-button :disabled="auditState === '1'" @click="reviewPass">审核通过</el-button>
+            <el-button :disabled="auditState === '0'" @click="reviewReject">驳回</el-button>
           </div>
         </div>
       </div>
@@ -105,7 +128,6 @@
       title
       :visible.sync="isDialogVisible"
       width="30%"
-      :before-close="handleClose"
     >
       <div class="dialog-content">
         <div
@@ -126,26 +148,25 @@
           type="primary"
           @click="reviewPassOpearte"
         >{{dialogHintOperate}}</el-button>
-        <el-button
-          v-if="dialogHintOperate==='批量通过'"
-          type="primary"
-          @click="batchReviewPass"
-        >{{dialogHintOperate}}</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
+import {getEstateAuthorizationExcelInfo, checkAuthRecord, modifyEleFileDate} from "@/rest/letterOfAuthorizationElecApi";
+import {USERID, PROBLEM_LIST} from "@/global/global";
+import { dateFormat } from '@/helpers/dateHelper';
+const ELEORFILE = 0;
+const CHECK = 1;
+const REJECT = 0;
 
 export default {
   data() {
     return {
-      payTheme: "",
-      contractNum: "",
-      payer: "",
-      questionDescrible: "",
-      questionClassificationList: ["无", "缺少公章", "公章与申请方名称不符", "公章不清", "缺少法人章", "法人章与实际法人名称不符", "法人章不清", "授权书无签署日期", "授权书已过期", "其他"],
+      isEleFiledFormEdit: true,
+      isPaperFiledFormEdit: true,
+      questionClassificationList: PROBLEM_LIST,
       question: "",
       isDialogVisible: false,
       rejectContent: "",
@@ -155,13 +176,19 @@ export default {
       dialogHintOperate: "驳回",
       dialogVisible: false,
       reviewStatus: "全部",
+      auditState: '',
       excelInfoItems: [
-        "公司名称：",
-        "营业执照：",
-        "授权书提交日期：",
-        "申请日期：",
-        "部门：",
-        "序号："
+        {key: 'companyName', value: "公司名称："},
+        {key: 'licenseNo', value: "营业执照："},
+        {key: 'submitDate', value: "授权书提交日期："},
+        {key: 'applyDate', value: "申请日期："},
+        {key: 'depart', value: "部门："},
+        {key: 'seqNo0', value: "序号："}
+      ],
+      dataBusInfoItems: [
+        {key: 'databusCompanyName', value: "公司名称："},
+        {key: 'databusLicenseNo', value: "营业执照："},
+        {key: 'databusPerson', value: "法人代表："}
       ],
       currentTitle: "20190404批次-金茂",
       breadCrumbList: [
@@ -169,7 +196,11 @@ export default {
         "识别结果",
         "电子版批次信息",
         "查询清单"
-      ]
+      ],
+      excelMsg: null,
+      elecFileForm: {},
+      paperFileForm: {},
+      dataBusData: {}
     };
   },
   methods: {
@@ -183,24 +214,145 @@ export default {
     previous() {
       this.$router.go(-1);
     },
-    rejectOpinionOperate() {},
-    reviewPassOpearte() {},
+    rejectOpinionOperate() {
+      this.isDialogVisible = false;
+      this.dialogVisible = true;
+      if (this.elecFileForm.problemType !== '' && this.elecFileForm.problemDescription !== '') {
+        this.checkOrRejectFun(REJECT, this.elecFileForm.problemType, this.elecFileForm.problemDescription);
+        this.auditState = '0';
+      } else {
+        this.$message({
+          message: '请选择问题分类并填写问题描述!',
+          type: 'warning'
+        })
+      }
+      
+    },
+    reviewPassOpearte() {
+      this.isDialogVisible = false;
+      this.dialogVisible = true;
+      this.checkOrRejectFun(CHECK, '', '');
+      this.elecFileForm.problemType = '';
+      this.elecFileForm.problemDescription = '';
+      this.auditState = '1';
+    },
     reviewReject() {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否驳回";
       this.dialogHintOperate = "驳回";
     },
+    checkOrRejectFun(state, problemType, problemDescription) {
+      const msg = state === 1 ? '审核' : '驳回';
+      const params = {
+        excel: {
+          id: this.excelMsg.id,
+          fileId: this.elecFileForm.id,
+          rowkey: "",
+          auditState: state,
+          problemType: problemType,
+          problemDescription: problemDescription,
+          elecOrFile: ELEORFILE
+        },
+        userId: USERID
+      };
+      checkAuthRecord(params).then(() => {
+        this.$message({
+          message: `${msg}完成`,
+          type: 'success'
+        });
+        this.dialogVisible = false;
+      }, (err) => {
+        this.$message({
+          // message: `${msg}失败`,
+          message: err.message,
+          type: 'warning'
+        })
+      })
+    },
     //智罗盘 查看企业详细信息
     lookCompanyInfo() {
-      this.$router.push({ name: "look-company-info" });
+      this.$router.push({ name: "look-company-info"});
+    },
+    // 电子识别
+    eleModifyFile() {
+      this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
+      const params = {
+        file: {
+          fileId: this.elecFileForm.id,
+          authorizationValidDate: dateFormat(this.elecFileForm.authorizationValidDate)
+        },
+        userId: USERID
+      }
+      modifyEleFileDate(params).then(() => {
+        this.$message({
+          message: '修改成功',
+          type: 'success'
+        })
+      }, () => {
+        this.$message({
+          message: '修改失败',
+          type: 'failed'
+        })
+      })
+    },
+    eleSaveFile() {
+      this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
+      // resourceWrapper.modifyPaymentOrder(params).then(() => {
+      //   this.$message({
+      //     message: '修改成功',
+      //     type: 'success'
+      //   })
+      // }, () => {
+      //   this.$message({
+      //     message: '修改失败',
+      //     type: 'failed'
+      //   })
+      // })
+    },
+    // 纸质信息匹配
+    paperModifyFile() {
+      this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
+    },
+    paperSaveFile() {
+      this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
+      // resourceWrapper.modifyPaymentOrder(params).then(() => {
+      //   this.$message({
+      //     message: '修改成功',
+      //     type: 'success'
+      //   })
+      // }, () => {
+      //   this.$message({
+      //     message: '修改失败',
+      //     type: 'failed'
+      //   })
+      // })
+    },
+    lookOriginElect() {
+      this.$router.push({ name: "look-origin", query: {fileId: this.elecFileForm.id} });
     },
     //查看原件
     lookOriginPaper() {
-      this.$router.push({ name: "look-origin" });
+      this.$router.push({ name: "look-origin", query: {fileId: this.paperFileForm.id} });
     },
-    lookOriginElect() {
-      this.$router.push({ name: "look-origin" });
+    fetchEstateAuthorizationExcelInfo() {
+      const params = {
+        excelId: this.excelId,
+        userId: USERID,
+        elecOrFile: ELEORFILE
+      };
+      getEstateAuthorizationExcelInfo(params)
+      .then(res => {
+        this.excelMsg = res.excel;
+        this.elecFileForm = res.elecFile;
+        this.dataBusData = res.databusInfo;
+        this.paperFileForm = res.file;
+      })
     }
+  },
+  mounted() {
+    this.excelId = this.$route.query.id;
+    this.auditState = this.$route.query.auditState;
+    this.fetchEstateAuthorizationExcelInfo();
   },
   components: {
     BreadCrumb
@@ -280,8 +432,65 @@ export default {
         }
         .content {
           padding: 30px;
+          /deep/ {
+            .el-form {
+              padding:  0 20px;
+              // z-index: 1999;
+              .goods-list {
+                border: 1px dashed #EBEBEB;
+              }
+              .el-form-item {
+                .el-form-item__label {
+                  line-height: 30px;
+                  font-size: 14px;
+                  color: #666666;
+                  font-weight: bold;
+                }
+                .el-form-item__content {
+                  line-height: 30px;
+                  .el-input {
+                    height: 30px;
+                    .el-input__inner {
+                      height: 30px;
+                    }
+                  &.is-disabled {
+                      .el-input__inner {
+                        border: none;
+                        color: #333333;
+                        background-color: #ffffff;
+                        cursor: default;
+                      }
+                    }
+                  }
+                  .el-date-editor {
+                    .el-input__prefix {
+                      .el-input__icon {
+                        line-height: 30px;
+                      }
+                    }
+                    .el-input__suffix {
+                      display: none;
+                    }
+                    &.el-input {
+                      width: 100%;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          .btn-group {
+            padding: 30px 0px;
+            display: flex;
+            justify-content: flex-end;
+            .modify-btn {
+              margin-left: 40px;
+            }
+          }
           .item {
-            margin-bottom: 20px;
+            height: 30px;
+            line-height: 30px;
+            margin-bottom: 22px;
             .item-title {
               display: flex;
               justify-content: flex-end;
@@ -348,6 +557,10 @@ export default {
   &:hover {
     background-color: #e9d58b;
     border-color: #e9d58b;
+  }
+  &.is-disabled {
+    background-color: #d9d9d9;
+    border-color: #d9d9d9;
   }
 }
 .el-button:active {

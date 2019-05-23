@@ -1,56 +1,64 @@
 <template>
-  <div>
-    <img
-      :id="id"
-      class="img-src"
-      :src="imagesSrc"
-      height="633"
-      width="494"
-    >
-  </div>
+  <encircle-image style="height:360px;" :rotate="360 - imageRotate" :img-src="imageUrl" ref="img"></encircle-image>
 </template>
 <script>
-import Viewer from "viewerjs";
+import {loadEncicleImage} from '@/helpers/zoomImage';
 
 export default {
   data() {
     return {
-      imagesSrc: "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
+      imageUrl: ''
     };
   },
+  mounted() {
+    loadEncicleImage().then(() => {
+      this.imageUrl = 'http://10.17.17.151:8080/test/test1.png';
+    // if (this.imageUrl == 'NULL' || this.imageUrl == '') {
+    //     this.imageUrl = 'NULL'
+    //   } else {
+    //     this.imageUrl = 'http://10.17.17.151:8080/test/test1.png';
+    //   }
+    }).catch(() => {
+      this.$message({
+        message: '图片错误',
+        type: 'failed'
+      })
+    })
+  },
   props: {
-    id: {
+    imagePosition: {
+      type: Array
+    },
+    imageRotate: {
       type: String
     }
   },
-  mounted() {
-    // this.$nextTick(
-    //   () => {
-        const viewer = new Viewer(document.getElementById(this.id), {
-          inline: true,
-          button: false, //右上角按钮
-          navbar: false, //底部缩略图
-          title: false, //当前图片标题
-          toolbar: false, //底部工具栏
-          tooltip: true, //显示缩放百分比
-          movable: true, //是否可以移动
-          zoomable: true, //是否可以缩放
-          rotatable: true, //是否可旋转
-          scalable: true, //是否可翻转
-          transition: true, //使用 CSS3 过度
-          fullscreen: false, //播放时是否全屏
-          keyboard: true, //是否支持键盘
-          viewed() {
-            viewer.zoomTo(1);
+  watch: {
+    imagePosition: {
+        handler: function (locations) {
+          if (!locations || locations.length == 0) {
+            this.$refs.img.focusAreas = locations;
+            return;
           }
-        });
-    //   }
-    // )
+          //默认单张图片的page为0
+          if (this.$refs.img) {
+            this.$refs.img.focusAreas = locations;
+          } else if (this.$refs.cimg) {
+            this.$refs.cimg.focusAreas = locations
+            let id = 'img' + new String(locations);
+            if (document.getElementById(id)) {
+              document.getElementById(id).focusAreas = locations;
+            }
+          } else {
+            this.$refs.carouse.setActiveItem(locations[0].imgUrl);
+            let id = new String(locations[0].imgUrl);
+            if (document.getElementById(id)) {
+              document.getElementById(id).focusAreas = locations;
+            }
+          }
+        },
+        deep: true
+      },
   }
 }
 </script>
-<style lang="scss" scoped>
-.viewer-backdrop {
-  background-color: #ffffff;
-}
-</style>

@@ -278,8 +278,10 @@ export default {
     batchReviewPass() {
       this.isDialogVisible = false;
       const params = {
-        ids: this.multipleSelection,
-        state: CHECK,
+        orders : {
+          ids: this.multipleSelection,
+          state: CHECK,
+        },
         userId: 1
       };
       checkPaymentRequestOrders(params).then(() => {
@@ -301,10 +303,12 @@ export default {
     },
     handleRejectClick() {
       const params = {
-        id: this.rejectId,
-        state: REJECT,
         userId: 1,
-        rejectReason: this.rejectContent
+        order: {
+          state: REJECT,
+          id: this.rejectId,
+          rejectReason: this.rejectContent
+        }
       };
       checkPaymentRequestOrder(params).then(() => {
         this.$message({
@@ -620,7 +624,7 @@ export default {
   }
   .review-icon {
     width: 36px;
-    height: 37px;
+    height: 36px;
     background: url("./../../../assets/imgs/9.png") no-repeat;
     background-size: cover;
   }

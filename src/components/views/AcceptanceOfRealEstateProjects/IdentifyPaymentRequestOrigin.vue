@@ -10,49 +10,42 @@
         <div class="left">
           <div class="title">付款申请原件</div>
           <div class="result" id="result">
-            <img
-              id="image"
-              class="img-src"
-              :src="imagesSrc"
-              height="600px"
-              width="100%"
-            >
-            <!-- <encircle-image style="height:360px;" :img-src="imagesSrc" ref="img"></encircle-image> -->
+            <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image>
           </div>
         </div>
         <div class="right">
           <div class="container">
             <div class="title">识别结果</div>
             <div class="result">
-              <el-form label-position="right" label-width="150px" :model="paymentOrderForm">
-                <el-form-item label="合同名称:">
+              <el-form label-position="right" label-width="40%" :model="paymentOrderForm">
+                <el-form-item label="合同名称:" @click.native="filedFocus('合同名称')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractName"></el-input>
                 </el-form-item>
-                <el-form-item label="合同编号:">
+                <el-form-item label="合同编号:" @click.native="filedFocus('合同编号')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractNo"></el-input>
                 </el-form-item>
-                <el-form-item label="付款主题:">
+                <el-form-item label="付款主题:" @click.native="filedFocus('付款主题')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.paymentTitle"></el-input>
                 </el-form-item>
-                <el-form-item label="申请日期:">
+                <el-form-item label="申请日期:" @click.native="filedFocus('申请日期')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.requestDate"></el-input>
                 </el-form-item>
-                <el-form-item label="付款单位:">
+                <el-form-item label="付款单位:" @click.native="filedFocus('付款单位')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.payer"></el-input>
                 </el-form-item>
-                <el-form-item label="收款单位:">
+                <el-form-item label="收款单位:" @click.native="filedFocus('收款单位')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.receiver"></el-input>
                 </el-form-item>
-                <el-form-item label="本次应付金额(大写):">
+                <el-form-item label="本次应付金额(大写):" @click.native="filedFocus('本次应付金额(大写)')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.acountPayable"></el-input>
                 </el-form-item>
-                <el-form-item label="合同动态金额(¥):">
+                <el-form-item label="合同动态金额(¥):" @click.native="filedFocus('合同动态金额(¥)')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractDynamicAmount"></el-input>
                 </el-form-item>
-                <el-form-item label="累计已付金额(¥):">
+                <el-form-item label="累计已付金额(¥):" @click.native="filedFocus('累计已付金额(¥)')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.paidAmount"></el-input>
                 </el-form-item>
-                <el-form-item label="应付未付金额(¥):">
+                <el-form-item label="应付未付金额(¥):" @click.native="filedFocus('应付未付金额(¥)')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.unpaidAmount"></el-input>
                 </el-form-item>
               </el-form>
@@ -70,11 +63,11 @@
   </div>
 </template>
 <script>
-import Viewer from "viewerjs";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import resourceWrapper from "@/rest/resourceWrapper";
 import {dateFormat} from '@/helpers/dateHelper';
-// import {loadEncicleImage} from '@/helpers/zoomImage';
+import ZoomImage from '@/components/common/ZoomImage';
+// import {global_} from '@/global/global';
 
 export default {
   data() {
@@ -85,6 +78,9 @@ export default {
       imagesSrc: 
         "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
       ,
+      positionInfo: null,
+      rotateAngle: '',
+      singleImagePosition: null,
       textarea: "",
       isSaveBtn: false,
       paymentOrderForm: {
@@ -140,40 +136,41 @@ export default {
       }
       resourceWrapper.getPaymentOrderDetail(params).then(res => {
           this.paymentOrderForm=res.data.order;
+          // this.imagesSrc = `${global_}${res.data.outputLocation}`;
+          this.positionInfo = JSON.parse(res.data.infos).position_info;
+          this.rotateAngle = String(JSON.parse(res.data.infos).rotation_angle);
           this.currentTitle = `${res.data.order.payer}-${res.data.order.contractNo}-${res.data.order.paymentTitle}`;
       })
+    },
+    filedFocus(item) {
+      const location_info = this.positionInfo[item];
+      const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
+          'imgUrl': this.imagesSrc,
+          'x': location_info.left,
+          'y': location_info.top,
+          'width': location_info.width,
+          'height': location_info.height,
+          borderColor: 'red',
+        }] : [{
+          'x': location_info.left,
+          'y': location_info.top,
+          'width': location_info.width,
+          'height': location_info.height,
+          borderColor: 'red',
+        }]) : [];
+        let imageUrl = location.length ? location[0].imgUrl : '';
+        if (imageUrl && imageUrl != 'undefined') {
+          this.singleImagePosition  = location;
+        }
     }
   },
   mounted() {
     this.paymentOrderId=this.$route.query.id;
     this.getPaymentDetailData();
-    const viewer = new Viewer(document.getElementById("image"), {
-      inline: true,
-      button: false, //右上角按钮
-      navbar: false, //底部缩略图
-      title: false, //当前图片标题
-      toolbar: false, //底部工具栏
-      tooltip: true, //显示缩放百分比
-      movable: true, //是否可以移动
-      zoomable: true, //是否可以缩放
-      rotatable: true, //是否可旋转
-      scalable: true, //是否可翻转
-      transition: true, //使用 CSS3 过度
-      fullscreen: false, //播放时是否全屏
-      keyboard: true, //是否支持键盘
-      // viewed() {
-      //   viewer.zoomTo(1);
-      // },
-      // zoomed(res) {
-      //   console.log(res);
-      // },
-      viewed(res) {
-        console.log(res);
-      }
-    });
   },
   components: {
-    BreadCrumb
+    BreadCrumb,
+    ZoomImage
   }
 };
 </script>
@@ -195,15 +192,17 @@ export default {
       display: flex;
       justify-content: center;
       .left {
-        // width: 494px;
+        display: flex;
+        flex-direction: column;
         width: 50%;
         height: 670px;
         border: 1px solid #ebebeb;
         padding: 20px 30px;
         .result {
           // width: 494px;
-          height: 100%;
+          flex: 1;
           margin-top: 10px;
+          padding-bottom: 20px;
           border: 1px solid #ebebeb;
           .result-img {
             width: 494px;

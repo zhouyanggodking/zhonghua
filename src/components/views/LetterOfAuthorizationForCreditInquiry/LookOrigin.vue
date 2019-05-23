@@ -8,101 +8,181 @@
     <div class="identify-pay-detail-page">
       <div class="content">
         <div class="left">
-          <div class="title">付款申请原件</div>
-          <div class="result">
-            <img
-              id="image"
-              class="img-src"
-              :src="imagesSrc"
-              height="633"
-              width="494"
-            >
+          <div class="title">征信授权书图像</div>
+          <div class="result" id="result">
+            <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image>
           </div>
         </div>
         <div class="right">
           <div class="container">
-            <div class="title">识别结果</div>
-            <div class="result">
-              <el-row class="item" v-for="(item,index) in itemResult" :key="index" :gutter="10">
-                <el-col :span="10" class="item_title col-6">{{item}}</el-col>
-                <el-col :span="14" class="item_num col-18"></el-col>
-              </el-row>
+            <div class="container-top">
+              <div class="title">识别结果</div>
+              <div class="result">
+                <el-form label-position="right" label-width="40%" :model="fileMessageForm">
+                  <el-form-item label="公司章:" @click.native="filedFocus('公司章')">
+                    <el-input :disabled="isFiledFormEdit" v-model="fileMessageForm.companySeal"></el-input>
+                  </el-form-item>
+                  <el-form-item label="人名章:" @click.native="filedFocus('人名章')">
+                    <el-input :disabled="isFiledFormEdit" v-model="fileMessageForm.personSeal"></el-input>
+                  </el-form-item>
+                  <el-form-item label="授权时间:" @click.native="filedFocus('授权时间')">
+                    <el-date-picker
+                      v-if="!isFiledFormEdit"
+                      v-model="fileMessageForm.signTime"
+                      type="date"
+                      value-format="yyyy-MM-dd"
+                      placeholder="选择日期">
+                    </el-date-picker>
+                    <el-input disabled v-else v-model="fileMessageForm.signTime"></el-input>
+                  </el-form-item>
+                  <el-form-item label="是否法人签章:" @click.native="filedFocus('是否法人签章')">
+                    <el-select v-if="!isFiledFormEdit"  v-model="fileMessageForm.corporateStamp" placeholder="">
+                      <el-option v-for="(item, index) in isStamp" :key="index" :label="item" :value="index"></el-option>
+                    </el-select>
+                    <el-input disabled v-else v-model="isStamp[fileMessageForm.corporateStamp]"></el-input>
+                    <!-- <div v-else>{{isStamp[fileMessageForm.corporateStamp]}}</div> -->
+                  </el-form-item>
+                </el-form>
+              </div>
             </div>
-            <div class="title">补充描述</div>
-            <div class="result">
-              <el-row class="item" v-for="(item,index) in itemResult" :key="index" :gutter="10">
-                <el-col :span="10" class="item_title col-6">{{item}}</el-col>
-                <el-col :span="14" class="item_num col-18"></el-col>
-              </el-row>
+            <div class="container-bottom">
+              <div class="title">存在问题</div>
+              <div class="result">
+                <el-form label-position="right" label-width="40%" :model="fileMessageForm">
+                  <el-form-item label="问题分类:" @click.native="filedFocus('是否法人签章')">
+                    <el-select v-if="!isFiledFormEdit"  v-model="fileMessageForm.problemType" placeholder="">
+                      <el-option v-for="(item, index) in problemList" :key="index" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                    <el-input disabled v-else v-model="problemMappingFun(fileMessageForm.problemType)[0].name"></el-input>
+                  </el-form-item>
+                </el-form>
+              </div>
             </div>
             <div class="btn-group">
               <el-button class="cancel-btn" @click="previous">返回</el-button>
-              <el-button v-if="!isSaveBtn" class="modify-btn" @click="modifyFile">修改</el-button>
+              <el-button v-if="isFiledFormEdit" class="modify-btn" @click="modifyFile">修改</el-button>
               <el-button v-else class="modify-btn" @click="saveFile">保存</el-button>
             </div>
           </div>
-          <div class="save-btn"></div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import Viewer from "viewerjs";
 import BreadCrumb from "@/components/common/BreadCrumb";
+import {getFileMessage, modifyFileMessage} from '@/rest/letterOfAuthorizationElecApi';
+import {dateFormat} from '@/helpers/dateHelper';
+import ZoomImage from '@/components/common/ZoomImage';
+import {USERID, PROBLEM_LIST} from '@/global/global';
 
 export default {
   data() {
     return {
+      isFiledFormEdit: true,
+      paymentOrderId: null,
+      problemList: PROBLEM_LIST,
       tableData: [],
+      isStamp: ['否', '是'],
       imagesSrc: 
         "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
       ,
+      positionInfo: null,
+      rotateAngle: '',
+      singleImagePosition: null,
       textarea: "",
       isSaveBtn: false,
-      itemResult: [
-        "合同名称：",
-        "合同编号：",
-        "付款主题：",
-        "申请日期："
-      ],
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
-      currentTitle: "付款公司名称-合同编号-付款主题"
+      currentTitle: "付款公司名称-合同编号-付款主题",
+      fileMessageForm: {},
+      oldData: {},
+      fileId: ''
     };
   },
   methods: {
     previous() {
       this.$router.go(-1);
     },
+    problemMappingFun (target) {
+      return this.problemList.filter(item => item.id === target);
+    },
     modifyFile() {
-      this.isSaveBtn = true;
+      this.isFiledFormEdit = !this.isFiledFormEdit;
     },
     saveFile() {
-      this.isSaveBtn = false;
+      this.isFiledFormEdit = !this.isFiledFormEdit;
+      const params = {
+        file: {
+          fileId: this.fileMessageForm.id,
+          companySeal: this.fileMessageForm.companySeal,
+          personSeal: this.fileMessageForm.personSeal,
+          signTime: dateFormat(this.fileMessageForm.signTime),
+          corporateStamp: this.fileMessageForm.corporateStamp,
+          problemType: this.fileMessageForm.problemType,
+          elecOrFile: this.fileMessageForm.elecOrFile,
+          summaryId: this.fileMessageForm.summaryId,
+          problemDescription: "",
+          changed: ""
+        },
+        userId: USERID
+      };
+      if (this.oldData.companySeal === params.file.companySeal) {
+        params.file.changed = 0;
+      } else {
+        params.file.changed = 1;
+      }
+      modifyFileMessage(params).then(() => {
+        this.$message({
+          message: '修改成功',
+          type: 'success'
+        })
+      }, () => {
+        this.$message({
+          message: '修改失败',
+          type: 'failed'
+        })
+      })
+    },
+    getFileDetailData(){
+      const params = {
+        userId: USERID,
+        fileId: this.fileId
+      }
+      getFileMessage(params)
+      .then(res => {
+        this.fileMessageForm = res;
+        this.oldData = JSON.parse(JSON.stringify(res));
+      });
+    },
+    filedFocus(item) {
+      const location_info = this.positionInfo[item];
+      const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
+          'imgUrl': this.imagesSrc,
+          'x': location_info.left,
+          'y': location_info.top,
+          'width': location_info.width,
+          'height': location_info.height,
+          borderColor: 'red',
+        }] : [{
+          'x': location_info.left,
+          'y': location_info.top,
+          'width': location_info.width,
+          'height': location_info.height,
+          borderColor: 'red',
+        }]) : [];
+        let imageUrl = location.length ? location[0].imgUrl : '';
+        if (imageUrl && imageUrl != 'undefined') {
+          this.singleImagePosition  = location;
+        }
     }
   },
   mounted() {
-    const viewer = new Viewer(document.getElementById("image"), {
-      inline: true,
-      button: false, //右上角按钮
-      navbar: false, //底部缩略图
-      title: false, //当前图片标题
-      toolbar: false, //底部工具栏
-      tooltip: true, //显示缩放百分比
-      movable: true, //是否可以移动
-      zoomable: true, //是否可以缩放
-      rotatable: true, //是否可旋转
-      scalable: true, //是否可翻转
-      transition: true, //使用 CSS3 过度
-      fullscreen: false, //播放时是否全屏
-      keyboard: true, //是否支持键盘
-      viewed() {
-        viewer.zoomTo(1);
-      }
-    });
+    this.fileId=this.$route.query.fileId;
+    this.getFileDetailData();
   },
   components: {
-    BreadCrumb
+    BreadCrumb,
+    ZoomImage
   }
 };
 </script>
@@ -124,18 +204,20 @@ export default {
       display: flex;
       justify-content: center;
       .left {
-        width: 494px;
+        display: flex;
+        flex-direction: column;
+        width: 50%;
         height: 670px;
         border: 1px solid #ebebeb;
         padding: 20px 30px;
         .result {
-          width: 494px;
-          height: 633px;
+          flex: 1;
           margin-top: 10px;
+          padding-bottom: 20px;
           border: 1px solid #ebebeb;
           .result-img {
             width: 494px;
-            height: 633px;
+            height: 100%;
           }
           .img-src {
             display: none;
@@ -144,27 +226,77 @@ export default {
         }
       }
       .right {
+        width: 50%;
         margin-left: 20px;
-        width: 530px;
-        height: 780px;
         .container {
-          overflow: auto;
-          padding: 20px 30px;
-          width: 470px;
+          display: flex;
+          flex-direction: column;
           height: 670px;
+          padding: 20px 30px;
           background: #fafafa;
           border: 1px solid #ebebeb;
           .result {
             overflow: auto;
-            min-height: 216px;
-            padding-top: 30px;
-            padding-bottom: 20px;
+            // height: 500px;
+            padding: 20px 0;
             margin-top: 10px;
             border-top: 1px solid #ebebeb;
+            /deep/ {
+              .el-form {
+                margin-top: 6px;
+                padding:  0 20px;
+                .el-form-item {
+                  .el-form-item__label {
+                    line-height: 30px;
+                    font-size: 14px;
+                    color: #333333;
+                    font-weight: bold;
+                  }
+                  .el-form-item__content {
+                    line-height: 30px;
+                    .el-input {
+                      height: 30px;
+                      .el-input__inner {
+                        height: 30px;
+                      }
+                    &.is-disabled {
+                        .el-input__inner {
+                          border: none;
+                          color: #333333;
+                          background-color: #FAFAFA;
+                          cursor: default;
+                        }
+                      }
+                    }
+                    .el-date-editor {
+                      // width: 100%;
+                      .el-input__prefix {
+                        .el-input__icon {
+                          line-height: 30px;
+                        }
+                      }
+                      .el-input__suffix {
+                        display: none;
+                      }
+                      &.el-input {
+                        width: 100%;
+                      }
+                    }
+                    .el-select {
+                      .el-input--suffix {
+                        .el-input__suffix {
+                          .el-icon-arrow-up {
+                            line-height: 1;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
             .item {
               margin-bottom: 20px;
-              margin-left: 0 !important;
-              margin-right: 0 !important;
               .item_title {
                 display: flex;
                 justify-content: flex-end;
@@ -179,18 +311,13 @@ export default {
           }
           .btn-group {
             display: flex;
+            margin-top: auto;
             justify-content: flex-end;
-            padding-top: 25px;
-            height: 40px;
-            border-top: 1px solid #ebebeb;
+            padding: 30px 0px;
             .modify-btn {
               margin-left: 40px;
             }
           }
-        }
-        .save-btn {
-          margin-top: 30px;
-          margin-left: 70%;
         }
       }
     }
