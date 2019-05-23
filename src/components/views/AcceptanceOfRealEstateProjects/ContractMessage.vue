@@ -8,82 +8,82 @@
       <el-input v-else :disabled="isFiledFormEdit" v-model="paymentOrderTheme"></el-input>
     </div>
     <el-form label-position="right" label-width="120px" :model="filedResultForm">
-      <el-form-item label="发票类型:">
+      <el-form-item label="发票类型:" @click.native="filedFocus('发票类型')">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType" placeholder="">
           <el-option label="专票" value="专票"></el-option>
           <el-option label="普票" value="普票"></el-option>
         </el-select>
         <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType"></el-input>
       </el-form-item>
-      <el-form-item label="验真状态:">
+      <el-form-item label="验真状态:" @click.native="filedFocus('验真状态')">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.verification" placeholder="">
           <el-option v-for="(item, index) in this.verification" :key="index" :label="item" :value="index"></el-option>
         </el-select>
         <el-input v-else :disabled="isFiledFormEdit" v-model="this.verification[filedResultForm.verification]"></el-input>
       </el-form-item>
-      <el-form-item label="是否盖章:">
+      <el-form-item label="是否盖章:" @click.native="filedFocus('是否盖章')">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.stamped" placeholder="">
           <el-option v-for="(item, index) in this.stamped" :key="index" :label="item" :value="index"></el-option>
         </el-select>
         <el-input v-else :disabled="isFiledFormEdit" v-model="this.stamped[filedResultForm.stamped]"></el-input>
       </el-form-item>
-      <el-form-item label="发票号码:">
+      <el-form-item label="发票号码:" @click.native="filedFocus('发票号码')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceNo"></el-input>
       </el-form-item>
-      <el-form-item label="发票代码:">
+      <el-form-item label="发票代码:" @click.native="filedFocus('发票代码')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceCode"></el-input>
       </el-form-item>
-      <el-form-item label="开票日期:">
+      <el-form-item label="开票日期:" @click.native="filedFocus('开票日期')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceTime"></el-input>
       </el-form-item>
-      <el-form-item label="购买方:">
+      <el-form-item label="购买方:" @click.native="filedFocus('购买方')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.buyyerName"></el-input>
       </el-form-item>
-      <el-form-item label="购买方税号:">
+      <el-form-item label="购买方税号:" @click.native="filedFocus('购买方税号')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.buyyerIndentification"></el-input>
       </el-form-item>
-      <el-form-item label="销售方:">
+      <el-form-item label="销售方:" @click.native="filedFocus('销售方')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.salerName"></el-input>
       </el-form-item>
-      <el-form-item label="销售方税号:">
+      <el-form-item label="销售方税号:" @click.native="filedFocus('销售方税号')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.salerIndentification"></el-input>
       </el-form-item>
       <div class="goods-list" v-for="(item, index) in filedResultForm.estateInvoiceItems" :key="index">
-        <el-form-item label="货物或服务名称:">
+        <el-form-item label="货物或服务名称:" @click.native="filedFocus('货物或服务名称')">
           <el-input :disabled="isFiledFormEdit" v-model="item.itemName"></el-input>
         </el-form-item>
-        <el-form-item label="规格型号:">
+        <el-form-item label="规格型号:" @click.native="filedFocus('规格型号')">
           <el-input :disabled="isFiledFormEdit" v-model="item.spec"></el-input>
         </el-form-item>
-        <el-form-item label="单位:">
+        <el-form-item label="单位:" @click.native="filedFocus('单位')">
           <el-input :disabled="isFiledFormEdit" v-model="item.unit"></el-input>
         </el-form-item>
-        <el-form-item label="数量:">
+        <el-form-item label="数量:" @click.native="filedFocus('数量')">
           <el-input :disabled="isFiledFormEdit" v-model="item.counts"></el-input>
         </el-form-item>
-        <el-form-item label="单价:">
+        <el-form-item label="单价:" @click.native="filedFocus('单价')">
           <el-input :disabled="isFiledFormEdit" v-model="item.unitPrice"></el-input>
         </el-form-item>
-        <el-form-item label="金额:">
+        <el-form-item label="金额:" @click.native="filedFocus('金额')">
           <el-input :disabled="isFiledFormEdit" v-model="item.totalPrice"></el-input>
         </el-form-item>
-        <el-form-item label="税率:">
+        <el-form-item label="税率:" @click.native="filedFocus('税率')">
           <el-input :disabled="isFiledFormEdit" v-model="item.taxRate"></el-input>
         </el-form-item>
-        <el-form-item label="税额:">
+        <el-form-item label="税额:" @click.native="filedFocus('税额')">
           <el-input :disabled="isFiledFormEdit" v-model="item.taxPrice"></el-input>
         </el-form-item>
       </div>
-      <el-form-item label="价税合计:">
+      <el-form-item label="价税合计:" @click.native="filedFocus('价税合计')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.finalPriceUpcase"></el-input>
       </el-form-item>
-      <el-form-item label="累积已用金额:">
+      <el-form-item label="累积已用金额:" @click.native="filedFocus('累积已用金额')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.usedPrice"></el-input>
       </el-form-item>
-      <el-form-item label="本次使用金额:">
+      <el-form-item label="本次使用金额:" @click.native="filedFocus('本次使用金额')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.usePrice"></el-input>
       </el-form-item>
-      <el-form-item label="凭证联:">
+      <el-form-item label="凭证联:" @click.native="filedFocus('凭证联')">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.certification" placeholder="">
           <el-option label="发票联" value="0"></el-option>
           <el-option label="抵扣联" value="1"></el-option>
@@ -91,7 +91,7 @@
         </el-select>
         <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.certification"></el-input>
       </el-form-item>
-      <el-form-item label="备注信息:">
+      <el-form-item label="备注信息:" @click.native="filedFocus('备注信息')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.remarkInfo"></el-input>
       </el-form-item>
     </el-form>
@@ -111,6 +111,9 @@ import {dateFormat} from '@/helpers/dateHelper';
 export default {
   data() {
     return {
+      imagesSrc: 
+        "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
+      ,
       paymentOrderTheme: '',
       paymentRequestOrderId: 1,
       invoiceId: null,
@@ -124,7 +127,12 @@ export default {
       tableData: [],
       textarea: "",
       breadCrumbList: ["首页", "资产识别比对", "识别结果"],
-      currentTitle: "付款公司名称-合同编号-付款主题"
+      currentTitle: "付款公司名称-合同编号-付款主题",
+      propsData: {
+        isShowContractMsg: true,
+        singleFieldPosition: [],
+        singleRotateAngle: ''
+      }
     };
   },
   props: {
@@ -132,6 +140,12 @@ export default {
       type: Object
     },
     titleInfos: {
+      type: Array
+    },
+    index: {
+      type: Number
+    },
+    positionInfos: {
       type: Array
     }
   },
@@ -150,7 +164,8 @@ export default {
       this.currentPage = index + 1;
     },
     invoiceSupply() {
-      this.$emit('change', false);
+      this.propsData.isShowContractMsg = false;
+      this.$emit('change', this.propsData);
     },
     modifyInvoice() {
       const mapData = this.filedResultForm;
@@ -192,6 +207,28 @@ export default {
           type: 'failed'
         })
       })
+    },
+    filedFocus(item) {
+      const location_info = JSON.parse(this.positionInfos[this.index]).position_info[item];
+      const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
+        'imgUrl': this.imagesSrc,
+        'x': location_info.left,
+        'y': location_info.top,
+        'width': location_info.width,
+        'height': location_info.height,
+        borderColor: 'red',
+      }] : [{
+        'x': location_info.left,
+        'y': location_info.top,
+        'width': location_info.width,
+        'height': location_info.height,
+        borderColor: 'red',
+      }]) : [];
+      let imageUrl = location.length ? location[0].imgUrl : '';
+      if (imageUrl && imageUrl != 'undefined') {
+        this.propsData.singleImagePosition = location;
+        this.$emit('change', this.propsData);
+      }
     }
   },
   mounted() {

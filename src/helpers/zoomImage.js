@@ -1,7 +1,7 @@
 let init = false;
 
 export function loadEncicleImage() {
-  return new Promise((r, j) => {
+  return new Promise((r) => {
     if (init) {
       requestAnimationFrame(() => {
         r()
@@ -13,7 +13,7 @@ export function loadEncicleImage() {
       //tag.src = "/ocr/assets/libs1/app.js";
 
       //有图片旋转功能
-      tag.src = "@/assets/libs/app.js";
+      tag.src = "/assets/libs/app.js";
       //tag.src = "/ocr/assets/libs/app.js";
 
       //修改跨域版本
@@ -24,7 +24,7 @@ export function loadEncicleImage() {
       //tag.src = "/assets/libs3/app.js";
 
       tag.async = "async";
-      tag.onload = function () {
+      tag.onload = () => {
         document.body.removeChild(tag)
         tag = document.createElement("encircle-image");
         document.body.appendChild(tag);

@@ -8,16 +8,16 @@
     <div class="company-info-page_container">
       <div class="company-details">
         <div class="company-details_header">
-          <div class="title">XXXXXXX有限公司</div>
-          <div class="status">开业</div>
+          <div class="title">{{dataBusInfo.entname}}</div>
+          <div class="status">{{dataBusInfo.entstatus}}</div>
         </div>
         <div class="company-details_content">
           <el-row class="item" :gutter="10" v-for="(item,index) in companyInfoItems" :key="index">
             <el-col class="item-title" :span="6">
-              <div>{{item}}</div>
+              <div>{{item.value}}</div>
             </el-col>
             <el-col class="item_num" :span="18">
-              <div class="bg-purple"></div>
+              <div class="bg-purple">{{dataBusInfo[item.key]}}</div>
             </el-col>
           </el-row>
         </div>
@@ -26,34 +26,49 @@
         <div class="title">营业执照信息</div>
         <div class="content">
           <div class="content_item">
-            <div class="item_title">企业类型：</div>
-            <div class="item_content">dasdadasdasdasadasdads</div>
+            <div class="item_title">企业类型:</div>
+            <div class="item_content">{{dataBusInfo.enttype}}</div>
           </div>
           <div class="content_item">
-            <div class="item_title">企业类型：</div>
-            <div class="item_content"></div>
+            <div class="item_title">营业状态:</div>
+            <div class="item_content">{{dataBusInfo.entstatus}}</div>
           </div>
           <div class="content_item">
-            <div class="item_title">企业类型：</div>
-            <div class="item_content"></div>
+            <div class="item_title">注册号:</div>
+            <div class="item_content">{{dataBusInfo.regno}}</div>
           </div>
           <div class="content_item">
-            <div class="item_title">企业类型：</div>
-            <div class="item_content"></div>
+            <div class="item_title">注册资本:</div>
+            <div class="item_content">{{dataBusInfo.regcap}}</div>
+          </div>
+          <div class="content_item">
+            <div class="item_title">所属行业:</div>
+            <div class="item_content">{{dataBusInfo.industryconame}}</div>
+          </div>
+          <div class="content_item">
+            <div class="item_title">核准日期:</div>
+            <div class="item_content">{{dataBusInfo.apprdate}}</div>
+          </div>
+          <div class="content_item">
+            <div class="item_title">公司地址:</div>
+            <div class="item_content">{{dataBusInfo.dom}}</div>
+          </div>
+          <div class="content_item">
+            <div class="item_title">经营范围:</div>
+            <div class="item_content">{{dataBusInfo.zsopscope}}</div>
           </div>
         </div>
       </div>
       <div class="shareholders-info">
         <div class="title">股东及出资信息</div>
         <div class="content">
-          <el-table :data="tableData" style="width: 100%">
+          <el-table :data="dataBusInfo.estateCompanyShareholders" style="width: 100%">
             <el-table-column type="index" label="序号" width="50"></el-table-column>
-            <el-table-column prop="date" label="股东名称" width="180"></el-table-column>
-            <el-table-column prop="name" label="股东名称" width="180"></el-table-column>
-            <el-table-column prop="address" label="证照类型"></el-table-column>
-            <el-table-column prop="address" label="认缴份额"></el-table-column>
-            <el-table-column prop="address" label="实缴份额"></el-table-column>
-            <el-table-column prop="address" label="出资日期"></el-table-column>
+            <el-table-column prop="shaname" label="股东名称" width="180"></el-table-column>
+            <el-table-column prop="invtype" label="股东类型" width="180"></el-table-column>
+            <el-table-column prop="subconam" label="认缴份额(万元)"></el-table-column>
+            <el-table-column prop="funderatio" label="出资比例"></el-table-column>
+            <el-table-column prop="condate" label="出资日期"></el-table-column>
           </el-table>
         </div>
       </div>
@@ -65,15 +80,18 @@
 </template>
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
+import {getDatabusMsg} from "@/rest/letterOfAuthorizationElecApi";
+import {USERID} from "@/global/global";
 
 export default {
   data() {
     return {
+      companyName: '',
       companyInfoItems: [
-        "统一社会信用代码：",
-        "法定代表人：",
-        "登记机关：",
-        "成立日期："
+        {key: 'creditcode', value: '统一社会信用代码:'},
+        {key: 'frname', value: '法定代表人:'},
+        {key: 'regorg', value: '登记机关:'},
+        {key: 'esdate', value: '成立日期:'}
       ],
       currentTitle: "20190404批次-金茂",
       breadCrumbList: [
@@ -82,35 +100,28 @@ export default {
         "电子版批次详情",
         "识别详情"
       ],
-      reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        }
-      ]
+      dataBusInfo: {}
     };
   },
   methods: {
-      goBack(){
-          this.$router.go(-1);
-      }
+    goBack(){
+        this.$router.go(-1);
+    },
+    fetchDataBusData() {
+      const params = {
+        // companyName: this.companyName,
+        companyName: '恒大集团有限公司',
+        userId: USERID
+      };
+      getDatabusMsg(params)
+      .then(res => {
+        this.dataBusInfo = res.info;
+      })
+    }
+  },
+  mounted() {
+    this.companyName = this.$route.query.companyName;
+    this.fetchDataBusData();
   },
   components: {
     BreadCrumb
@@ -166,6 +177,7 @@ export default {
         display: flex;
         align-items: center;
         .title {
+          margin-right: 10px;
           font-family: PingFangSC-Semibold;
           font-size: 20px;
           color: #333333;
@@ -187,15 +199,23 @@ export default {
         background: #fafafa;
         .item {
           margin-bottom: 10px;
-          .item-title {
-            display: flex;
-            justify-content: flex-end;
-            font-size: 14px;
-            color: #666666;
-          }
-          .item-num {
-            font-size: 14px;
-            color: #333;
+          font-size: 14px;
+          color: #333333;
+          /deep/ {
+            .el-col {
+              &.item-title {
+                display: flex;
+                // margin-right: 30px;
+                justify-content: flex-end;
+                font-size: 14px;
+                color: #666666;
+              }
+              &.item_num {
+                padding-left: 20px !important;
+                font-size: 14px;
+                color: #333;
+              }
+            }
           }
         }
         .item:last-child {
@@ -219,12 +239,16 @@ export default {
         .content_item {
           display: flex;
           margin-right: 100px;
+          padding: 10px 0px;
         }
         .item_title {
+          flex-shrink: 0;
+          width: 60px;
+          margin-right: 20px;
           font-family: PingFangSC-Semibold;
           font-size: 14px;
           color: #666666;
-          margin-right: 30px;
+          text-align: right;
         }
         .item_content {
           font-family: PingFangSC-Regular;

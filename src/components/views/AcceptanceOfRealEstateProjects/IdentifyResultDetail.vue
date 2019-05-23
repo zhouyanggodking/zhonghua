@@ -91,7 +91,7 @@
           <!-- <div class="invoice-num red-text">发票数量：</div> -->
         </div>
         <div class="invoice-table_content">
-          <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
+          <el-table v-loading="isLoading" ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
             <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
             <el-table-column label="发票号码" prop="invoiceNo" width="120">
             </el-table-column>
@@ -190,6 +190,7 @@ const PAGESIZE = 10;
 export default {
   data() {
     return {
+      isLoading: false,
       checkBtnToggle: false,
       pageSize: PAGESIZE,
       currentPage: 1,
@@ -251,10 +252,12 @@ export default {
     rejectOpinionOperate(){
       this.data.state = 0;
       const params = {
-        id: this.data.id,
-        state: REJECT,
         userId: 1,
-        rejectReason: this.data.rejectReason
+        order: {
+          state: REJECT,
+          id: this.data.id,
+          rejectReason: this.data.rejectReason
+        }
       };
       checkPaymentRequestOrder(params).then(() => {
         this.$message({
@@ -272,10 +275,12 @@ export default {
     reviewPassOpearte(){
       this.data.state = 1;
       const params = {
-        id: this.data.id,
-        state: CHECK,
         userId: 1,
-        rejectReason: ''
+        order: {
+          state: CHECK,
+          id: this.data.id,
+          rejectReason: ''
+        }
       };
       checkPaymentRequestOrder(params).then(() => {
         this.$message({
@@ -307,11 +312,12 @@ export default {
       }
       resourceWrapper.getPaymentOrderDetail(params).then(res => {
           this.data=res.data.order;
-          this.tableData=res.data.estateInvoices;
           this.currentTitle = `${res.data.order.payer}-${res.data.order.contractNo}-${res.data.order.paymentTitle}`;
       })
     },
     getInvoicesTableData() {
+      this.isLoading = true;
+      this.tableData = [];
       const params = {
         pageSize: this.pageSize,
         pageNum: this.currentPage,
@@ -319,6 +325,7 @@ export default {
         userId: 1
       }
       resourceWrapper.getInvoicesByPaymentOrder(params).then(res => {
+        this.isLoading = false;
         this.tableData = res.data.data;
         this.totalCount = res.data.total;
       })
