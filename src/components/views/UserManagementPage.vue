@@ -18,7 +18,7 @@
         </div>
         <div class="search-box search-options">
           <el-button class="search-btn" @click="search">查询</el-button>
-          <div class="export-excel" @click="exportExcel">导出excel</div>
+          <div class="export-excel" @click="exportExcel">导出Excel</div>
         </div>
         <div class="search-box search-authority">
           <div class="text">权限</div>
@@ -101,7 +101,7 @@
 </template>
 <script>
 import Pagination from "@/components/common/Pagination";
-import {getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount} from "@/rest/userManagmentPageApi";
+import { getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount } from "@/rest/userManagmentPageApi";
 
 const PAGE_SIZE = 10;
 
@@ -120,38 +120,33 @@ export default {
       }
     };
     return {
-      loginUserId: localStorage.getItem('USERID'), // 登陆者id
-      //检索条件
+      loginUserId: localStorage.getItem('USERID'), 
       searchUsername: '',
       searchPhoneNum: '',
       searchAuthority: [],
       searchDepartment: '',
-      //权限多选框
       authorityList: [
-        {id: 1, authorityName: '地产承兑'},
-        {id: 2, authorityName: '其他承兑'},
-        {id: 3, authorityName: '贴现'},
-        {id: 4, authorityName: '征信查询'},
+        { id: 1, authorityName: '地产承兑' },
+        { id: 2, authorityName: '其他承兑' },
+        { id: 3, authorityName: '贴现' },
+        { id: 4, authorityName: '征信查询' },
       ],
-      //部门下拉框
       departmentList: [
-        {id: '', departmentName: '全部'},
-        {id: 1, departmentName: '开发部'},
-        {id: 2, departmentName: '测试部'},
-        {id: 3, departmentName: '销售部'}
+        { id: '', departmentName: '全部' },
+        { id: 1, departmentName: '开发部' },
+        { id: 2, departmentName: '测试部' },
+        { id: 3, departmentName: '销售部' }
       ],
       isDialogVisible: false,
       confirmDialogVisiable: false,
       addButtonTitle: "确定",
       freezeButtonTitle: "冻结",
-      //要冻结的用户id
       freezeUserId: null,
       currentPage: 1,
       totalCount: 0,
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       tableData: [],
-      //对话框表单数据
       addUserform: {
         id: "",
         username: '',
@@ -179,17 +174,14 @@ export default {
     };
   },
   methods: {
-    //查询
     search() {
       this.fetchUserCount();
     },
-    //新增用户
     addNewUser() {
       this.isDialogVisible = true;
       this.dialogTitle = '新增用户';
       this.addButtonTitle = '新增';
     },
-    //变更用户
     updateAccount(index, row) {
       this.isDialogVisible = true;
       this.dialogTitle = '用户变更';
@@ -202,7 +194,6 @@ export default {
         department: row.deptId
       }
     },
-    //对话框: 确定按钮
     handleSubmitClick() {
       this.$refs.addUserform.validate((vaild) => {
         if (vaild) {
@@ -213,35 +204,35 @@ export default {
             deptId: this.addUserform.department,
             aclId: this.addUserform.authority
           }
-          if (this.dialogTitle === '用户变更'){
+          if (this.dialogTitle === '用户变更') {
             params.id = this.addUserform.id;
             updateUserAccount(params)
             .then((flag) => {
-              if(flag){
+              if (flag) {
                 this.$message({
                   message: '用户变更成功!',
                   type: 'success'
                 })
                 this.fetchUserCount();
                 this.clearAddUserform();
-              }else{
+              } else {
                 this.$message({
                   message: '手机号码已存在!',
                   type: 'error'
                 })
               }
             })
-          }else{
+          } else {
             addNewUserAccount(params)
             .then((res) => {
-              if(res){
+              if (res) {
                 this.$message({
                   message: '用户增加成功!',
                   type: 'success'
                 })
                 this.fetchUserCount();
                 this.clearAddUserform();
-              }else{
+              } else {
                 this.$message({
                   message: '手机号码已存在!',
                   type: 'error'
@@ -252,12 +243,11 @@ export default {
         }
       })
     },
-    //对话框：取消按钮
+    // 取消
     cancelEditFileds() {
       this.$refs['addUserform'].resetFields();
       this.clearAddUserform();
     },
-    //关闭并清空对话框中的表单
     clearAddUserform() {
       this.isDialogVisible = false;
       this.addUserform = {
@@ -267,13 +257,11 @@ export default {
         authority: []
       }
     },
-    //冻结用户
     freezeAccount(index, row) {
       this.confirmDialogVisiable = true;
       this.freezeUserId = row.id;
       this.freezeButtonTitle = '冻结';
     },
-    //解冻用户
     unfreezeAccount(index, row) {
       this.confirmDialogVisiable = true;
       this.freezeUserId = row.id;
@@ -284,28 +272,28 @@ export default {
         loginUserId: this.loginUserId,
         id: this.freezeUserId
       }
-      if(this.freezeButtonTitle == '冻结'){
-        params.status = 0; // 执行的操作，0 冻结
-      }else {
-        params.status = 1; // 执行的操作，1：解冻
+      if (this.freezeButtonTitle == '冻结') {
+        params.status = 0; // 冻结
+      } else {
+        params.status = 1; // 解冻
       }
       freezeUserAccount(params)
       .then(() => {
         this.$message({
-          message: '用户' + this.freezeButtonTitle +'成功!',
+          message: '用户' + this.freezeButtonTitle + '成功!',
           type: 'success'
         })
         this.fetchUserCount();
       })
       this.confirmDialogVisiable = false;
     },
-    //翻页
+    // 翻页
     onUserPageNumChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
       this.fetchUserCount();
     },
-    //获取用户列表
+    // 获取用户列表
     fetchUserCount() { 
       const params = {
         username: this.searchUsername, //姓名
@@ -317,31 +305,31 @@ export default {
       }
       getUserList(params)
       .then((res) => {
-        for(let i =0; i< res.data.length; i++){
-          var authorityIdTemp = new Array()
-          var authorityNameTemp = new Array()
-          for(let j =0; j< res.data[i].sysOcrAcls.length; j++){
-            authorityIdTemp.push(res.data[i].sysOcrAcls[j].id);
-            authorityNameTemp.push(res.data[i].sysOcrAcls[j].aclName);
-          }
-          res.data[i].authorityId = authorityIdTemp;
-          res.data[i].authorityName  =  authorityNameTemp.join('，');
-        }
+        res.data.forEach((data) => {
+          let authorityIdTemp = new Array()
+          let authorityNameTemp = new Array()
+           data.sysOcrAcls.forEach((deptdata) => {
+            authorityIdTemp.push(deptdata.id);
+            authorityNameTemp.push(deptdata.aclName);
+           })
+          data.authorityId = authorityIdTemp;
+          data.authorityName  =  authorityNameTemp.join('，');
+        })
         this.tableData = res.data; 
         this.totalCount = res.total;
       })
     },
-    //导出excel
+    // 导出excel
     exportExcel() {
       const params = {
         username: this.searchUsername, //姓名
         telephone: this.searchPhoneNum, //手机号
         deptId: this.searchDepartment, //部门
         aclId: this.searchAuthority, //权限
-        loginUserId: this.loginUserId,
-        fileName: ''
+        titles: '表头',
+        name: '名字'
       }
-      window.open(`${global_}/?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}`,'_parent')
+      window.open(`http://10.17.20.121:8080/sys/ocr/getUserExcel?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}`,'_parent')
     }
   },
   mounted() {

@@ -1,22 +1,26 @@
 import axios from 'axios';
 import Qs from 'qs';
+axios.defaults.withCredentials = true;
 
 //获取手机验证码
 export const getPhoneVerifyCode = (params)=> {
-  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/messageVerification?telephone=${params.telephone}`)
+  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/sendMessageVerification?telephone=${params.telephone}`)
   .then(res => {
-    return res.data;
+    var errorFlag = false;
+    if (res.data.message == '该用户不存在！') {
+      errorFlag = true;
+    }
+    return errorFlag;
   }, (err) => {
     return Promise.reject(err)
   })
 }
-//验证手机验证码、判断手机号是否存在
-export const verifyTelephoneAndCode = (params)=> {
-  //return axios.post('http://10.17.20.121:8080/sys/ocr/user/forgetPassword', params)
-  return axios.get(`?phonecode=${params.phonecode}&telephone=${params.telephone}`)
+//验证手机验证码
+export const verifyTelephoneCode = (params)=> {
+  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/checkMessageVerification?messageCode=${params.messageCode}&telephone=${params.telephone}`)
   .then(res => {
     var flag = false;
-    if(res.data.status == '200'){
+    if(res.data.status == '200' && res.data.message == 'success'){
       flag = true;
     }
     return flag;

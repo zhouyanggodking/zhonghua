@@ -85,7 +85,7 @@
 <script>
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { clearInterval } from 'timers';
-import { getPhoneVerifyCode, verifyTelephoneAndCode, resetPassword} from "@/rest/userManagmentPageApi";
+import { getPhoneVerifyCode, verifyTelephoneCode, resetPassword } from "@/rest/userManagmentPageApi";
 
 export default {
   data() {
@@ -97,6 +97,7 @@ export default {
         if (!value.match(phoneReg)) {
           callback(new Error('请输入正确手机号码'));
         } else {
+          this.checkTelephone = true; // 手机号码验证成功
           callback();
         }
       }
@@ -120,11 +121,12 @@ export default {
       }
     };
     return {
-      phoneVerifyCode: '1111',
       isErrorDialogVisible: false,
       activeTag: 'signinTag',
       count: 0,
       timer: null,
+      // 单独验证电话号
+      checkTelephone: false,
       // 验证信息
       signinForm: {
         telephone: '',
@@ -183,17 +185,17 @@ export default {
     },
     handleSigninClick() {
       this.$refs.resetPwdForm.validate((valid) => {
-        if(valid) {
+        if (valid) {
           const params = {
             telephone: this.signinForm.telephone,
             newPassword: this.resetPwdForm.password
           }
           resetPassword(params)
           .then((res) => {
-            if(res){
+            if (res) {
               this.$refs.restPwdContainer.setActiveItem('successTag');
               this.activeTag = 'successTag';
-            }else{
+            } else {
               this.$message({
                 message: '账号不存在!',
                 type: 'error'
@@ -203,37 +205,26 @@ export default {
         }
       })
     },
+    
+    //验证手机验证码是否正确
     handleNextStepClick() {
       this.$refs.signinForm.validate((valid) => {
-        if(valid) {
-          if(this.signinForm.phoneIentifyCode != this.phoneVerifyCode) {
-            this.isErrorDialogVisible = true;
-          }else{
-            this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
-            this.activeTag = 'resetPwdTag';
+        if (valid) {
+          const params = {
+            messageCode: this.signinForm.phoneIentifyCode,
+            telephone: this.signinForm.telephone
           }
-          //验证手机验证码是否正确，手机号是否存在
-          // const params = {
-          //   code: this.signinForm.phoneIentifyCode,
-          //   telephone: this.signinForm.telephone
-          // }
-          // verifyTelephoneAndCode(params)
-          // .then((res) => {
-          //   if(res == '0'){
-          //     //手机验证码不正确
-          //     this.isErrorDialogVisible = true;
-          //   }else if(res == '1'){
-          //     //账号不存在
-          //     this.$message({
-          //       message: '账号不存在!',
-          //       type: 'error'
-          //     })
-          //   }else{
-          //     //正常下一步
-          //     this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
-          //     this.activeTag = 'resetPwdTag';
-          //   }
-          //})
+          verifyTelephoneCode(params)
+          .then((flag) => {
+            if (flag) {
+              //正常下一步
+              this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
+              this.activeTag = 'resetPwdTag';
+            } else {
+              //手机验证码不正确
+              this.isErrorDialogVisible = true;
+            }
+          })
         }
       })
     },
@@ -250,21 +241,31 @@ export default {
         }, 1000);
       }
     },
+    // 获取手机验证码
     getPhoneIdentifyCode() {
-      this.interval();
-      //获取手机验证码
-      const params = {
-        telephone: this.signinForm.telephone
+      if (this.checkTelephone) {
+        const params = {
+          telephone: this.signinForm.telephone
+        }
+        getPhoneVerifyCode(params)
+        .then((errorFlag) => {
+          if (errorFlag) {
+            this.$message({
+              message: '该用户不存在!',
+              type: 'error'
+            })
+          } else {
+            this.interval(); //倒计时
+          }
+        })
       }
-      getPhoneVerifyCode(params)
-      .than((res) => {
-        this.phoneVerifyCode = res.data.code;
-        return;
-      })
     },
     toLoginPage() {
       this.$router.push('/login');
     }
+  },
+  mounted() {
+    this.refreshCode();
   },
   components: {
     IdentifyCode

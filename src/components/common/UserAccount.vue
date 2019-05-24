@@ -28,8 +28,8 @@
 </template>
 
 <script>
-import {logout} from '@/rest/authQuery';
-import {changePassword} from "@/rest/userManagmentPageApi";
+import { logout } from '@/rest/authQuery';
+import { changePassword } from "@/rest/userManagmentPageApi";
 
 export default {
   name: 'userAccount',
@@ -83,22 +83,21 @@ export default {
     },
     handleSubmitClick() {
       this.$refs.resetPwdForm.validate((valid) => {
-        if(valid) {
+        if (valid) {
           const params = {
             password: this.resetPwdForm.oldPassword,
             newpassword: this.resetPwdForm.newPassword,
             telephone: localStorage.getItem("TELEPHONE")
           }
-          //修改密码
           changePassword(params)
             .then((res) => {
-              if(res) {
+              if (res) {
                 this.$message({
                   message: '密码修改成功!',
                   type: 'success'
                 })
                 this.clearResetPwdForm();
-              }else {
+              } else {
                 this.$message({
                   message: '原始密码错误，请重新输入!',
                   type: 'error'
@@ -108,12 +107,11 @@ export default {
         }
       })
     },
-    //对话框：取消按钮
+    // 取消
     cancelEditFileds() {
       this.$refs['resetPwdForm'].resetFields();
       this.clearResetPwdForm();
     },
-    //关闭并清空对话框中的表单
     clearResetPwdForm() {
       this.dialogFormVisible = false;
       this.resetPwdForm = {
