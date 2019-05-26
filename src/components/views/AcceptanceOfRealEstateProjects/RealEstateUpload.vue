@@ -2,7 +2,7 @@
   <div class="real-estate-upload">
     <bread-crumb :data="breadCrumbList" currentTitle="文件上传"></bread-crumb>
     <div class="upload-main">
-      <file-upload class="file-upload-box"></file-upload>
+      <file-upload fileType="1" class="file-upload-box"></file-upload>
       <div class="filed-edit">
         <div class="title">提取字段编辑</div>
         <div class="add-filed-btn">
@@ -161,6 +161,7 @@ export default {
         status: 1
       },
       filedList: [],
+      copyFiledList: [],
       rules: {
         name: [
           { required: true, message: '请输入标准字段(必填)', trigger: 'blur' }
@@ -200,7 +201,7 @@ export default {
       }
     },
     cancleEditFileds() {
-      this.fetchTemplateFileds();
+      this.filedList = this.copyFiledList;
     },
     handleSubmitClick(btnType) {
       this.$refs.addFiledform.validate((valid) => {
@@ -250,6 +251,7 @@ export default {
       getOcrExtractTemplateFields(1, 1, '')
       .then((res) => {
         this.filedList = res.data;
+        this.copyFiledList = JSON.parse(JSON.stringify(res.data));
         this.isLoading = false;
       });
     },

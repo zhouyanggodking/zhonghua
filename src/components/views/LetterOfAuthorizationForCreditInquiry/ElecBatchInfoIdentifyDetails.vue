@@ -21,13 +21,14 @@
               </el-col>
             </el-row>
           </div>
+          <div class="content no-data" v-else>暂无数据</div>
         </div>
         <div class="elect-batch-row_item">
           <div class="elect-batch-row_item_header">
             <div class="title">电子文件识别结果</div>
             <div class="look-origin" @click="lookOriginElect">查看原件</div>
           </div>
-          <div class="content">
+          <div class="content" v-if="elecFileForm">
             <el-form label-position="right" label-width="40%" :model="elecFileForm">
               <el-form-item label="公司章:">
                 <el-input disabled v-model="elecFileForm.companySeal"></el-input>
@@ -36,20 +37,20 @@
                 <el-input disabled v-model="elecFileForm.personSeal"></el-input>
               </el-form-item>
               <el-form-item label="签署时间:">
-                <el-date-picker
-                  v-if="!isEleFiledFormEdit"
-                  v-model="elecFileForm.signTime"
-                  type="date"
-                  value-format="yyyy-MM-dd"
-                  placeholder="选择日期">
-                </el-date-picker>
-                <el-input disabled v-else v-model="elecFileForm.signTime"></el-input>
+                <el-input disabled v-model="elecFileForm.signTime"></el-input>
               </el-form-item>
               <el-form-item label="是否法人签章:">
                 <el-input disabled v-model="elecFileForm.corporateStamp"></el-input>
               </el-form-item>
               <el-form-item label="授权有效期:">
-                <el-input disabled v-model="elecFileForm.authorizationValidDate"></el-input>
+                <el-date-picker
+                  v-if="!isEleFiledFormEdit"
+                  v-model="elecFileForm.authorizationValidDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
+                <el-input disabled v-else v-model="elecFileForm.authorizationValidDate"></el-input>
               </el-form-item>
             </el-form>
             <div class="btn-group">
@@ -57,6 +58,7 @@
               <el-button v-else class="modify-btn" @click="eleSaveFile">保存</el-button>
             </div>
           </div>
+          <div class="content no-data" v-else>暂无数据</div>
         </div>
       </div>
       <div class="elect-batch-row">
@@ -65,7 +67,7 @@
             <div class="title">智罗盘信息</div>
             <div class="look-origin" @click="lookCompanyInfo">查看企业详细信息</div>
           </div>
-          <div class="content">
+          <div class="content" v-if="dataBusInfoItems">
             <el-row class="item" :gutter="10" v-for="(item,index) in dataBusInfoItems" :key="index">
               <el-col class="item-title" :span="10">
                 <div>{{item.value}}</div>
@@ -75,16 +77,24 @@
               </el-col>
             </el-row>
           </div>
+          <div class="content no-data" v-else>暂无数据</div>
         </div>
         <div class="elect-batch-row_item">
           <div class="elect-batch-row_item_header">
             <div class="title">纸质文件信息匹配</div>
             <div class="look-origin" @click="lookOriginPaper">查看原件</div>
           </div>
-          <div class="content">
+          <div class="content" v-if="paperFileForm">
              <el-form label-position="right" label-width="40%" :model="paperFileForm">
               <el-form-item label="文件提交时间:">
-                <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.signTime"></el-input>
+                <el-date-picker
+                  v-if="!isPaperFiledFormEdit"
+                  v-model="paperFileForm.submitDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
+                <el-input disabled v-else v-model="paperFileForm.submitDate"></el-input>
               </el-form-item>
               <el-form-item label="档案编号:">
                 <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.fileNo"></el-input>
@@ -95,6 +105,7 @@
               <el-button v-else class="modify-btn" @click="paperSaveFile">保存</el-button>
             </div>
           </div>
+          <div class="content no-data" v-else>暂无数据</div>
         </div>
       </div>
       <div class="review-opinion">
@@ -154,7 +165,7 @@
 </template>
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
-import {getEstateAuthorizationExcelInfo, checkAuthRecord, modifyEleFileDate} from "@/rest/letterOfAuthorizationElecApi";
+import {getEstateAuthorizationExcelInfo, checkAuthRecord, modifyEleFileDate, modifyPaperFile} from "@/rest/letterOfAuthorizationElecApi";
 import {USERID, PROBLEM_LIST} from "@/global/global";
 import { dateFormat } from '@/helpers/dateHelper';
 const ELEORFILE = 0;
@@ -276,6 +287,9 @@ export default {
     // 电子识别
     eleModifyFile() {
       this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
+    },
+    eleSaveFile() {
+      this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
       const params = {
         file: {
           fileId: this.elecFileForm.id,
@@ -295,37 +309,31 @@ export default {
         })
       })
     },
-    eleSaveFile() {
-      this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
-      // resourceWrapper.modifyPaymentOrder(params).then(() => {
-      //   this.$message({
-      //     message: '修改成功',
-      //     type: 'success'
-      //   })
-      // }, () => {
-      //   this.$message({
-      //     message: '修改失败',
-      //     type: 'failed'
-      //   })
-      // })
-    },
     // 纸质信息匹配
     paperModifyFile() {
       this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
     },
     paperSaveFile() {
       this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
-      // resourceWrapper.modifyPaymentOrder(params).then(() => {
-      //   this.$message({
-      //     message: '修改成功',
-      //     type: 'success'
-      //   })
-      // }, () => {
-      //   this.$message({
-      //     message: '修改失败',
-      //     type: 'failed'
-      //   })
-      // })
+      const params = {
+        file: {
+          fileId: this.paperFileForm.id,
+          fileNo: this.paperFileForm.fileNo,
+          submitDate: dateFormat(this.paperFileForm.submitDate)
+        },
+        userId: USERID
+      }
+      modifyPaperFile(params).then(() => {
+        this.$message({
+          message: '修改成功',
+          type: 'success'
+        })
+      }, () => {
+        this.$message({
+          message: '修改失败',
+          type: 'failed'
+        })
+      })
     },
     lookOriginElect() {
       this.$router.push({ name: "look-origin", query: {fileId: this.elecFileForm.id} });
@@ -432,6 +440,12 @@ export default {
         }
         .content {
           padding: 30px;
+          &.no-data {
+            font-size: 24px;
+            color: #333333;
+            font-weight: bold;
+            text-align: center;
+          }
           /deep/ {
             .el-form {
               padding:  0 20px;

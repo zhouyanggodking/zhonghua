@@ -86,14 +86,35 @@
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
           <el-table-column prop="depart" label="部门" show-overflow-tooltip></el-table-column>
           <el-table-column prop="companyName" label="公司名称" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="name" label="公章" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="companySealMatch" label="公章是否一致" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="companySeal" label="公章" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="companySealMatch" label="公章是否一致" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.companySealMatch === 0">否</span>
+              <span v-else-if="scope.row.companySealMatch === 1">是</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="personSeal" label="人名章" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="corporateStamp" label="是否法人" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="corporateStamp" label="是否法人" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.corporateStamp === 0">否</span>
+              <span v-else-if="scope.row.corporateStamp === 1">是</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="submitDate" label="授权提交时间" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="签署时间" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="authorizationValidDateLegal" label="授权有效期" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="auditState" label="审核状态" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="signTime" label="签署时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="authorizationValidDateLegal" label="授权有效期" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.authorizationValidDateLegal === 0">大于等于申请日期</span>
+              <span v-else-if="scope.row.authorizationValidDateLegal === 1">小于申请日期</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="auditState" label="审核状态" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.auditState === 0">驳回</span>
+              <span v-else-if="scope.row.auditState === 1" style="color: #417505;">已审核</span>
+              <span v-else-if="scope.row.auditState === 2" style="color: #F5A623;">未审核</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="fileNo" label="档案编号" show-overflow-tooltip></el-table-column>
           <el-table-column prop="fileId" label="提供纸质授权书" show-overflow-tooltip>
             <!-- //审核通过为是 -->
@@ -124,15 +145,15 @@
         <div class="search-condition_input">
           <div class="search-condition_input_item">
             <div class="text">公司章</div>
-            <el-input v-model="unMatchedTableData.companySeal" placeholder="请输入内容"></el-input>
+            <el-input v-model="unMatchedSearchCondition.companySeal" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">人名章</div>
-            <el-input v-model="unMatchedTableData.personSeal" placeholder="请输入内容"></el-input>
+            <el-input v-model="unMatchedSearchCondition.personSeal" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">签署时间</div>
-            <date-range @change="onDateRangeChange"></date-range>
+            <date-range @change="onSigninDateRangeChange"></date-range>
           </div>
           <!-- 上传时间 -->
           <!-- <div class="search-condition_input_item">
@@ -141,7 +162,7 @@
           </div> -->
           <div class="search-condition_input_item second">
             <el-button class="search-btn" @click="unMatchedSearch">查询</el-button>
-            <div class="export-excel" @click="exportExcel">导出Excel</div>
+            <div class="export-excel" @click="exportUnmatchedExcel">导出Excel</div>
           </div>
         </div>
       </div>
@@ -151,17 +172,12 @@
         <el-table-column type="index" label="序号" width="50"></el-table-column>
         <el-table-column prop="companySeal" label="公司章"></el-table-column>
         <el-table-column prop="personSeal" label="人名章"></el-table-column>
-        <el-table-column prop="signStartTime"  label="签署时间"></el-table-column>
+        <el-table-column prop="signTime"  label="签署时间"></el-table-column>
         <!-- <el-table-column prop="address" label="上传时间"></el-table-column> -->
         <el-table-column label="操作">
             <template slot-scope="scope">
-              <!-- <el-button
-                class="table-btn"
-                size="mini"
-                @click="lookOrigin(scope.$index, scope.row)"
-              >详情</el-button> -->
-              <span class="detail-button" @click="lookOrigin(scope.$index, scope.row)">
-                详情
+              <span class="detail-button" @click="lookOrigin(scope.row)">
+                查看原件
               </span>
             </template>
           </el-table-column>
@@ -266,9 +282,7 @@ export default {
         signEndTime: '',
         summaryId: '',
         elecOrFile: ELE_FILE,
-        userId: USERID,
-        pageNum: '',
-        pageSize: ''
+        userId: USERID
       },
       rejectObj: {
         fileId: '',
@@ -318,6 +332,10 @@ export default {
     onDateRangeChange(res) {
       this.searchCondition.submitStartTime = res.startTime;
       this.searchCondition.submitEndTime = res.endTime;
+    },
+    onSigninDateRangeChange(res) {
+      this.unMatchedSearchCondition.signStartTime = res.startTime || '';
+      this.unMatchedSearchCondition.signEndTime = res.endTime || '';
     },
     goBack() {},
     search() {
@@ -369,8 +387,9 @@ export default {
       this.activedIndex = index;
     },
     //未授权 查看原件
-    lookOrigin(){
-      this.$router.push({ name: "look-origin" });
+    lookOrigin(row){
+      // this.$router.push({ name: "look-origin" });
+      this.$router.push({ name: "look-origin", query: {fileId: row.id} });
     },
     // 批量审核
     batchReviewPass() {
@@ -444,6 +463,12 @@ export default {
       params.pageSize = this.pageSize;
       window.open(`${global_}/auth/estateAuthorizationExcelController/exportExcelRecords${formatQuery(params)}`,'_parent');
     },
+    // 导出为匹配详情
+    exportUnmatchedExcel() {
+      const params = this.unMatchedSearchCondition;
+      window.open(`${global_}/auth/estateAuthorizationFileController/exportUnmatchedFilesToExcel
+${formatQuery(params)}`,'_parent');
+    },
     tableItemReview() {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否审核通过";
@@ -493,7 +518,7 @@ export default {
       unMatchedElecDetailList(this.unMatchedSearchCondition)
       .then(res => {
         this.unMatchedTableData = res.data;
-        this.totalCount = res.total;
+        this.unMatchedtotalCount = res.total;
       });
     }
   },

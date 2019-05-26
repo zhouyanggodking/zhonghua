@@ -68,7 +68,11 @@
                     <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.personSeal"></el-input>
                   </el-form-item>
                   <el-form-item label="是否法人签章:">
-                    <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.corporateStamp"></el-input>
+                    <el-select v-if="!isPaperFiledFormEdit"  v-model="paperFileForm.corporateStamp" placeholder="">
+                      <el-option v-for="(item, index) in isStamp" :key="index" :label="item" :value="index"></el-option>
+                    </el-select>
+                    <el-input disabled v-else v-model="isStamp[paperFileForm.corporateStamp]"></el-input>
+                    <!-- <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.corporateStamp"></el-input> -->
                   </el-form-item>
                 </div>
               </div>
@@ -148,6 +152,7 @@ const REJECT = 0;
 export default {
   data() {
     return {
+      isStamp: ['否', '是'],
       isPaperFiledFormEdit: true,
       questionClassificationList: PROBLEM_LIST,
       questionDescrible: "",
@@ -428,6 +433,59 @@ export default {
       .paper-result {
         width: 100%;
         .content {
+          /deep/ {
+            .el-form {
+              padding:  0 20px;
+              .el-form-item {
+                .el-form-item__label {
+                  line-height: 30px;
+                  font-size: 14px;
+                  color: #666666;
+                  font-weight: bold;
+                }
+                .el-form-item__content {
+                  line-height: 30px;
+                  .el-input {
+                    height: 30px;
+                    .el-input__inner {
+                      height: 30px;
+                    }
+                  &.is-disabled {
+                      .el-input__inner {
+                        border: none;
+                        color: #333333;
+                        background-color: #ffffff;
+                        cursor: default;
+                      }
+                    }
+                  }
+                  .el-select {
+                    width: 100%;
+                    .el-input--suffix {
+                      .el-input__suffix {
+                        .el-icon-arrow-up {
+                          line-height: 1;
+                        }
+                      }
+                    }
+                  }
+                  .el-date-editor {
+                    .el-input__prefix {
+                      .el-input__icon {
+                        line-height: 30px;
+                      }
+                    }
+                    .el-input__suffix {
+                      display: none;
+                    }
+                    &.el-input {
+                      width: 100%;
+                    }
+                  }
+                }
+              }
+            }
+          }
           .item-result {
               margin-bottom: 20px;
             .item-title {
@@ -451,7 +509,6 @@ export default {
             width: 100%;
             display: flex;
             .part {
-              margin-left: -50px;
               width: 50%;
             }
           }
