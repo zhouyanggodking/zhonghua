@@ -92,9 +92,11 @@ export default {
     const phoneReg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
     const phoneMatch = (rule, value, callback) => {
       if (!value) {
+        this.checkTelephone = false;
         callback(new Error('请输入手机号码'));
       } else {
         if (!value.match(phoneReg)) {
+          this.checkTelephone = false;
           callback(new Error('请输入正确手机号码'));
         } else {
           this.checkTelephone = true; // 手机号码验证成功
@@ -183,6 +185,48 @@ export default {
         ];
       }
     },
+    // 获取手机验证码
+    getPhoneIdentifyCode() {
+      if (this.checkTelephone) {
+        const params = {
+          telephone: this.signinForm.telephone
+        }
+        getPhoneVerifyCode(params)
+        .then((errorFlag) => {
+          if (errorFlag) {
+            this.$message({
+              message: '该用户不存在!',
+              type: 'error'
+            })
+          } else {
+            this.interval(); //倒计时
+          }
+        })
+      }
+    },
+    //下一步
+    handleNextStepClick() {
+      this.$refs.signinForm.validate((valid) => {
+        if (valid) {
+          const params = {
+            messageCode: this.signinForm.phoneIentifyCode,
+            telephone: this.signinForm.telephone
+          }
+          verifyTelephoneCode(params)
+          .then((flag) => {
+            if (flag) {
+              //正常下一步
+              this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
+              this.activeTag = 'resetPwdTag';
+            } else {
+              //手机验证码不正确
+              this.isErrorDialogVisible = true;
+            }
+          })
+        }
+      })
+    },
+    //提交
     handleSigninClick() {
       this.$refs.resetPwdForm.validate((valid) => {
         if (valid) {
@@ -205,29 +249,6 @@ export default {
         }
       })
     },
-    
-    //验证手机验证码是否正确
-    handleNextStepClick() {
-      this.$refs.signinForm.validate((valid) => {
-        if (valid) {
-          const params = {
-            messageCode: this.signinForm.phoneIentifyCode,
-            telephone: this.signinForm.telephone
-          }
-          verifyTelephoneCode(params)
-          .then((flag) => {
-            if (flag) {
-              //正常下一步
-              this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
-              this.activeTag = 'resetPwdTag';
-            } else {
-              //手机验证码不正确
-              this.isErrorDialogVisible = true;
-            }
-          })
-        }
-      })
-    },
     interval() {
       this.count = 60;
       if (!this.timer) {
@@ -239,25 +260,6 @@ export default {
             this.timer = null;
           }
         }, 1000);
-      }
-    },
-    // 获取手机验证码
-    getPhoneIdentifyCode() {
-      if (this.checkTelephone) {
-        const params = {
-          telephone: this.signinForm.telephone
-        }
-        getPhoneVerifyCode(params)
-        .then((errorFlag) => {
-          if (errorFlag) {
-            this.$message({
-              message: '该用户不存在!',
-              type: 'error'
-            })
-          } else {
-            this.interval(); //倒计时
-          }
-        })
       }
     },
     toLoginPage() {
