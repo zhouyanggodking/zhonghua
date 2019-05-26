@@ -324,7 +324,6 @@ export default {
         }
       }
       .collapse {
-        height: 60px;
         padding: 20px 0;
         text-align: center;
         background: #FAFAFA;
