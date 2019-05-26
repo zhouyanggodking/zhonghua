@@ -39,11 +39,28 @@
           width="520px"
           center>
           <div class="icon"></div>
-          <div class="text">用户名或密码输入错误{{loginErrorCount}}次</div>
-          <div class="prompt-text">累计错误输入6次，本日将无法登录</div>
+          <div v-if="loginErrorCount < 6">
+            <div class="text">用户名或密码输入错误<span class="text-span">{{loginErrorCount}}</span>次</div>
+            <div class="prompt-text">累计错误输入6次，本日将无法登录</div>
+          </div>
+          <div v-if="loginErrorCount >=6">
+            <div class="prompt-text">该用户已锁定，今日无法登录</div>
+          </div>
           <span slot="footer" class="dialog-footer">
             <el-button class="cancle-btn" @click="isErrorDialogVisible = false">取 消</el-button>
             <el-button class="submit-btn" type="primary" @click="handleForgetPwdClick">忘记密码</el-button>
+          </span>
+        </el-dialog>
+        <el-dialog
+          :visible.sync="isMassageDialogVisible"
+          :show-close="false"
+          class="confirmDialog"
+          width="520px"
+          center>
+          <div class="icon"></div>
+          <div class="text">{{dialogMassage}}</div>
+          <span slot="footer" class="dialog-footer">
+            <el-button class="submit-btn" type="primary" @click="isMassageDialogVisible = false">确定</el-button>
           </span>
         </el-dialog>
       </div>
@@ -55,7 +72,7 @@
 import '../../../assets/iconfont/iconfont.css';
 import Footer from '@/components/common/Footer';
 import IdentifyCode from '@/components/common/IdentifyCode';
-import {login} from "@/rest/authQuery";
+import { login } from "@/rest/authQuery";
 
 export default {
   data() {
@@ -84,6 +101,8 @@ export default {
       isLoginDisabled: false,
       loginErrorCount: 0,
       isErrorDialogVisible: false,
+      isMassageDialogVisible: false,
+      dialogMassage: '',
       signinForm: {
         telephone: '',
         password: '',
@@ -124,27 +143,39 @@ export default {
     },
     handleLoginClick() {
       this.$refs.signinForm.validate((valid) => {
-        if(valid) {
+        if (valid) {
           const params = {
             telephone: this.signinForm.telephone,
             password: this.signinForm.password
           }
-          if(this.loginErrorCount < 6){
-            login(params)
-            .then((res) => {
-              if(res){
-                this.$router.push('/'); //页面跳转
-              }else{
-                this.loginErrorCount ++,
-                this.isErrorDialogVisible = true;
-              }
-            }, () => {
-              this.loginErrorCount ++,
-              this.isErrorDialogVisible = true;
-            })
-          }else{
-            this.isLoginDisabled = true;
-          }
+          login(params)
+          .then((res) => {
+            let type = res.type;
+            let data = res.data;
+            switch(type) {
+              case 'phoneError':
+                this.$message({
+                  message: '账号不存在!',
+                  type: 'error'
+                })
+                break;
+              case 'locked':
+                this.loginErrorCount = 6
+                this.isErrorDialogVisible = true; //账号或密码错误6次
+                break;
+              case 'numerror':
+                this.loginErrorCount = data.num;
+                this.isErrorDialogVisible = true; //账号或密码错误小于6次
+                break;
+              case 'freeze':
+                this.dialogMassage = "用户处于冻结状态，无法登录";
+                this.isMassageDialogVisible = true; //冻结状态无法登录
+                break;
+              case 'success':
+                this.$router.push('/'); //正常登录，页面跳转
+                break;
+            }
+          })
         }
       })
     },
@@ -157,8 +188,7 @@ export default {
     }
   },
   mounted() {
-    this.identifyCode = "";
-    this.initCode(this.identifyCodes, 4);
+    this.refreshCode();
   },
   components: {
     Footer,
@@ -280,6 +310,10 @@ export default {
         font-size: 16px;
         text-align: center;
         margin-top: 10px;
+      }
+      .text-span {
+        margin: 3px;
+        color: red !important;
       }
     }
   }

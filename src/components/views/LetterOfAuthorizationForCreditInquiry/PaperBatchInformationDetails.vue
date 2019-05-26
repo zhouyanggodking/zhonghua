@@ -10,40 +10,46 @@
         <div class="search-condition_input">
           <div class="search-condition_input_item">
             <div class="text">部门</div>
-            <el-input v-model="payTheme" placeholder="请输入内容"></el-input>
+            <el-select v-model="searchCondition.depart" placeholder="请选择">
+              <el-option v-for="(item, index) in departmentList" :key="index" :label="item.departmentName" :value="item.id"></el-option>
+            </el-select>
           </div>
           <div class="search-condition_input_item">
             <div class="text">公司名称</div>
-            <el-input v-model="contractNum" placeholder="请输入内容"></el-input>
+            <el-input v-model="searchCondition.companyName" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">授权提交时间</div>
-            <el-date-picker
-              v-model="applyDate"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
+            <date-range @change="onDateRangeChange"></date-range>
           </div>
           <div class="search-condition_input_item">
             <div class="text">公司名称一致</div>
-            <el-input v-model="collector" placeholder="请输入内容"></el-input>
+            <el-select v-model="searchCondition.companySealMatch" placeholder="请选择">
+              <el-option label="全部" value=""></el-option>
+              <el-option label="是" value="0"></el-option>
+              <el-option label="否" value="1"></el-option>
+            </el-select>
           </div>
           <div class="search-condition_input_item">
             <div class="text">是否法人</div>
-            <el-input v-model="collector" placeholder="请输入内容"></el-input>
+            <el-select v-model="searchCondition.corporateStamp" placeholder="请选择">
+              <el-option label="全部" value=""></el-option>
+              <el-option label="是" value="0"></el-option>
+              <el-option label="否" value="1"></el-option>
+            </el-select>
           </div>
           <div class="search-condition_input_item">
             <div class="text">授权有效期</div>
-            <el-select v-model="reviewStatus" placeholder="请选择">
-              <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+            <el-select v-model="searchCondition.authorizationValidDateLegal	" placeholder="请选择">
+              <el-option label="全部" value=""></el-option>
+              <el-option label="大于等于申请日期" value="0"></el-option>
+              <el-option label="小于申请日期" value="1"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item">
             <div class="text">审核状态</div>
-            <el-select v-model="reviewStatus" placeholder="请选择">
-              <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+            <el-select v-model="searchCondition.auditState" placeholder="请选择">
+              <el-option v-for="(item, index) in auditState" :key="index" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item second">
@@ -57,10 +63,10 @@
       <div class="identify-page-table_btn">
         <el-checkbox v-model="allChecked">全选</el-checkbox>
         <el-button class="btn" @click="tableDownload()">下载</el-button>
-        <!-- <el-button class="btn" @click="batchReview()">批量审核</el-button> -->
       </div>
       <div class="identify-page-table_content">
         <el-table
+          v-loading="isLoading"
           ref="multipleTable"
           :data="tableData"
           tooltip-effect="dark"
@@ -69,39 +75,45 @@
         >
           <el-table-column fixed type="selection" width="30"></el-table-column>
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column label="部门" width="120">
-            <template slot-scope="scope">{{ scope.row.date }}</template>
+          <el-table-column prop="depart" label="部门" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="companyName" label="公司名称" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="companySeal" label="公章" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="companySealMatch" label="公章是否一致" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="personSeal" label="人名章" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="corporateStamp" label="是否法人" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="submitDate" label="授权提交时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="signTime" label="签署时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="authorizationValidDateLegal" label="授权有效期" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="auditState" label="审核状态" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.auditState === 0">驳回</span>
+              <span v-else-if="scope.row.auditState === 1" style="color: #417505;">已审核</span>
+              <span v-else-if="scope.row.auditState === 2" style="color: #F5A623;">未审核</span>
+            </template>
           </el-table-column>
-          <el-table-column prop="name" label="公司名称" width="120"></el-table-column>
-          <el-table-column prop="address" label="公章" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="公章是否一致" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="人名章" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="是否法人" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="授权提交时间" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="签署时间" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="授权有效期" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="审核状态" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="档案编号" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="匹配电子授权书" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="fileNo" label="档案编号" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="elecFileId" label="提供电子授权书" show-overflow-tooltip>
+            <!-- //审核通过为是 -->
+          </el-table-column>
           <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
               <el-button
                 class="table-btn"
                 size="mini"
-                @click="tableItemDetails(scope.$index, scope.row)"
+                @click="tableItemDetails(scope.row)"
               >详情</el-button>
               <el-button
                 class="table-btn"
                 size="mini"
                 type="danger"
-                @click="tableItemRejected(scope.$index, scope.row)"
+                @click="tableItemRejected(scope.row)"
               >驳回</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="table-footer">
-        <Pagination></Pagination>
+        <Pagination :totalCount="totalCount" @change="onPageNumberChange"></Pagination>
       </div>
     </div>
     <el-dialog
@@ -114,7 +126,7 @@
       <div class="dialog-content">
         <div
           class="dialog-content_icon"
-          :class="{'review-icon':dialogHintOperate==='审核通过','reject-icon':dialogHintOperate==='驳回'}"
+          :class="{'reject-icon':dialogHintOperate==='驳回'}"
         ></div>
         <div class="dialog-content_text">{{dialogHintText}}</div>
       </div>
@@ -124,16 +136,6 @@
           v-if="dialogHintOperate==='驳回'"
           type="primary"
           @click="rejectOpinion"
-        >{{dialogHintOperate}}</el-button>
-        <el-button
-          v-if="dialogHintOperate==='审核通过'"
-          type="primary"
-          @click="reviewPass"
-        >{{dialogHintOperate}}</el-button>
-        <el-button
-          v-if="dialogHintOperate==='批量通过'"
-          type="primary"
-          @click="batchReviewPass"
         >{{dialogHintOperate}}</el-button>
       </div>
     </el-dialog>
@@ -145,31 +147,80 @@
       :before-close="handleClose"
     >
       <div class="reject-content">
-        <div class="label-content">驳回意见</div>
-        <el-input v-model="rejectContent" placeholder="请输入内容"></el-input>
+        <el-form ref="rejectForm" label-position="right" :rules="rejectRules" label-width="120px" :model="rejectForm">
+          <el-form-item label="问题分类:" prop="problemType">
+            <el-select v-model="rejectForm.problemType" placeholder="请选择">
+              <el-option
+                v-for="(item, index) in questionClassificationList"
+                :key="index"
+                :label="item.name"
+                :value="item.id"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="驳回意见:" prop="problemDescription">
+            <el-input v-model="rejectForm.problemDescription" auto-complete="off"></el-input>
+          </el-form-item>
+        </el-form>
       </div>
+      
       <div slot="footer" class="dialog-footer">
         <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">驳 回</el-button>
+        <el-button type="primary" @click="handleRejectClick">驳 回</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import {elecDetailList, checkAuthRecord} from "@/rest/letterOfAuthorizationElecApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
+import DateRange from "@/components/common/DateRange";
+import {formatQuery} from '@/helpers/formatGetParams';
+import {DEPARTMENT_LIST, USERID, CHECK_STATUS_LIST, global_, PROBLEM_LIST} from '@/global/global';
 
 const PAGE_SIZE = 10;
+const ELE_FILE = 1;
 
 export default {
   data() {
     return {
-      payTheme: "",
-      contractNum: "",
-      payer: "",
-      applyDate: "",
+      isLoading: false,
+      searchCondition: {
+        depart: '',
+        companyName: '',
+        submitStartTime: '',
+        submitEndTime: '',
+        companySealMatch: '',
+        corporateStamp: '',
+        authorizationValidDateLegal: '',
+        summaryId: '',
+        elecOrFile: ELE_FILE,
+        userId: USERID,
+        pageNum: '',
+        pageSize: ''
+      },
+      rejectObj: {
+        fileId: '',
+        id: ''
+      },
+      rejectForm: {
+        problemType: '',
+        problemDescription: ''
+      },
+      rejectRules: {
+        problemType: [
+          { required: true, message: '请选择问题类型', trigger: 'blur' },
+        ],
+        problemDescription: [
+          { required: true, message: '请输入驳回意见', trigger: 'blur' },
+        ]
+      },
+      questionClassificationList: PROBLEM_LIST,
+      auditState: CHECK_STATUS_LIST,
       activedIndex: 0,
       topBtnGroup: ["查询清单", "未匹配查询清单授权书"],
+      departmentList: DEPARTMENT_LIST,
       allChecked: false,
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
@@ -186,73 +237,93 @@ export default {
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
-      reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
-      tableData: [
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        }
-      ]
+      tableData: [],
+      summaryId: ''
     };
   },
   methods: {
+    onDateRangeChange(res) {
+      this.searchCondition.submitStartTime = res.startTime;
+      this.searchCondition.submitEndTime = res.endTime;
+    },
     goBack() {},
-    search() {},
-    tableDownload() {},
-    batchReview() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否批量通过";
-      this.dialogHintOperate = "批量通过";
+    search() {
+      this.fetchPaperDetailList();
     },
-    batchReviewPass() {},
-    tableItemDetails() {
-      this.$router.push({ name: "paper-batch-indentify-details", query: { id: 1 } });
+    onPageNumberChange(res) {
+      this.pageSize = res.pageSize;
+      this.currentPage = res.pageNum;
+      this.fetchPaperDetailList();
     },
-    exportExcel() {},
-    tableItemReview() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否审核通过";
-      this.dialogHintOperate = "审核通过";
+    tableDownload() {
+      if (this.multipleSelection.length) {
+        const params = {
+          ids: this.multipleSelection,
+          elecOrFile: ELE_FILE,
+          summaryId: this.summaryId,
+          userId: USERID
+        };
+        window.open(`${global_}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById${formatQuery(params)}`,'_parent');
+      } else {
+        this.$message({
+          message: '请勾选要下载的对象!',
+          type: 'warning'
+        })
+      }
     },
-    tableItemRejected() {
-      // this.dialogVisible = true;
+    // 详情按钮
+    tableItemDetails(row) {
+      this.$router.push({
+        name: "paper-batch-indentify-details",
+        query: { id: row.id, auditState: row.auditState }
+      });
+    },
+    // 驳回
+    handleRejectClick() {
+      const params = {
+        excel: {
+          id: this.rejectObj.id,
+          fileId: this.rejectObj.fileId,
+          rowkey: "",
+          auditState: 0,
+          problemType: this.rejectForm.problemType,
+          problemDescription: this.rejectForm.problemDescription,
+          elecOrFile: ELE_FILE
+        },
+        userId: USERID
+      };
+      this.$refs.rejectForm.validate(valid => {
+        if (valid) {
+          checkAuthRecord(params).then(() => {
+            this.$message({
+              message: '驳回完成',
+              type: 'success'
+            });
+            this.dialogVisible = false;
+            this.fetchPaperDetailList();
+          }, () => {
+            this.$message({
+              message: '驳回失败',
+              type: 'warning'
+            })
+          })
+        }
+      })
+    },
+    // 导出excel
+    exportExcel() {
+      const params = this.searchCondition;
+      params.pageNum = this.currentPage;
+      params.pageSize = this.pageSize;
+      window.open(`${global_}/auth/estateAuthorizationExcelController/exportExcelRecords${formatQuery(params)}`,'_parent');
+    },
+    tableItemRejected(row) {
+      //this.dialogVisible = true;
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否驳回";
       this.dialogHintOperate = "驳回";
-    },
-    reviewPass() {
-      this.isDialogVisible = false;
+      this.rejectObj.fileId = row.elecFileId;
+      this.rejectObj.id = row.id
     },
     rejectOpinion() {
       this.isDialogVisible = false;
@@ -262,18 +333,29 @@ export default {
       this.dialogVisible = false;
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val;
+      this.multipleSelection = val.map(item => item.id);
     },
-    handleSizeChange(pageSize) {
-      this.pageSize = pageSize;
-    },
-    handleCurrentChange(currPage) {
-      this.currentPage = currPage;
+    fetchPaperDetailList() {
+      this.isLoading = true;
+      this.searchCondition.pageSize = this.pageSize;
+      this.searchCondition.pageNum = this.currentPage;
+      this.searchCondition.summaryId = this.summaryId;
+      elecDetailList(this.searchCondition)
+      .then(res => {
+        this.tableData = res.data;
+        this.totalCount = res.total;
+        this.isLoading = false;
+      });
     }
+  },
+  mounted() {
+    this.summaryId = this.$route.query.id;
+    this.fetchPaperDetailList();
   },
   components: {
     BreadCrumb,
-    Pagination
+    Pagination,
+    DateRange
   }
 };
 </script>

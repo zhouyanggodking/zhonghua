@@ -47,10 +47,10 @@
         <el-carousel-item class="reset-pwd" name="resetPwdTag" :key="2">
           <el-form class="reset-pwd-form" ref="resetPwdForm" :rules="pwdrules" :model="resetPwdForm" label-width="80px">
             <el-form-item label="输入新密码" prop="password">
-              <el-input v-model="resetPwdForm.password"></el-input>
+              <el-input type="password" v-model="resetPwdForm.password"></el-input>
             </el-form-item>
             <el-form-item label="验证新密码" prop="identifyPassword">
-              <el-input v-model="resetPwdForm.identifyPassword"></el-input>
+              <el-input type="password" v-model="resetPwdForm.identifyPassword"></el-input>
             </el-form-item>
             <el-form-item class="sign-in-btn">
               <el-button @click="handleSigninClick">提交</el-button>
@@ -71,7 +71,10 @@
           width="520px"
           center>
           <div class="icon"></div>
-          <div class="text">验证码输入错误，请重新输入</div>
+          <div class="dialog-content">
+            <div class="text-alert">提示</div>
+            <div class="text-massage">手机验证码输入错误，请重新输入</div>
+          </div>
           <span slot="footer" class="dialog-footer">
             <el-button class="submit-btn"  type="primary" @click="isErrorDialogVisible = false">确定</el-button>
           </span>
@@ -82,7 +85,7 @@
 <script>
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { clearInterval } from 'timers';
-//import { getPhoneVerifyCode, resetPassword} from "@/rest/userManagmentPageApi";
+import { getPhoneVerifyCode, verifyTelephoneCode, resetPassword } from "@/rest/userManagmentPageApi";
 
 export default {
   data() {
@@ -94,6 +97,7 @@ export default {
         if (!value.match(phoneReg)) {
           callback(new Error('请输入正确手机号码'));
         } else {
+          this.checkTelephone = true; // 手机号码验证成功
           callback();
         }
       }
@@ -117,11 +121,12 @@ export default {
       }
     };
     return {
-      phoneVerifyCode: '1111',
       isErrorDialogVisible: false,
       activeTag: 'signinTag',
       count: 0,
       timer: null,
+      // 单独验证电话号
+      checkTelephone: false,
       // 验证信息
       signinForm: {
         telephone: '',
@@ -161,7 +166,7 @@ export default {
           { validator: passwordMatch, trigger: 'blur' }
         ]
       }
-    };
+    }; 
   },
   methods: {
     randomNum(min, max) {
@@ -180,28 +185,46 @@ export default {
     },
     handleSigninClick() {
       this.$refs.resetPwdForm.validate((valid) => {
-        if(valid) {
-          // const params = {
-          //   telephone: this.signinForm.telephone,
-          //   newPassword: this.resetPwdForm.password
-          // }
-          // resetPassword(params)
-          // .than((res) => {
-            this.$refs.restPwdContainer.setActiveItem('successTag');
-            this.activeTag = 'successTag';
-          // })
+        if (valid) {
+          const params = {
+            telephone: this.signinForm.telephone,
+            newPassword: this.resetPwdForm.password
+          }
+          resetPassword(params)
+          .then((res) => {
+            if (res) {
+              this.$refs.restPwdContainer.setActiveItem('successTag');
+              this.activeTag = 'successTag';
+            } else {
+              this.$message({
+                message: '账号不存在!',
+                type: 'error'
+              })
+            }
+          })
         }
       })
     },
+    
+    //验证手机验证码是否正确
     handleNextStepClick() {
       this.$refs.signinForm.validate((valid) => {
-        if(valid) {
-          if(this.signinForm.phoneIentifyCode != this.phoneVerifyCode) {
-            this.isErrorDialogVisible = true;
-          }else{
-            this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
-            this.activeTag = 'resetPwdTag';
+        if (valid) {
+          const params = {
+            messageCode: this.signinForm.phoneIentifyCode,
+            telephone: this.signinForm.telephone
           }
+          verifyTelephoneCode(params)
+          .then((flag) => {
+            if (flag) {
+              //正常下一步
+              this.$refs.restPwdContainer.setActiveItem('resetPwdTag');
+              this.activeTag = 'resetPwdTag';
+            } else {
+              //手机验证码不正确
+              this.isErrorDialogVisible = true;
+            }
+          })
         }
       })
     },
@@ -209,7 +232,7 @@ export default {
       this.count = 60;
       if (!this.timer) {
         this.timer = setInterval(() => {
-          if (this.count > 0) {
+          if (this.count > 0) { 
             this.count--;
           } else {
             clearInterval(this.timer);
@@ -218,18 +241,31 @@ export default {
         }, 1000);
       }
     },
+    // 获取手机验证码
     getPhoneIdentifyCode() {
-      this.interval();
-      // //获取手机验证码
-      // getPhoneVerifyCode()
-      // .than((res) => {
-      //   this.phoneVerifyCode = res.data.code;
-      //   return;
-      // })
+      if (this.checkTelephone) {
+        const params = {
+          telephone: this.signinForm.telephone
+        }
+        getPhoneVerifyCode(params)
+        .then((errorFlag) => {
+          if (errorFlag) {
+            this.$message({
+              message: '该用户不存在!',
+              type: 'error'
+            })
+          } else {
+            this.interval(); //倒计时
+          }
+        })
+      }
     },
     toLoginPage() {
       this.$router.push('/login');
     }
+  },
+  mounted() {
+    this.refreshCode();
   },
   components: {
     IdentifyCode
@@ -442,6 +478,29 @@ export default {
         }
       }
     }
+    .el-dialog{
+      .dialog-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .text-alert {
+        width: 40px;
+        font-size: 20px;
+        color: #9A8B7B;
+        margin-top: 15px;
+        margin-bottom: 6px;
+      }
+      .text-massage {
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+        color: #666666;
+        text-align: center;
+      }
+    }
+    
   }
 }
 </style>

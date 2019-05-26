@@ -1,21 +1,42 @@
 import axios from 'axios';
 import Qs from 'qs';
+axios.defaults.withCredentials = true;
 
 //获取手机验证码
 export const getPhoneVerifyCode = (params)=> {
-  return axios.get(`?telephone=${params.telephone}`)
+  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/sendMessageVerification?telephone=${params.telephone}`)
   .then(res => {
-    return res.data;
+    var errorFlag = false;
+    if (res.data.message == '该用户不存在！') {
+      errorFlag = true;
+    }
+    return errorFlag;
   }, (err) => {
     return Promise.reject(err)
   })
 }
-
+//验证手机验证码
+export const verifyTelephoneCode = (params)=> {
+  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/checkMessageVerification?messageCode=${params.messageCode}&telephone=${params.telephone}`)
+  .then(res => {
+    var flag = false;
+    if(res.data.status == '200' && res.data.message == 'success'){
+      flag = true;
+    }
+    return flag;
+  }, (err) => {
+    return Promise.reject(err)
+  })
+}
 //忘记密码
 export const resetPassword = (params)=> {
-  return axios.get(`/finance/ocr/user/updatePassword?password=${params.newPassword}&telephone=${params.telephone}`)
+  return axios.post('http://10.17.20.121:8080/sys/ocr/user/forgetPassword', Qs.stringify(params))
   .then(res => {
-    return res.data;
+    var flag = false;
+    if(res.data.status == '200'){
+      flag = true;
+    }
+    return flag;
   }, (err) => {
     return Promise.reject(err)
   })
@@ -23,10 +44,13 @@ export const resetPassword = (params)=> {
 
 //修改密码
 export const changePassword = (params)=> {
-  //return axios.get(`/finance/ocr/user/updatePassword?pwd=${params.oldPassword}&newpwd=${params.newPassword}&id=${params.userId}`)
-  return axios.get(`/finance/ocr/user/updatePassword?oldPassword=${params.oldPassword}&password=${params.newPassword}&id=${params.userId}`)
+  return axios.post('http://10.17.20.121:8080/sys/ocr/changePassword', Qs.stringify(params))
   .then(res => {
-    return res.data;
+    var flag = false;
+    if(res.data.status == '200'){
+      flag = true;
+    }
+    return flag;
   }, (err) => {
     return Promise.reject(err)
   })
@@ -34,53 +58,45 @@ export const changePassword = (params)=> {
 
 //查询用户列表
 export const getUserList = (params)=> {
-    return axios.get(`?userName=${params.userName}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)
-    .then(res => {
-      return res.data;
-    }, (err) => {
-      return Promise.reject(err)
-    })
-  }
+  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/queryUser?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)    
+  .then(res => {
+    return res.data.data;
+  }, (err) => {
+    return Promise.reject(err)
+  })
+}
 
 //新增用户
 export const addNewUserAccount = (params)=> {
-    return axios.post('', Qs.stringify({
-        'userId': params.userId, //登录者
-        'name': params.name, //姓名
-        'phoneNum': params.phoneNum, //手机号
-        'department': params.department, //部门
-        'authority': params.authority, //权限
-    }))
-    .then(res => {
-      return res.data;
-    }, (err) => {
-      return Promise.reject(err)
-    })
-  }
+  return axios.post('http://10.17.20.121:8080/sys/ocr/user/addUser', Qs.stringify(params, { indices: false }))
+  .then(res => {
+    var flag = false;
+    if(res.data.status == '200'){
+      flag = true;
+    }
+    return flag;
+  }, (err) => {
+    return Promise.reject(err)
+  })
+}
 
 //变更用户
 export const updateUserAccount= (params)=> {
-    return axios.post('', Qs.stringify({
-        'userId': params.userId, //登录者
-        'id': params.id,
-        'name': params.name, //变更用户：姓名
-        'phoneNum': params.phoneNum, //变更用户：手机号
-        'department': params.department, //变更用户：权限
-        'authority': params.authority, //变更用户：权限
-    }))
-    .then(res => {
-      return res.data;
-    }, (err) => {
-      return Promise.reject(err)
-    })
-  }
+  return axios.post('http://10.17.20.121:8080/sys/ocr/user/updateUser',  Qs.stringify(params ,{ indices: false }))
+  .then(res => {
+    var flag = false;
+    if(res.data.status == '200'){
+      flag = true;
+    }
+    return flag;
+  }, (err) => {
+    return Promise.reject(err)
+  })
+}
 
-//冻结用户
+//冻结、解冻用户
 export const freezeUserAccount= (params)=> {
-  return axios.post('', Qs.stringify({
-      'userId': params.userId, //登录者
-      'id': params.id
-  }))
+  return axios.post('http://10.17.20.121:8080/sys/ocr/user/updateUserStatus', Qs.stringify(params))
   .then(res => {
     return res.data;
   }, (err) => {
@@ -88,17 +104,5 @@ export const freezeUserAccount= (params)=> {
   })
 }
 
-//导出excel
-export const exportUserToExcel= (params)=> {
-  return axios.post('', Qs.stringify({
-      'userId': params.userId, //登录者
-      'id': params.id
-  }))
-  .then(res => {
-    return res.data;
-  }, (err) => {
-    return Promise.reject(err)
-  })
-}
 
   

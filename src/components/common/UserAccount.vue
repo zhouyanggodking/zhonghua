@@ -1,7 +1,7 @@
 <template>
   <div class="user-account-container">
     <el-dropdown trigger="hover" placement="bottom" @command="handleCommand">
-      <div>{{userName}} <span style="font-size:35px" class="el-icon-user"></span></div>
+      <div>{{userName}}<span class="el-icon-arrow-down"></span></div>
       <el-dropdown-menu class="user-account" slot="dropdown">
         <el-dropdown-item class="logout" command="resetPassword"><span class="name">修改密码</span></el-dropdown-item>
         <el-dropdown-item class="logout" command="logout"><span class="name">退出登录</span></el-dropdown-item>
@@ -10,13 +10,13 @@
     <el-dialog class="dialog-form" title="修改密码" :visible.sync="dialogFormVisible">
       <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm">
         <el-form-item label="原始密码" :label-width="formLabelWidth" prop="oldPassword">
-          <el-input v-model="resetPwdForm.oldPassword" autocomplete="off"></el-input>
+          <el-input type="password" v-model="resetPwdForm.oldPassword" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="新密码" :label-width="formLabelWidth" prop="newPassword">
-          <el-input  v-model="resetPwdForm.newPassword" autocomplete="off"></el-input>
+          <el-input type="password" v-model="resetPwdForm.newPassword" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" :label-width="formLabelWidth" prop="confirmPassword">
-          <el-input  v-model="resetPwdForm.confirmPassword" autocomplete="off"></el-input>
+          <el-input type="password" v-model="resetPwdForm.confirmPassword" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -28,9 +28,8 @@
 </template>
 
 <script>
-import {logout} from '@/rest/authQuery';
-//import {changePassword} from "@/rest/userManagmentPageApi";
-//import localStorageHelper from '@/helpers/localStorageHelper';
+import { logout } from '@/rest/authQuery';
+import { changePassword } from "@/rest/userManagmentPageApi";
 
 export default {
   name: 'userAccount',
@@ -84,27 +83,35 @@ export default {
     },
     handleSubmitClick() {
       this.$refs.resetPwdForm.validate((valid) => {
-        if(valid) {
-          // const params = {
-          //   oldPassword: this.resetPwdForm.oldPassword,
-          //   newPassword: this.resetPwdForm.newPassword,
-          //   userId: localStorageHelper.getItem("USERID")
-          // }
-          // //修改密码
-          // changePassword(params)
-          //   .then(() => {
-          //     return;
-          //   })
-          this.clearResetPwdForm();
+        if (valid) {
+          const params = {
+            password: this.resetPwdForm.oldPassword,
+            newpassword: this.resetPwdForm.newPassword,
+            telephone: localStorage.getItem("TELEPHONE")
+          }
+          changePassword(params)
+            .then((res) => {
+              if (res) {
+                this.$message({
+                  message: '密码修改成功!',
+                  type: 'success'
+                })
+                this.clearResetPwdForm();
+              } else {
+                this.$message({
+                  message: '原始密码错误，请重新输入!',
+                  type: 'error'
+                })
+              }
+            })
         }
       })
     },
-    //对话框：取消按钮
+    // 取消
     cancelEditFileds() {
       this.$refs['resetPwdForm'].resetFields();
       this.clearResetPwdForm();
     },
-    //关闭并清空对话框中的表单
     clearResetPwdForm() {
       this.dialogFormVisible = false;
       this.resetPwdForm = {
@@ -115,7 +122,7 @@ export default {
     },
   },
   mounted() {
-    //this.userName = localStorageHelper.getItem("USERNAME");
+    this.userName = localStorage.getItem("USERNAME");
   }
 };
 </script>
