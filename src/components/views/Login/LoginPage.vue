@@ -175,6 +175,7 @@ export default {
                 this.$router.push('/'); //正常登录，页面跳转
                 break;
             }
+            this.refreshCode();
           })
         }
       })
