@@ -10,18 +10,12 @@
         <div class="search-condition_input">
           <div class="search-condition_input_item date-picker">
             <div class="text">申请日期</div>
-            <el-date-picker
-              v-model="applyDate"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
+            <date-range @change="onDateRangeChange"></date-range>
           </div>
           <div class="search-condition_input_item">
             <div class="text">审核状态</div>
-            <el-select v-model="reviewStatus" placeholder="请选择">
-              <el-option v-for="item in reviewStatusList" :key="item" :label="item" :value="item"></el-option>
+            <el-select v-model="state" placeholder="请选择">
+              <el-option v-for="(item, index) in checkStatusList" :key="index" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item second">
@@ -38,6 +32,7 @@
       </div>
       <div class="identify-page-table_content">
         <el-table
+          v-loading="isLoading"
           ref="multipleTable"
           :data="tableData"
           tooltip-effect="dark"
@@ -46,45 +41,54 @@
         >
           <el-table-column fixed type="selection" width="30"></el-table-column>
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column label="申请日期" width="120">
-            <template slot-scope="scope">{{ scope.row.date }}</template>
+          <el-table-column prop="applyDate" label="申请日期" width="120"></el-table-column>
+          <el-table-column prop="submitOnApply" label="申请日提交" width="120"></el-table-column>
+          <el-table-column prop="submitNotOnApply" label="非申请日提交" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="uploadFileNum" label="上传文件数量" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="state" label="状态" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.state === '0'">驳回</span>
+              <span v-else-if="scope.row.state === '1'" style="color: #417505;">已审核</span>
+              <span v-else-if="scope.row.state === '2'" style="color: #F5A623;">未审核</span>
+            </template>
           </el-table-column>
-          <el-table-column prop="name" label="申请日提交" width="120"></el-table-column>
-          <el-table-column prop="address" label="非申请日提交" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="上传文件数量" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="状态" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="上传人员" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="address" label="上传日期" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="createUser" label="上传人员" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="createTime" label="上传日期" show-overflow-tooltip></el-table-column>
           <el-table-column label="操作" width="80" fixed="right">
             <template slot-scope="scope">
               <el-button
                 class="table-btn"
                 size="mini"
-                @click="tableItemDetails(scope.$index, scope.row)"
+                @click="tableItemDetails(scope.row)"
               >详情</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="table-footer">
-        <Pagination></Pagination>
+        <Pagination :totalCount="totalCount" @change="onPageNumberChange"></Pagination>
       </div>
     </div>
   </div>
 </template>
 <script>
+import {getEstateElecAuthorizationSummaryInfos} from "@/rest/letterOfAuthorizationElecApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
+import DateRange from "@/components/common/DateRange";
 import Pagination from "@/components/common/Pagination";
+import {global_} from "@/global/global";
+import {formatQuery} from '@/helpers/formatGetParams';
 
 const PAGE_SIZE = 10;
 
 export default {
   data() {
     return {
-      payTheme: "",
-      contractNum: "",
-      payer: "",
+      isLoading: false,
       applyDate:'',
+      startTime: '',
+      endTime: '',
+      elecOrFile: 1,
       allChecked: false,
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
@@ -93,7 +97,7 @@ export default {
       collector: "",
       dialogTitle: "填写驳回意见",
       dialogVisible: false,
-      reviewStatus: "全部",
+      state: "",
       multipleSelection: [],
       currentPage: 1,
       totalCount: 0,
@@ -104,61 +108,72 @@ export default {
         ],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
-      reviewStatusList: ["全部", "未审核", "已审核", "审核中"],
-      tableData: [
+      checkStatusList: [
         {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
+          name: '全部',
+          id: ''
         },
         {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
+          name: '驳回',
+          id: 0
         },
         {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
+          name: '已审核',
+          id: 1
         },
         {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
+          name: '未审核',
+          id: 2
         },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        }
-      ]
+      ],
+      tableData: []
     };
   },
   methods: {
+    onDateRangeChange(res) {
+      this.startTime = res.startTime;
+      this.endTime = res.endTime;
+    },
     goBack() {},
-    search() {},
-    tableDownload() {},
+    search() {
+      this.fetchTableData();
+    },
+    tableDownload() {
+      if (this.multipleSelection.length) {
+        const params = {
+          ids: this.multipleSelection,
+          userId: 1,
+          elecOrFile: this.elecOrFile
+        };
+        window.open(`${global_}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
+${formatQuery(params)}`,'_parent');
+      } else {
+        this.$message({
+          message: '请勾选要下载的对象!',
+          type: 'warning'
+        })
+      }
+    },
     batchReview() {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否批量通过";
       this.dialogHintOperate = "批量通过";
     },
     batchReviewPass() {},
-    tableItemDetails() {
-      
-      this.$router.push({ name: "paper-batch-information-details", query: { id: 1 } });
+    tableItemDetails(row) {
+      this.$router.push({ name: "paper-batch-information-details", query: { id: row.id } });
     },
-    exportExcel() {},
+    exportExcel() {
+      const params = {
+        startTime: this.startTime,
+        endTime: this.endTime,
+        state: this.state,
+        userId: 1,
+        elecOrFile: this.elecOrFile
+      }
+      window.open(`${global_}/auth/estateAuthorizationSummaryController/exportToExcel
+${formatQuery(params)}`,'_parent');
+    },
     reviewPass() {
       this.isDialogVisible = false;
     },
@@ -170,18 +185,40 @@ export default {
       this.dialogVisible = false;
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val;
+      this.multipleSelection = val.map(item => item.id);
     },
-    handleSizeChange(pageSize) {
-      this.pageSize = pageSize;
+    // 分页
+    onPageNumberChange(res) {
+      this.pageSize = res.pageSize;
+      this.currentPage = res.pageNum;
+      this.fetchTableData();
     },
-    handleCurrentChange(currPage) {
-      this.currentPage = currPage;
+    fetchTableData() {
+      this.isLoading = true;
+      const params = {
+        startTime: this.startTime,
+        endTime: this.endTime,
+        state: this.state,
+        userId: 1,
+        elecOrFile: this.elecOrFile,
+        pageSize: this.pageSize,
+        pageNum: this.currentPage
+      };
+      getEstateElecAuthorizationSummaryInfos(params)
+      .then(res => {
+        this.tableData = res.data.data;
+        this.totalCount = res.data.total;
+        this.isLoading = false;
+      })
     }
+  },
+  mounted() {
+    this.fetchTableData();
   },
   components: {
     BreadCrumb,
-    Pagination
+    Pagination,
+    DateRange
   }
 };
 </script>
@@ -243,8 +280,10 @@ export default {
           margin-right: 30px;
           margin-top: 20px;
           .text {
-            width: 56px;
+            flex-shrink: 0;
+            width: 80px;
             margin-right: 10px;
+            text-align: right;
             font-family: "PingFangSC-Semibold";
             font-size: 14px;
             color: #666666;

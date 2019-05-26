@@ -24,6 +24,7 @@ const electronicBatchInformationDetails = resolve => require.ensure([], () => re
 const elecBatchInfoIdentifyDetails = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/ElecBatchInfoIdentifyDetails.vue')), '电子版批次识别详情');
 const lookOrigin = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/LookOrigin.vue')), '电子版批次识别详情');
 const lookCompanyInfo = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/LookCompanyInfo.vue')), '电子版批次识别详情');
+const creditPaperIdentifyResultPage = resolve => require.ensure([], () => resolve(require('../components/views/CreditElectronicIdentifyResultPage.vue')), '识别结果');
 const paperBatchInformation = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/PaperBatchInformation.vue')), '纸质版批次信息');
 const paperBatchIdentifyDetails = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/PaperBatchIdentifyDetails.vue')), '纸质版批次信息');
 const paperBatchInformationDetails = resolve => require.ensure([], () => resolve(require('../components/views/LetterOfAuthorizationForCreditInquiry/PaperBatchInformationDetails.vue')), '纸质版批次信息');
@@ -124,6 +125,17 @@ const router = new Router({
               path:'look-company-info',
               name:'look-company-info',
               component:lookCompanyInfo
+            }
+          ]
+        },
+        {
+          path: 'creditPaperBatchInformation',
+          component: creditPaperIdentifyResultPage,
+          children: [
+            {
+              path: '/',
+              name: 'creditPaperBatchInformation',
+              component: paperBatchInformation,
             },
             {
               path:'paperBatchInformationDetails',
@@ -134,13 +146,13 @@ const router = new Router({
               path:'paperBatchIdentifyDetails',
               name:'paper-batch-indentify-details',
               component:paperBatchIdentifyDetails
+            },
+            {
+              path:'lookOrigin',
+              name:'look-origin-paper',
+              component:lookOrigin
             }
           ]
-        },
-        {
-          path: 'creditPaperBatchInformation',
-          name: 'creditPaperBatchInformation',
-          component: paperBatchInformation,
         },
         {
           path: 'userManagement',
