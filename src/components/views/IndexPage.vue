@@ -16,8 +16,41 @@
           <p class="count" v-if="item.type === 'upload'">已上传资料<span>{{item.count}}</span>份</p>
           <p class="count" v-else>已提取完成资料<span>{{item.count}}</span>份</p>
         </div>
-        <el-button class="upload" v-if="item.type === 'upload'">去上传</el-button>
-        <el-button class="download" v-else>去下载</el-button>
+        <div v-if="item.type === 'upload'">
+          <router-link v-if="index === 0" to="/realEstateUpload">
+            <el-button class="upload" v-if="item.type === 'upload'">
+              去上传
+            </el-button>
+          </router-link>
+          <router-link v-if="index === 2" to="/creditUpload">
+            <el-button class="upload" v-if="item.type === 'upload'">
+              去上传
+            </el-button>
+          </router-link>
+          <router-link v-if="index === 4" to="/creditUpload">
+            <el-button class="upload" v-if="item.type === 'upload'">
+              去上传
+            </el-button>
+          </router-link>
+        </div>
+        <div v-else>
+          <router-link v-if="index === 1" to="/realEstateIdentifyResult">
+            <el-button class="download">
+              去下载
+            </el-button>
+          </router-link>
+          <router-link v-if="index === 3" to="/creditElectronicBatchInformation">
+            <el-button class="download">
+              去下载
+            </el-button>
+          </router-link>
+          <router-link v-if="index === 5" to="/creditPaperBatchInformation">
+            <el-button class="download">
+              去下载
+            </el-button>
+          </router-link>
+        </div>
+        
       </div>
     </div>
   </div>
@@ -129,6 +162,13 @@ p {
         // width: 134px;
         height: 44px;
         @include buttonStyle;
+        a {
+          color: #ffffff;
+          text-decoration: none;
+          &:active {
+            color: #ffffff;
+          }
+        }
       }
     }
   }

@@ -20,6 +20,15 @@ export const elecDetailList = (params) => {
     return Promise.reject(err);
   })
 }
+//未匹配查询清单授权书
+export const unMatchedElecDetailList = (params) => {
+  return axios.get(`/auth/estateAuthorizationFileController/getUnMatchedFiles${formatQuery(params)}`)
+  .then(res => {
+    return res.data.data || [];
+  }, err => {
+    return Promise.reject(err);
+  })
+}
 //清单单个详情
 export const getEstateAuthorizationExcelInfo = (params) => {
   return axios.get(`/auth/estateAuthorizationExcelController/getEstateAuthorizationExcelInfo${formatQuery(params)}`)

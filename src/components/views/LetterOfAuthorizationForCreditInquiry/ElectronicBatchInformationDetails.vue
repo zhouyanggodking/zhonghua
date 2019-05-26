@@ -124,34 +124,35 @@
         <div class="search-condition_input">
           <div class="search-condition_input_item">
             <div class="text">公司章</div>
-            <el-input placeholder="请输入内容"></el-input>
+            <el-input v-model="unMatchedTableData.companySeal" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">人名章</div>
-            <el-input placeholder="请输入内容"></el-input>
+            <el-input v-model="unMatchedTableData.personSeal" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">签署时间</div>
             <date-range @change="onDateRangeChange"></date-range>
           </div>
-          <div class="search-condition_input_item">
+          <!-- 上传时间 -->
+          <!-- <div class="search-condition_input_item">
             <div class="text">上传时间</div>
             <date-range @change="onDateRangeChange"></date-range>
-          </div>
+          </div> -->
           <div class="search-condition_input_item second">
-            <el-button class="search-btn" @click="search">查询</el-button>
+            <el-button class="search-btn" @click="unMatchedSearch">查询</el-button>
             <div class="export-excel" @click="exportExcel">导出Excel</div>
           </div>
         </div>
       </div>
     </div>
     <div class="search-unauth-table" v-if="activedIndex===1">
-      <el-table :data="tableData" style="width: 100%">
+      <el-table :data="unMatchedTableData" style="width: 100%">
         <el-table-column type="index" label="序号" width="50"></el-table-column>
-        <el-table-column prop="date" label="公司章"></el-table-column>
-        <el-table-column prop="name" label="人名章"></el-table-column>
-        <el-table-column prop="address"  label="签署时间"></el-table-column>
-        <el-table-column prop="address" label="上传时间"></el-table-column>
+        <el-table-column prop="companySeal" label="公司章"></el-table-column>
+        <el-table-column prop="personSeal" label="人名章"></el-table-column>
+        <el-table-column prop="signStartTime"  label="签署时间"></el-table-column>
+        <!-- <el-table-column prop="address" label="上传时间"></el-table-column> -->
         <el-table-column label="操作">
             <template slot-scope="scope">
               <!-- <el-button
@@ -165,6 +166,9 @@
             </template>
           </el-table-column>
       </el-table>
+      <div class="table-footer">
+        <Pagination :totalCount="unMatchedtotalCount" @change="onUnmatchedPageNumberChange"></Pagination>
+      </div>
     </div>
     <el-dialog
       class="dialog-common"
@@ -227,7 +231,7 @@
   </div>
 </template>
 <script>
-import {elecDetailList, checkAuthRecords, checkAuthRecord} from "@/rest/letterOfAuthorizationElecApi";
+import {elecDetailList, checkAuthRecords, checkAuthRecord, unMatchedElecDetailList} from "@/rest/letterOfAuthorizationElecApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import DateRange from "@/components/common/DateRange";
@@ -255,6 +259,17 @@ export default {
         pageNum: '',
         pageSize: ''
       },
+      unMatchedSearchCondition: {
+        companySeal: '',
+        personSeal: '',
+        signStartTime: '',
+        signEndTime: '',
+        summaryId: '',
+        elecOrFile: ELE_FILE,
+        userId: USERID,
+        pageNum: '',
+        pageSize: ''
+      },
       rejectObj: {
         fileId: '',
         id: ''
@@ -271,6 +286,7 @@ export default {
           { required: true, message: '请输入驳回意见', trigger: 'blur' },
         ]
       },
+      unMatchedTableData: [],
       questionClassificationList: PROBLEM_LIST,
       auditState: CHECK_STATUS_LIST,
       activedIndex: 0,
@@ -287,11 +303,13 @@ export default {
       reviewStatus: "全部",
       multipleSelection: [],
       currentPage: 1,
+      unMatchedcurrentPage: 1,
       totalCount: 0,
+      unMatchedtotalCount: 0,
       currentTitle: "识别结果",
       breadCrumbList: ["征信查询授权书","识别结果","电子版批次信息"],
       pageSize: PAGE_SIZE,
-      pageSizes: [PAGE_SIZE],
+      unMatchedPageSize: PAGE_SIZE,
       tableData: [],
       summaryId: ''
     };
@@ -305,10 +323,18 @@ export default {
     search() {
       this.fetchElecDetailList();
     },
+    unMatchedSearch() {
+      this.fetchUnmatchedElecDetailList();
+    },
     onPageNumberChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
       this.fetchElecDetailList();
+    },
+    onUnmatchedPageNumberChange(res) {
+      this.unMatchedPageSize = res.pageSize;
+      this.unMatchedcurrentPage = res.pageNum;
+      this.fetchUnmatchedElecDetailList();
     },
     // 下载
     tableDownload() {
@@ -459,11 +485,22 @@ export default {
         this.tableData = res.data;
         this.totalCount = res.total;
       });
+    },
+    fetchUnmatchedElecDetailList() {
+      this.unMatchedSearchCondition.pageSize = this.unMatchedPageSize;
+      this.unMatchedSearchCondition.pageNum = this.unMatchedcurrentPage;
+      this.unMatchedSearchCondition.summaryId = this.summaryId;
+      unMatchedElecDetailList(this.unMatchedSearchCondition)
+      .then(res => {
+        this.unMatchedTableData = res.data;
+        this.totalCount = res.total;
+      });
     }
   },
   mounted() {
     this.summaryId = this.$route.query.id;
     this.fetchElecDetailList();
+    this.fetchUnmatchedElecDetailList();
   },
   components: {
     BreadCrumb,
