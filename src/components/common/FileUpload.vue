@@ -28,6 +28,8 @@ import {relocateFile} from '@/rest/realEstateUploadApi';
 
 export default {
   data() {
+    let fileType = this.fileType;
+    let timeStamp = this.timeStamp;
     return {
       file_md5: null,
       uploader_file: null,
@@ -50,6 +52,8 @@ export default {
         chunkSize: 1 * 1024 * 1024, // 切片大小
         allowDuplicateUploads: true, // 允许重复上传
         prioritizeFirstAndLastChunk: true, // 优先第一个和最后一个快
+        businessTypeId: 3,
+        authorizationValidDate: '',
         generateUniqueIdentifier: function (file) {
           // 生成文件唯一标识
           return file.size
@@ -60,7 +64,8 @@ export default {
             identifier: file.size + '_' + fileName,
             type: 'zc',
             userId: 1,
-            businessTypeId: 1
+            businessTypeId: fileType,
+            authorizationValidDate: timeStamp,
           }
         },
         initFileFn: function (file) {
@@ -68,6 +73,16 @@ export default {
         },
       }
     };
+  },
+  props: {
+    fileType: {
+      type: String,
+      default: ''
+    },
+    timeStamp: {
+      type: String,
+      default: ''
+    }
   },
   methods: {
     fileChange(e) {
@@ -126,7 +141,8 @@ export default {
       // 合并文件
       let obg = {
         userId: 1,
-        businessTypeId: 1,
+        businessTypeId: this.fileType,
+        authorizationValidDate: this.timeStamp,
         md5: this.file_md5,
         filename: file.name,
         identifier: _identifier,

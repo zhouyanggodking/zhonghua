@@ -50,7 +50,7 @@
               <div class="result">
                 <el-form label-position="right" label-width="40%" :model="fileMessageForm">
                   <el-form-item label="问题分类:" @click.native="filedFocus('是否法人签章')">
-                    <el-select v-if="!isFiledFormEdit"  v-model="fileMessageForm.problemType" placeholder="">
+                    <el-select v-if="!isFiledFormEdit && fileMessageForm.problemType"  v-model="fileMessageForm.problemType" placeholder="">
                       <el-option v-for="(item, index) in problemList" :key="index" :label="item.name" :value="item.id"></el-option>
                     </el-select>
                     <el-input disabled v-else v-model="problemMappingFun(fileMessageForm.problemType)[0].name"></el-input>

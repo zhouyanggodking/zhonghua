@@ -26,16 +26,16 @@
             <div class="text">公司名称一致</div>
             <el-select v-model="searchCondition.companySealMatch" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
-              <el-option label="是" value="0"></el-option>
-              <el-option label="否" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+              <el-option label="是" value="1"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item">
             <div class="text">是否法人</div>
             <el-select v-model="searchCondition.corporateStamp" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
-              <el-option label="是" value="0"></el-option>
-              <el-option label="否" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+              <el-option label="是" value="1"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item">
@@ -78,12 +78,27 @@
           <el-table-column prop="depart" label="部门" show-overflow-tooltip></el-table-column>
           <el-table-column prop="companyName" label="公司名称" show-overflow-tooltip></el-table-column>
           <el-table-column prop="companySeal" label="公章" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="companySealMatch" label="公章是否一致" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="companySealMatch" label="公章是否一致" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.companySealMatch === 0">否</span>
+              <span v-else-if="scope.row.companySealMatch === 1">是</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="personSeal" label="人名章" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="corporateStamp" label="是否法人" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="corporateStamp" label="是否法人" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.corporateStamp === 0">否</span>
+              <span v-else-if="scope.row.corporateStamp === 1">是</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="submitDate" label="授权提交时间" show-overflow-tooltip></el-table-column>
           <el-table-column prop="signTime" label="签署时间" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="authorizationValidDateLegal" label="授权有效期" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="authorizationValidDateLegal" label="授权有效期" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span v-if="scope.row.authorizationValidDateLegal === 0">大于等于申请日期</span>
+              <span v-else-if="scope.row.authorizationValidDateLegal === 1">小于申请日期</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="auditState" label="审核状态" show-overflow-tooltip>
             <template slot-scope="scope">
               <span v-if="scope.row.auditState === 0">驳回</span>

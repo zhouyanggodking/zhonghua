@@ -10,7 +10,15 @@ export const getEstateElecAuthorizationSummaryInfos = (params)  => {
     return Promise.reject(err);
   })
 }
-
+// 上传历史
+export const getUploadHistory = (params) => {
+  return axios.get(`/uploader/hostory${formatQuery(params)}`)
+  .then(res => {
+        return res.data;
+    }, (err) => {
+        return Promise.reject(err)
+    })
+}
 // 查询清单
 export const elecDetailList = (params) => {
   return axios.get(`/auth/estateAuthorizationExcelController/getEstateAuthorizationExcelInfos${formatQuery(params)}`)
@@ -87,6 +95,15 @@ export const modifyFileMessage = (params) => {
 //修改电子版时间
 export const modifyEleFileDate = (params) => {
   return axios.post('/auth/estateAuthorizationFileController/modifyElecFileAuthrizationDate', params)
+  .then(res => {
+    return Promise.resolve(res);
+  }, err => {
+    return Promise.reject(err);
+  });
+}
+//修改纸质文件信息匹配
+export const modifyPaperFile = (params) => {
+  return axios.post('/auth/estateAuthorizationFileController/modifyMatchedFile', params)
   .then(res => {
     return Promise.resolve(res);
   }, err => {

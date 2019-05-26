@@ -9,7 +9,7 @@
       <div class="identify-page_search_condition">
         <div class="search-condition_input">
           <div class="search-condition_input_item date-picker">
-            <div class="text">申请日期</div>
+            <div class="text">上传日期</div>
             <date-range @change="onDateRangeChange"></date-range>
           </div>
           <div class="search-condition_input_item">
@@ -84,21 +84,15 @@ const PAGE_SIZE = 10;
 export default {
   data() {
     return {
+      allChecked: false,
       isLoading: false,
       applyDate:'',
       startTime: '',
       endTime: '',
       elecOrFile: 1,
-      allChecked: false,
-      dialogHintText: "请确认是否驳回",
-      dialogHintOperate: "驳回",
-      isDialogVisible: false,
       rejectContent: "",
       collector: "",
-      dialogTitle: "填写驳回意见",
-      dialogVisible: false,
       state: "",
-      multipleSelection: [],
       currentPage: 1,
       totalCount: 0,
       currentTitle: "纸质版授权书批次识别结果",
@@ -154,12 +148,6 @@ ${formatQuery(params)}`,'_parent');
         })
       }
     },
-    batchReview() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否批量通过";
-      this.dialogHintOperate = "批量通过";
-    },
-    batchReviewPass() {},
     tableItemDetails(row) {
       this.$router.push({ name: "paper-batch-information-details", query: { id: row.id } });
     },
@@ -173,16 +161,6 @@ ${formatQuery(params)}`,'_parent');
       }
       window.open(`${global_}/auth/estateAuthorizationSummaryController/exportToExcel
 ${formatQuery(params)}`,'_parent');
-    },
-    reviewPass() {
-      this.isDialogVisible = false;
-    },
-    rejectOpinion() {
-      this.isDialogVisible = false;
-      this.dialogVisible = true;
-    },
-    handleClose() {
-      this.dialogVisible = false;
     },
     handleSelectionChange(val) {
       this.multipleSelection = val.map(item => item.id);
