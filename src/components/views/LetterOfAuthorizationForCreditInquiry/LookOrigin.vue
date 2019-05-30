@@ -269,20 +269,24 @@ export default {
                       }
                     }
                     .el-date-editor {
-                      // width: 100%;
                       .el-input__prefix {
                         .el-input__icon {
                           line-height: 30px;
                         }
                       }
                       .el-input__suffix {
-                        display: none;
+                        .el-input__suffix-inner {
+                          .el-input__icon {
+                            line-height: 30px;
+                          }
+                        }
                       }
                       &.el-input {
                         width: 100%;
                       }
                     }
                     .el-select {
+                      width: 100%;
                       .el-input--suffix {
                         .el-input__suffix {
                           .el-icon-arrow-up {

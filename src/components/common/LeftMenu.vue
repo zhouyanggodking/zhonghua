@@ -21,82 +21,22 @@
           </el-menu-item>
         </div>
       </el-submenu>
-      <el-menu-item :disabled="item.index === '2'" v-else :index="item.index">
+      <el-menu-item  :disabled="item.index === '2'" v-else :index="item.index">
         {{item.name}}
       </el-menu-item>
     </div>
   </el-menu>
 </template>
 <script>
+import totalMenu from '@/helpers/roleMenu';
+import LocalStorageHelper from '@/helpers/localStorageHelper';
 export default {
   data() {
     return {
       activeMenu: '/',
       uniqueOpened: true,
       userRouter: true,
-      menuList:[
-        {
-          name: '首页',
-          index: '/',
-          children: []
-        },
-        {
-          name: '承兑业务单据',
-          index: '2',
-          children: []
-        },
-        {
-          name: '地产项目承兑',
-          index: 'realEstate',
-          children: [
-            {
-              name: '文件上传',
-              index: '/realEstateUpload',
-              children: []
-            },
-            {
-              name: '识别结果',
-              index: '/realEstateIdentifyResult',
-              children: []
-            }
-          ]
-        },
-        {
-          name: '征信查询授权书',
-          index: '/credit',
-          children: [
-            {
-              name: '文件上传',
-              index: '/creditUpload',
-              children: []
-            },
-            {
-              name: '文件补录',
-              index: '/creditReupload',
-              children: []
-            },
-            {
-              name: '识别结果',
-              index: '/creditIdentifyResult',
-              children: [
-                {
-                  name: '电子版批次信息',
-                  index: '/creditElectronicBatchInformation'
-                },
-                {
-                  name: '纸质版批次信息',
-                  index: '/creditPaperBatchInformation'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          name: '用户管理',
-          index: '/userManagement',
-          children: []
-        },
-      ]
+      menuList: []
     };
   },
   watch:{
@@ -105,6 +45,22 @@ export default {
     }
   },
   mounted() {
+    const roleId = Number(LocalStorageHelper.getItem('ROLE_ID'));
+    const roleList = JSON.parse(LocalStorageHelper.getItem('ROLE_LIST'));
+    const formatRoleList = roleList.map(item => item.aclName);
+    if(roleId === 1) {
+      this.menuList = totalMenu;
+    } else {
+      if (formatRoleList.indexOf('地产承兑') > -1 && formatRoleList.indexOf('征信查询') > -1) {
+        this.menuList = totalMenu.filter(item => item.name !== '用户管理');
+      } else if (formatRoleList.indexOf('地产承兑') > -1 && formatRoleList.indexOf('征信查询') < 0) {
+        this.menuList = totalMenu.filter(item => item.name !== '用户管理' && item.name !== '征信查询授权书');
+      } else if (formatRoleList.indexOf('地产承兑') < 0 && formatRoleList.indexOf('征信查询') > -1) {
+        this.menuList = totalMenu.filter(item => item.name !== '用户管理' && item.name !== '地产项目承兑');
+      } else {
+        this.menuList = totalMenu.filter(item => item.name !== '用户管理' && item.name !== '地产项目承兑' && item.name !== '征信查询授权书');
+      }
+    }
     this.activeMenu = `/${this.$route.path.split('/')[1]}`;
   }
 }

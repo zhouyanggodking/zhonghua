@@ -4,7 +4,7 @@ axios.defaults.withCredentials = true;
 
 //获取手机验证码
 export const getPhoneVerifyCode = (params)=> {
-  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/sendMessageVerification?telephone=${params.telephone}`)
+  return axios.get(`/sys/ocr/user/sendMessageVerification?telephone=${params.telephone}`)
   .then(res => {
     var errorFlag = false;
     if (res.data.message == '该用户不存在！') {
@@ -17,7 +17,7 @@ export const getPhoneVerifyCode = (params)=> {
 }
 //验证手机验证码
 export const verifyTelephoneCode = (params)=> {
-  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/checkMessageVerification?messageCode=${params.messageCode}&telephone=${params.telephone}`)
+  return axios.get(`/sys/ocr/user/checkMessageVerification?messageCode=${params.messageCode}&telephone=${params.telephone}`)
   .then(res => {
     var flag = false;
     if(res.data.status == '200' && res.data.message == 'success'){
@@ -30,7 +30,7 @@ export const verifyTelephoneCode = (params)=> {
 }
 //忘记密码
 export const resetPassword = (params)=> {
-  return axios.post('http://10.17.20.121:8080/sys/ocr/user/forgetPassword', Qs.stringify(params))
+  return axios.post('/sys/ocr/user/forgetPassword', Qs.stringify(params))
   .then(res => {
     var flag = false;
     if(res.data.status == '200'){
@@ -44,7 +44,7 @@ export const resetPassword = (params)=> {
 
 //修改密码
 export const changePassword = (params)=> {
-  return axios.post('http://10.17.20.121:8080/sys/ocr/changePassword', Qs.stringify(params))
+  return axios.post('/sys/ocr/changePassword', Qs.stringify(params))
   .then(res => {
     var flag = false;
     if(res.data.status == '200'){
@@ -58,7 +58,7 @@ export const changePassword = (params)=> {
 
 //查询用户列表
 export const getUserList = (params)=> {
-  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/queryUser?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)    
+  return axios.get(`/sys/ocr/user/queryUser?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}&pageSize=${params.pageSize}&pageNum=${params.pageNum}`)    
   .then(res => {
     return res.data.data;
   }, (err) => {
@@ -68,7 +68,7 @@ export const getUserList = (params)=> {
 
 //新增用户
 export const addNewUserAccount = (params)=> {
-  return axios.post('http://10.17.20.121:8080/sys/ocr/user/addUser', Qs.stringify(params, { indices: false }))
+  return axios.post('/sys/ocr/user/addUser', Qs.stringify(params, { indices: false }))
   .then(res => {
     var flag = false;
     if(res.data.status == '200'){
@@ -82,7 +82,7 @@ export const addNewUserAccount = (params)=> {
 
 //变更用户
 export const updateUserAccount= (params)=> {
-  return axios.post('http://10.17.20.121:8080/sys/ocr/user/updateUser',  Qs.stringify(params ,{ indices: false }))
+  return axios.post('/sys/ocr/user/updateUser',  Qs.stringify(params ,{ indices: false }))
   .then(res => {
     var flag = false;
     if(res.data.status == '200'){
@@ -96,7 +96,7 @@ export const updateUserAccount= (params)=> {
 
 //冻结、解冻用户
 export const freezeUserAccount= (params)=> {
-  return axios.post('http://10.17.20.121:8080/sys/ocr/user/updateUserStatus', Qs.stringify(params))
+  return axios.post('/sys/ocr/user/updateUserStatus', Qs.stringify(params))
   .then(res => {
     return res.data;
   }, (err) => {

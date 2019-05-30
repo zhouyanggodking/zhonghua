@@ -12,7 +12,7 @@ export const getEstateElecAuthorizationSummaryInfos = (params)  => {
 }
 // 上传历史
 export const getUploadHistory = (params) => {
-  return axios.get(`/uploader/hostory${formatQuery(params)}`)
+  return axios.get(`/uploader/history${formatQuery(params)}`)
   .then(res => {
         return res.data;
     }, (err) => {
@@ -83,7 +83,7 @@ export const getFileMessage = (params) => {
     return Promise.reject(err);
   });
 }
-//修改电子或纸质版文件信息
+//修改电子或纸质版文件原件信息
 export const modifyFileMessage = (params) => {
   return axios.post('/auth/estateAuthorizationFileController/modifyOneFile', params)
   .then(res => {

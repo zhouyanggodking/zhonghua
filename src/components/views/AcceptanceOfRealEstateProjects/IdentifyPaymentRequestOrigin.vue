@@ -10,7 +10,7 @@
         <div class="left">
           <div class="title">付款申请原件</div>
           <div class="result" id="result">
-            <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image>
+            <zoom-image v-if="imagesSrc" :imagePosition="singleImagePosition" style="height:360px;" :imgSrc="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image>
           </div>
         </div>
         <div class="right">
@@ -28,7 +28,14 @@
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.paymentTitle"></el-input>
                 </el-form-item>
                 <el-form-item label="申请日期:" @click.native="filedFocus('申请日期')">
-                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.requestDate"></el-input>
+                  <el-date-picker
+                    v-if="!isFiledFormEdit"
+                    v-model="paymentOrderForm.requestDate"
+                    type="date"
+                    value-format="yyyy-MM-dd 00:00:00"
+                    placeholder="选择日期">
+                  </el-date-picker>
+                  <el-input disabled v-else v-model="paymentOrderForm.requestDate"></el-input>
                 </el-form-item>
                 <el-form-item label="付款单位:" @click.native="filedFocus('付款单位')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.payer"></el-input>
@@ -75,9 +82,7 @@ export default {
       isFiledFormEdit: true,
       paymentOrderId: null,
       tableData: [],
-      imagesSrc: 
-        "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
-      ,
+      imagesSrc: '',
       positionInfo: null,
       rotateAngle: '',
       singleImagePosition: null,
@@ -136,9 +141,9 @@ export default {
       }
       resourceWrapper.getPaymentOrderDetail(params).then(res => {
           this.paymentOrderForm=res.data.order;
-          // this.imagesSrc = `${global_}${res.data.outputLocation}`;
-          this.positionInfo = JSON.parse(res.data.infos).position_info;
-          this.rotateAngle = String(JSON.parse(res.data.infos).rotation_angle);
+          this.imagesSrc = res.data.order.outputLocation;
+          this.positionInfo = JSON.parse(res.data.infos) ? JSON.parse(res.data.infos).position_info : {};
+          this.rotateAngle = JSON.parse(res.data.infos) ? String(JSON.parse(res.data.infos).rotation_angle) : '';
           this.currentTitle = `${res.data.order.payer}-${res.data.order.contractNo}-${res.data.order.paymentTitle}`;
       })
     },
@@ -271,6 +276,23 @@ export default {
                             line-height: 30px;
                           }
                         }
+                      }
+                    }
+                    .el-date-editor {
+                      .el-input__prefix {
+                        .el-input__icon {
+                          line-height: 30px;
+                        }
+                      }
+                      .el-input__suffix {
+                        .el-input__suffix-inner {
+                          .el-input__icon {
+                            line-height: 30px;
+                          }
+                        }
+                      }
+                      &.el-input {
+                        width: 100%;
                       }
                     }
                   }

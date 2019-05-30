@@ -24,13 +24,14 @@
 </template>
 <script>
 import {calculateMd5} from '@/utils/fileUpload.js';
-import {relocateFile} from '@/rest/realEstateUploadApi';
+import {relocateFile, fileIsExist} from '@/rest/realEstateUploadApi';
 
 export default {
   data() {
     let fileType = this.fileType;
     let timeStamp = this.timeStamp;
     return {
+      identifyFileType: this.fileType,
       file_md5: null,
       uploader_file: null,
       load: false,
@@ -59,7 +60,7 @@ export default {
           return file.size
         },
         query: function (file) {
-          let fileName = file.name.split('.')[0]
+          let fileName = file.name.split('.')[0];
           return {
             identifier: file.size + '_' + fileName,
             type: 'zc',
@@ -88,42 +89,58 @@ export default {
     fileChange(e) {
       let that = this
       that.loadingText = '文件解析中...'
-      let fileName = e.target.files[0].name
+      let fileName = e.target.files[0].name;
       var ext = fileName.slice(fileName.lastIndexOf(".") + 1).toLowerCase();
       if ('rar' == ext || 'zip' == ext || '7z' === ext) {
-        let completeFiile = e.target.files[0]
+        let completeFiile = e.target.files[0];
+        let identifier = `${e.target.files[0].size}_${e.target.files[0].name.split('.')[0]}`
         that.load = true
         calculateMd5(completeFiile, function (val) {
           that.file_md5 = val;
           that.loadingText = '文件解析成功';
           that.load = false;
-          // fileIsExist({md5: val}).then(res => {
-          //   if (res.status === 200) {
-          //     if (res.data === true) {
-          //       // 文件没上传过 就上传
-          //       if (this.uploader_file) {
-          //         this.uploader_file.resume()
-          //       }
-          //     } else {
-          //       this.$message({
-          //         message: '此文件已经上传过，请您选择其他文件',
-          //         type: 'warning'
-          //       })
-          //       document.querySelector('.uploader-file-status').style.visibility = 'hidden'
-          //       document.querySelector('.uploader-file-resume').style.visibility = 'hidden'
-          //     }
-          //   } else {
-          //     this.$message({
-          //       message: '选择文件出错',
-          //       type: 'error'
-          //     })
-          //   }
-          // }).catch(() => {
-          //   this.$message({
-          //     message: '选择文件出错',
-          //     type: 'error'
-          //   })
-          // })
+          fileIsExist({
+            businessTypeId: that.identifyFileType,
+            identifier: identifier
+          }).then(res => {
+            if(res) {
+              that.$message({
+                message: '此文件已经上传过，请您选择其他文件',
+                type: 'warning'
+              });
+              document.querySelector('.uploader-file-status').style.visibility = 'hidden'
+              document.querySelector('.uploader-file-resume').style.visibility = 'hidden'
+            } else {
+              if (that.uploader_file) {
+                that.uploader_file.resume()
+              }
+            }
+            // if (res.status === 200) {
+            //   if (res.data === true) {
+            //     // 文件没上传过 就上传
+            //     if (this.uploader_file) {
+            //       this.uploader_file.resume()
+            //     }
+            //   } else {
+            //     this.$message({
+            //       message: '此文件已经上传过，请您选择其他文件',
+            //       type: 'warning'
+            //     })
+            //     document.querySelector('.uploader-file-status').style.visibility = 'hidden'
+            //     document.querySelector('.uploader-file-resume').style.visibility = 'hidden'
+            //   }
+            // } else {
+            //   this.$message({
+            //     message: '选择文件出错',
+            //     type: 'error'
+            //   })
+            // }
+          }).catch(() => {
+            this.$message({
+              message: '选择文件出错',
+              type: 'error'
+            })
+          })
         })
       } else {
         this.$message({
@@ -150,23 +167,23 @@ export default {
         type: 'zc',
         location: '',
         serviceFilePath: servicePath,
-      }
+      };
       relocateFile(obg).then(res => {
         if (res.status === 200) {
           this.$message({
             message: '文件上传成功',
             type: 'success'
-          })
-          this.getFileList()
+          });
+          this.$emit('change', 'update');
         } else {
           this.$message({
             message: '文件上传失败',
             type: 'error'
           })
         }
-      }).catch(() => {
+      }, err => {
         this.$message({
-          message: '文件上传失败',
+          message: err,
           type: 'error'
         })
       })

@@ -136,6 +136,13 @@ export default {
   margin-left: 24px;
   margin-right: 24px;
   cursor: pointer;
+  .el-dropdown {
+    .el-dropdown-selfdefine {
+      .el-icon-arrow-down {
+        margin-left: 8px;
+      }
+    }
+  }
   /deep/ {
     .dialog-form {
       .cancle-btn {

@@ -124,7 +124,7 @@
                 <el-button
                   class="table-btn"
                   size="mini"
-                  @click="checkInvoiceInfo(scope.row)"
+                  @click="checkInvoiceInfo(scope.$index, scope.row)"
                 >查看原件</el-button>
               </template>
             </el-table-column>
@@ -144,8 +144,8 @@
       <div class="divide-line"></div>
       <div class="review-btn-group">
         <el-button class="cancel-btn" @click="previous">返回</el-button>
-        <el-button :disabled="data.state === 1" @click="reviewPass">审核通过</el-button>
-        <el-button :disabled="data.state === 0" @click="reviewReject">驳回</el-button>
+        <el-button :disabled="data.auditState === 1" @click="reviewPass">审核通过</el-button>
+        <el-button :disabled="data.auditState === 0" @click="reviewReject">驳回</el-button>
       </div>
     </div>
     <el-dialog
@@ -211,8 +211,8 @@ export default {
     };
   },
   methods: {
-    checkInvoiceInfo(row) {
-      this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, paymentOrderId: this.paymentOrderId, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo}});
+    checkInvoiceInfo(index, row) {
+      this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, paymentOrderId: this.paymentOrderId, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo, index: index + 1}});
     },
     onFinalPriceChange(row) {
       const params = {
@@ -250,34 +250,40 @@ export default {
       this.dialogHintOperate = "驳回";
     },
     rejectOpinionOperate(){
-      this.data.state = 0;
       const params = {
         userId: 1,
         order: {
-          state: REJECT,
+          auditState: REJECT,
           id: this.data.id,
           rejectReason: this.data.rejectReason
         }
       };
-      checkPaymentRequestOrder(params).then(() => {
+      if (this.data.rejectReason === '') {
         this.$message({
-          message: '驳回成功',
-          type: 'success'
-        });
-        this.isDialogVisible = false;
-      },() => {
-        this.$message({
-          message: '驳回失败',
+          message: '请填写驳回原因',
           type: 'warning'
         })
-      });
+      } else {
+        checkPaymentRequestOrder(params).then(() => {
+          this.$message({
+            message: '驳回成功',
+            type: 'success'
+          });
+          this.data.auditState = 0;
+          this.isDialogVisible = false;
+        },() => {
+          this.$message({
+            message: '驳回失败',
+            type: 'warning'
+          })
+        });
+      }
     },
     reviewPassOpearte(){
-      this.data.state = 1;
       const params = {
         userId: 1,
         order: {
-          state: CHECK,
+          auditState: CHECK,
           id: this.data.id,
           rejectReason: ''
         }
@@ -288,6 +294,7 @@ export default {
           type: 'success'
         });
         this.isDialogVisible = false;
+        this.data.auditState = 1;
         this.data.rejectReason = '';
       },() => {
         this.$message({

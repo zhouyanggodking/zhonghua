@@ -34,7 +34,14 @@
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceCode"></el-input>
       </el-form-item>
       <el-form-item label="开票日期:" @click.native="filedFocus('开票日期')">
-        <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceTime"></el-input>
+        <el-date-picker
+          v-if="!isFiledFormEdit"
+          v-model="filedResultForm.invoiceTime"
+          type="date"
+          value-format="yyyy-MM-dd 00:00:00"
+          placeholder="选择日期">
+        </el-date-picker>
+        <el-input disabled v-else v-model="filedResultForm.invoiceTime"></el-input>
       </el-form-item>
       <el-form-item label="购买方:" @click.native="filedFocus('购买方')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.buyyerName"></el-input>
@@ -96,7 +103,7 @@
       </el-form-item>
     </el-form>
     <div class="btn-list">
-      <el-button class="back-btn">返回</el-button>
+      <el-button class="back-btn" @click="goBack">返回</el-button>
       <el-button class="verify-btn" @click="invoiceSupply">发票补录</el-button>
       <el-button v-if="isFiledFormEdit" class="submit-btn" type="primary" @click="handleClickModify">修改</el-button>
       <el-button v-else class="submit-btn" type="primary" @click="handleClickSave">保存</el-button>
@@ -105,7 +112,7 @@
 </template>
 <script>
 import { modifyInvoice } from '@/rest/realEstateUploadApi';
-// import {USERID} from '@/global/global';
+import {USERID} from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
 
 export default {
@@ -130,8 +137,7 @@ export default {
       currentTitle: "付款公司名称-合同编号-付款主题",
       propsData: {
         isShowContractMsg: true,
-        singleFieldPosition: [],
-        singleRotateAngle: ''
+        singleFieldPosition: []
       }
     };
   },
@@ -150,6 +156,9 @@ export default {
     }
   },
   methods: {
+    goBack() {
+      this.$router.go(-1);
+    },
     onImgPageChange(pageNum) {
       this.$refs.carousel.setActiveItem(pageNum-1);
     },
@@ -172,12 +181,13 @@ export default {
       mapData.createTime = dateFormat(mapData.createTime);
       mapData.invoiceTime = dateFormat(mapData.invoiceTime);
       mapData.lastUpdateTime = dateFormat(mapData.lastUpdateTime);
+      mapData.paymentRequestOrderId = this.paymentRequestOrderId;
       const invoicesItem = mapData.estateInvoiceItems;
       this.$delete(mapData, 'estateInvoiceItems');
       const params = {
         invoice: mapData,
-        paymentRequestOrderId: this.paymentRequestOrderId,
-        estateInvoiceItems: invoicesItem.map(item => {
+        userId: USERID,
+        invoiceItems: invoicesItem.map(item => {
           return {
             createTime : dateFormat(item.createTime),
             lastUpdateTime : dateFormat(item.lastUpdateTime),
@@ -331,6 +341,24 @@ export default {
                   line-height: 30px;
                 }
               }
+            }
+          }
+          .el-date-editor {
+            // width: 100%;
+            .el-input__prefix {
+              .el-input__icon {
+                line-height: 30px;
+              }
+            }
+            .el-input__suffix {
+              .el-input__suffix-inner {
+                .el-input__icon {
+                  line-height: 30px;
+                }
+              }
+            }
+            &.el-input {
+              width: 100%;
             }
           }
         }

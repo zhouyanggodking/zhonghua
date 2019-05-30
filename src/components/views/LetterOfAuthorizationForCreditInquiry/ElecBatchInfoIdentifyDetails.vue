@@ -128,8 +128,8 @@
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button :disabled="auditState === '1'" @click="reviewPass">审核通过</el-button>
-            <el-button :disabled="auditState === '0'" @click="reviewReject">驳回</el-button>
+            <el-button :disabled="auditState === 1" @click="reviewPass">审核通过</el-button>
+            <el-button :disabled="auditState === 0" @click="reviewReject">驳回</el-button>
           </div>
         </div>
       </div>
@@ -215,8 +215,6 @@ export default {
     };
   },
   methods: {
-    goBack() {},
-    search() {},
     reviewPass() {
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否审核通过";
@@ -230,7 +228,7 @@ export default {
       this.dialogVisible = true;
       if (this.elecFileForm.problemType !== '' && this.elecFileForm.problemDescription !== '') {
         this.checkOrRejectFun(REJECT, this.elecFileForm.problemType, this.elecFileForm.problemDescription);
-        this.auditState = '0';
+        this.auditState = 0;
       } else {
         this.$message({
           message: '请选择问题分类并填写问题描述!',
@@ -245,7 +243,7 @@ export default {
       this.checkOrRejectFun(CHECK, '', '');
       this.elecFileForm.problemType = '';
       this.elecFileForm.problemDescription = '';
-      this.auditState = '1';
+      this.auditState = 1;
     },
     reviewReject() {
       this.isDialogVisible = true;
@@ -359,7 +357,7 @@ export default {
   },
   mounted() {
     this.excelId = this.$route.query.id;
-    this.auditState = this.$route.query.auditState;
+    this.auditState = Number(this.$route.query.auditState);
     this.fetchEstateAuthorizationExcelInfo();
   },
   components: {
@@ -483,7 +481,11 @@ export default {
                       }
                     }
                     .el-input__suffix {
-                      display: none;
+                      .el-input__suffix-inner {
+                        .el-input__icon {
+                          line-height: 30px;
+                        }
+                      }
                     }
                     &.el-input {
                       width: 100%;

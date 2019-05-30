@@ -8,26 +8,27 @@
         <div class="left-img">
           <identify-result-top-banner title="发票图像" :currentPage="currentPage" :total="invoicesMessage.length" @change="onImgPageChange"></identify-result-top-banner>
           <div class="img-group">
-            <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
+            <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" :initial-index="currentPage - 1" @change="imgCarouselChange">
               <el-carousel-item v-for="item in invoicesMessage.length" :key="item">
-                <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="String(rotateAngleList[item])" ref="img"></zoom-image>
+                <!-- {{item}}{{currentPage}} -->
+                <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :imgSrc="invoicesMessage[item-1].outputLocation" :imageRotate="String(rotateAngleList[item-1])" ref="img"></zoom-image>
               </el-carousel-item>
             </el-carousel>
           </div>
         </div>
         <div class="right-filed">
           <identify-result-top-banner title="识别结果" @change="onImgPageChange" :total="invoicesMessage.length" :currentPage="currentPage"></identify-result-top-banner>
-          <el-carousel ref="invoiceCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" @change="carouselChange">
+          <el-carousel ref="invoiceCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" :initial-index="currentPage - 1">
             <el-carousel-item v-for="(item, index) in invoicesMessage" :key="index">
               <contract-message v-if="isShowContractMsg" :titleInfos="simpleInfos" :contractData="item" :index="index" :positionInfos="infos"  @change="toggleInvoice"></contract-message>
-              <contract-supplyment v-else :titleInfos="simpleInfos" @change="toggleInvoice"></contract-supplyment>
+              <contract-supplyment :originalFileId="item.originalFileId" :outputImg="item.outputLocation" :inputImg="item.inputLocation" v-else :titleInfos="simpleInfos" @change="toggleInvoice"></contract-supplyment>
             </el-carousel-item>
           </el-carousel>
         </div>
       </div>
-      <div class="footer-btn">
+      <!-- <div class="footer-btn">
         <el-button>提交验真</el-button>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -47,12 +48,11 @@ export default {
       rotateAngle: null,
       locationInfos: null,
       isShowContractMsg: true,
-      imagesSrc: "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg",
+      imagesSrc: "",
       paymentOrderTheme: '',
-      // imagesSrc: "http://10.17.17.151:8080/opt/output/test.png",
       paymentRequestId: null,
       stamped: ['否', '是'],
-      currentPage: 1,
+      currentPage: 2,
       imgAutoPlay: false,
       tableData: [],
       textarea: "",
@@ -71,6 +71,7 @@ export default {
     onImgPageChange(pageNum) {
       this.$refs.invoiceCarousel.setActiveItem(pageNum-1);
       this.$refs.imgCarousel.setActiveItem(pageNum-1);
+      this.currentPage = Number(pageNum);
     },
     handleClickModify() {
       this.isFiledFormEdit = !this.isFiledFormEdit;
@@ -78,14 +79,11 @@ export default {
     handleClickSave() {
       this.isFiledFormEdit = !this.isFiledFormEdit;
     },
-    carouselChange(index) {
+    imgCarouselChange(index) {
       this.$refs.imgCarousel.setActiveItem(index);
       this.$refs.invoiceCarousel.setActiveItem(index);
-      this.currentPage = index + 1;
+      this.currentPage = (index + 1);
       this.singleImagePosition = [];
-      // if (this.invoicesMessage.length) {
-      //   this.imagesSrc = `${global_}${this.invoicesMessage[index].outputLocation}`;
-      // }
     },
     fetchTotalInvoices() {
       const params = {
@@ -108,7 +106,13 @@ export default {
       })
     }
   },
+  watch: {
+    isShowContractMsg() {
+      this.fetchTotalInvoices();
+    }
+  },
   mounted() {
+    this.currentPage = Number(this.$route.query.index);
     this.paymentRequestId = this.$route.query.paymentOrderId;
     this.paymentOrderTheme = this.$route.query.title;
     this.currentTitle = `${this.$route.query.payer}-${this.$route.query.contractNo}-${this.$route.query.title}`;
@@ -140,7 +144,7 @@ export default {
     }
   }
   .original-invoice {
-    min-height: 1000px;
+    min-height: 600px;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -154,7 +158,6 @@ export default {
       margin-bottom: 30px;
       .left-img {
         flex-shrink: 0;
-        // width: 574px;
         width: 50%;
         padding: 10px 30px 76px 30px;
         margin-right: 10px;
@@ -192,19 +195,22 @@ export default {
             height: 100%;
             .el-carousel__container {
               height: 100%;
+              .el-carousel__arrow {
+                display: none;
+              }
             }
           }
         }
       }
     }
-    .footer-btn {
-      margin-top: auto;
-      text-align: right;
-      .el-button {
-        @include buttonStyle;
-        margin: 0;
-      }
-    }
+    // .footer-btn {
+    //   margin-top: auto;
+    //   text-align: right;
+    //   .el-button {
+    //     @include buttonStyle;
+    //     margin: 0;
+    //   }
+    // }
   }
 }
 .btn {

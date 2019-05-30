@@ -26,7 +26,7 @@
         <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
         <div class="accept-type">支持.zip/.rar/.7z格式</div>
       </div>
-      <file-upload :timeStamp="authorizationValidDate" :fileType="businessTypeId" v-else class="file-upload-box"></file-upload>
+      <file-upload @change="uploadSuccess" :timeStamp="authorizationValidDate" :fileType="businessTypeId" v-else class="file-upload-box"></file-upload>
       <div class="upload-history">
         <div class="title">上传记录</div>
         <el-table
@@ -102,13 +102,16 @@ export default {
       pageSizes: [PAGE_SIZE],
       formLabelWidth: '120px',
       breadCrumbList: [
-        '征信查询授权书', '文件上传'
+        '首页', '征信查询授权书', '文件上传'
       ],
       tableData: [],
       readyDeleteItem: null
     };
   },
   methods: {
+    uploadSuccess() {
+      this.fetchHistoryList();
+    },
     toggleFiledList() {
       this.isShowFiledList = !this.isShowFiledList;
     },
@@ -274,7 +277,7 @@ export default {
     padding: 24px  0;
     background-color: #ffffff;
     text-align: right;
-    z-index: 999;
+    z-index: 9999;
     /deep/ {
       .el-button {
         &.return-back {
