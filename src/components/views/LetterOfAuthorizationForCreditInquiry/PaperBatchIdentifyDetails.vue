@@ -72,7 +72,6 @@
                       <el-option v-for="(item, index) in isStamp" :key="index" :label="item" :value="index"></el-option>
                     </el-select>
                     <el-input disabled v-else v-model="isStamp[paperFileForm.corporateStamp]"></el-input>
-                    <!-- <el-input :disabled="isPaperFiledFormEdit" v-model="paperFileForm.corporateStamp"></el-input> -->
                   </el-form-item>
                 </div>
               </div>
@@ -89,7 +88,7 @@
         <div class="review-opinion_content">
           <div class="question-classify">
             <div class="text">问题分类:</div>
-            <el-select v-model="rejectForm.problemType" placeholder="请选择">
+            <el-select v-model="elecMsg.problemType" placeholder="请选择">
               <el-option
                 v-for="(item, index) in questionClassificationList"
                 :key="index"
@@ -100,12 +99,12 @@
           </div>
           <div class="question-describe">
             <div class="text">其他问题描述:</div>
-            <el-input type="textarea" placeholder="请输入内容" v-model="rejectForm.problemDescription" :rows="5"></el-input>
+            <el-input type="textarea" placeholder="请输入内容" v-model="elecMsg.problemDescription" :rows="5"></el-input>
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button @click="reviewPass">审核通过</el-button>
-            <el-button @click="reviewReject">驳回</el-button>
+            <el-button :disabled="auditState === 1" @click="reviewPass">审核通过</el-button>
+            <el-button :disabled="auditState === 0" @click="reviewReject">驳回</el-button>
           </div>
         </div>
       </div>
@@ -214,9 +213,9 @@ export default {
     reviewPassOpearte() {
       this.isDialogVisible = false;
       this.checkOrRejectFun(CHECK, '', '');
-      this.rejectForm.problemType = '';
-      this.rejectForm.problemDescription = '';
-      this.auditState = '1';
+      this.elecMsg.problemType = 0;
+      this.elecMsg.problemDescription = '';
+      this.auditState = 1;
     },
     // 驳回
     reviewReject() {
@@ -227,9 +226,9 @@ export default {
     // 驳回，确定
     rejectOpinionOperate() {
       this.isDialogVisible = false;
-      if (this.rejectForm.problemType !== '' && this.rejectForm.problemDescription !== '') {
-        this.checkOrRejectFun(REJECT, this.rejectForm.problemType, this.rejectForm.problemDescription);
-        this.auditState = '0';
+      if (this.elecMsg.problemType !== '' && this.elecMsg.problemDescription !== '') {
+        this.checkOrRejectFun(REJECT, this.elecMsg.problemType, this.elecMsg.problemDescription);
+        this.auditState = 0;
       } else {
         this.$message({
           message: '请选择问题分类并填写问题描述!',
@@ -330,7 +329,7 @@ export default {
   },
   mounted() {
     this.excelId = this.$route.query.id;
-    this.auditState = this.$route.query.auditState;
+    this.auditState = Number(this.$route.query.auditState);
     this.fetchEstateAuthorizationExcelInfo();
   },
   components: {
@@ -470,13 +469,18 @@ export default {
                     }
                   }
                   .el-date-editor {
+                    // width: 100%;
                     .el-input__prefix {
                       .el-input__icon {
                         line-height: 30px;
                       }
                     }
                     .el-input__suffix {
-                      display: none;
+                      .el-input__suffix-inner {
+                        .el-input__icon {
+                          line-height: 30px;
+                        }
+                      }
                     }
                     &.el-input {
                       width: 100%;
@@ -571,6 +575,10 @@ export default {
   &:hover {
     background-color: #e9d58b;
     border-color: #e9d58b;
+  }
+  &.is-disabled {
+    background-color: #d9d9d9;
+    border-color: #d9d9d9;
   }
 }
 .el-button:active {

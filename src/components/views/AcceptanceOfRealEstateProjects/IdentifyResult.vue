@@ -280,7 +280,7 @@ export default {
       const params = {
         orders : {
           ids: this.multipleSelection,
-          state: CHECK,
+          auditState: CHECK,
         },
         userId: 1
       };
@@ -288,7 +288,8 @@ export default {
         this.$message({
           message: '审核完成',
           type: 'success'
-        })
+        });
+        this.getPaymentOrderInfos();
       }, () => {
         this.$message({
           message: '审核失败',
@@ -305,7 +306,7 @@ export default {
       const params = {
         userId: 1,
         order: {
-          state: REJECT,
+          auditState: REJECT,
           id: this.rejectId,
           rejectReason: this.rejectContent
         }
@@ -316,6 +317,7 @@ export default {
           type: 'success'
         });
         this.dialogVisible = false;
+        this.getPaymentOrderInfos();
       },() => {
         this.$message({
           message: '驳回失败',

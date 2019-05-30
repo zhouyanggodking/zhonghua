@@ -1,12 +1,15 @@
 import axios from 'axios';
 import localStorageHelper from '@/helpers/localStorageHelper';
-const USERID = 'USERID' // 用户id
-const USERNAME = 'USERNAME' // 用户名
-const TELEPHONE = 'TELEPHONE' // 电话号码
+const USER_STATUS = 'USER_STATUS';
+const USERID = 'USERID'; // 用户id
+const USERNAME = 'USERNAME'; // 用户名
+const TELEPHONE = 'TELEPHONE'; // 电话号码
+const ROLE_ID = 'ROLE_ID'; //管理员和普通用户
+const ROLE_LIST = 'ROLE_LIST'; //权限列表
 
 // 登录
 export const login = (params)=> {
-  return axios.get(`http://10.17.20.121:8080/sys/ocr/user/login?telephone=${params.telephone}&password=${params.password}`)
+  return axios.get(`/sys/ocr/user/login?telephone=${params.telephone}&password=${params.password}`)
   .then(res => {
     // 登录标识
     var flag = ''; 
@@ -26,7 +29,10 @@ export const login = (params)=> {
         } else {
           localStorageHelper.setItem(USERID, res.data.data.id);
           localStorageHelper.setItem(USERNAME, res.data.data.username);
-          localStorageHelper.setItem(TELEPHONE, res.data.data.telephone);    
+          localStorageHelper.setItem(TELEPHONE, res.data.data.telephone);  
+          localStorageHelper.setItem(USER_STATUS, res.data.data.status);  
+          localStorageHelper.setItem(ROLE_ID, res.data.data.roleId);
+          localStorageHelper.setItem(ROLE_LIST, JSON.stringify(res.data.data.sysOcrAcls));
           flag = 'success'; // 用户正常登录
         }
       }
@@ -40,6 +46,9 @@ export const login = (params)=> {
     localStorageHelper.removeItem(USERID);
     localStorageHelper.removeItem(USERNAME);
     localStorageHelper.removeItem(TELEPHONE);
+    localStorageHelper.removeItem(USER_STATUS);
+    localStorageHelper.removeItem(ROLE_ID);
+    localStorageHelper.removeItem(ROLE_LIST);
     return Promise.reject(err)
   })
 }
@@ -50,11 +59,17 @@ export const logout = ()=> {
     localStorageHelper.removeItem(USERID);
     localStorageHelper.removeItem(USERNAME);
     localStorageHelper.removeItem(TELEPHONE);
+    localStorageHelper.removeItem(USER_STATUS);
+    localStorageHelper.removeItem(ROLE_ID);
+    localStorageHelper.removeItem(ROLE_LIST);
     return res.data;
   }, (err) => {
     localStorageHelper.removeItem(USERID);
     localStorageHelper.removeItem(USERNAME);
     localStorageHelper.removeItem(TELEPHONE);
+    localStorageHelper.removeItem(USER_STATUS);
+    localStorageHelper.removeItem(ROLE_ID);
+    localStorageHelper.removeItem(ROLE_LIST);
     return Promise.reject(err)
   })
 }

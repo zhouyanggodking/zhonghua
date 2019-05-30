@@ -3,10 +3,10 @@
     <div class="payment-order-theme">
       <label>关联付款主题:</label>
       <el-select v-model="paymentRequestOrderId" placeholder="">
-        <el-option v-for="(value, key, index) of titleInfos[0]" :key="index" :label="value" :value="key"></el-option>
+        <el-option v-for="(value, key, index) of titleInfos[0]" :key="index" :label="value" :value="Number(key)"></el-option>
       </el-select>
     </div>
-    <el-form label-position="right" :rules="rules" label-width="120px" :model="contractSupplymentForm">
+    <el-form ref="contractSupplymentForm" label-position="right" :rules="rules" label-width="120px" :model="contractSupplymentForm">
       <el-form-item label="发票类型:" prop="invoiceType">
         <el-select  v-model="contractSupplymentForm.invoiceType" placeholder="">
           <el-option label="增值税普通发票" value="增值税普通发票"></el-option>
@@ -34,20 +34,35 @@
       <el-form-item label="校验码:" prop="checkCode">
         <el-input v-model="contractSupplymentForm.checkCode"></el-input>
       </el-form-item>
+      <el-form-item label="验真状态:">
+        <div>
+          <span v-if="verifiedInvoiceItems.verification === 1">验真通过</span>
+          <span v-else-if="verifiedInvoiceItems.verification === 0">验真失败</span>
+          <span v-else></span>
+        </div>
+      </el-form-item>
     </el-form>
-    <div class="btn-list">
-      <el-button class="verify-btn" @click="back">无法识别</el-button>
-      <el-button class="verify-btn" @click="handleNotVerifyClick">验真不通过</el-button>
+    <div class="btn-list" v-if="isAddInvoice">
+      <el-button class="verify-btn" disabled>无法识别</el-button>
+      <el-button class="verify-btn" disabled>验真不通过</el-button>
+      <el-button class="submit-btn" type="primary" @click="handleAddInvoiceClick">确认</el-button>
+    </div>
+    <div class="btn-list" v-else>
+      <el-button class="verify-btn"  @click.native="contRecognize">无法识别</el-button>
+      <el-button class="verify-btn" :disabled="!verifiedInvoiceItems.verification"  @click.native="contRecognize">验真不通过</el-button>
       <el-button class="submit-btn" type="primary" @click="handleVerifyClick">提交验真</el-button>
     </div>
   </div>
 </template>
 <script>
-import { supplyInvoice } from '@/rest/realEstateUploadApi';
+import { supplyInvoice, verifyInvoice } from '@/rest/realEstateUploadApi';
+import {USERID} from '@/global/global';
+import {dateFormat} from '@/helpers/dateHelper';
 
 export default {
   data() {
     return {
+      isAddInvoice: false,
       paymentRequestOrderId: 1,
       isFiledFormEdit: false,
       contractSupplymentForm: {
@@ -56,10 +71,10 @@ export default {
         invoiceCode: '',
         invoiceTime: '',
         checkCode: '',
-        finalPrice: null,
-        outputLocation: '/test/test.png',
-        inputLocation: '/test/test.png',
-        originalFileId: 1
+        finalPrice: '',
+        outputLocation: this.outputImg,
+        inputLocation: this.inputImg,
+        originalFileId: this.originalFileId
       },
       rules: {
         invoiceType: [
@@ -79,40 +94,132 @@ export default {
         ],
         finalPrice: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^\d$/, message: '金额为数字', trigger: 'blur' }
+          { pattern: /^(([1-9]\d*)|0)(\.\d*)?$/, message: '金额为数字', trigger: 'blur' }
         ]
+      },
+      verifiedInvoiceItems: {},
+      propsData: {
+        isShowContractMsg: true,
+        singleFieldPosition: []
       }
     }
   },
   props: {
     titleInfos: {
       type: Array
+    },
+    outputImg: {
+      type: String
+    },
+    inputImg: {
+      type: String
+    },
+    originalFileId: {
+      type: Number
     }
   },
   methods: {
     handleNotVerifyClick() {},
-    back() {
-      this.$emit('change', true);
-    },
     handleVerifyClick() {
-      const params = this.contractSupplymentForm;
-      params.paymentRequestOrderId = this.paymentRequestOrderId;
-      this.requestInvoiceSupply(params);
+      const invoiceItems = this.contractSupplymentForm;
+      invoiceItems.paymentRequestOrderId = this.paymentRequestOrderId;
+      const params = {
+        invoice: invoiceItems,
+        userId: USERID
+      }
+      this.requestVerifyInvoice(params);
     },
-    requestInvoiceSupply(params) {
+    requestVerifyInvoice(params) {
+      this.$refs.contractSupplymentForm.validate(valid => {
+        if(valid) {
+          verifyInvoice(params).then((res) => {
+            this.verifiedInvoiceItems = res.data;
+            this.isAddInvoice = true;
+          }, () => {
+            this.$message({
+              message: '验真错误',
+              type: 'failed'
+            })
+          })
+        }
+      })
+    },
+    handleAddInvoiceClick() {
+      const mapData = this.verifiedInvoiceItems;
+      mapData.createTime = dateFormat(mapData.createTime);
+      mapData.invoiceTime = dateFormat(mapData.invoiceTime);
+      mapData.lastUpdateTime = dateFormat(mapData.lastUpdateTime);
+      mapData.paymentRequestOrderId = this.paymentRequestOrderId;
+      const invoicesItem = mapData.estateInvoiceItems;
+      this.$delete(mapData, 'estateInvoiceItems');
+      const params = {
+        invoice: mapData,
+        userId: USERID,
+        invoiceItems: invoicesItem ? invoicesItem.map(item => {
+          return {
+            createTime : dateFormat(item.createTime),
+            lastUpdateTime : dateFormat(item.lastUpdateTime),
+            id: item.id,
+            itemName: item.itemName,
+            spec : item.spec,
+            unit : item.unit,
+            counts : item.counts,
+            unitPrice : item.unitPrice,
+            totalPrice : item.totalPrice,
+            taxRate : item.taxRate,
+            taxPrice : item.taxPrice,
+            invoiceId : item.invoiceId,
+            createUser : item.createUser,
+            lastUpdateUser : item.lastUpdateUser
+          }
+        }) : []
+      };
+      this.addInvoice(params);
+    },
+    addInvoice(params) {
       supplyInvoice(params).then(() => {
         this.$message({
-          message: '修改成功',
+          message: '补录成功',
           type: 'success'
         });
-        this.$emit('change', true);
+        this.propsData.isShowContractMsg = true;
+        this.$emit('change', this.propsData);
       }, () => {
         this.$message({
-          message: '修改失败',
+          message: '补录失败',
           type: 'failed'
         })
       })
+    },
+    // 无法识别,验证不通过
+    contRecognize() {
+      const params = {
+        invoice: {
+          paymentRequestOrderId: this.paymentOrderId,
+          inputLocation: this.inputImg,
+          outputLocation: this.outputImg,
+          originalFileId: this.originalFileId
+        },
+        invoiceItems: [],
+        userId: USERID
+      };
+      supplyInvoice(params).then(() => {
+        this.$message({
+          message: '补录成功',
+          type: 'success'
+        });
+        this.propsData.isShowContractMsg = true;
+        this.$emit('change', this.propsData);
+      }, () => {
+        this.$message({
+          message: '补录失败',
+          type: 'success'
+        });
+      })
     }
+  },
+  mounted() {
+    this.paymentOrderId = this.$route.query.paymentOrderId;
   }
 }
 </script>
@@ -220,6 +327,13 @@ export default {
                 line-height: 30px;
               }
             }
+            .el-input__suffix {
+              .el-input__suffix-inner {
+                .el-input__icon {
+                  line-height: 30px;
+                }
+              }
+            }
             &.el-input {
               width: 100%;
             }
@@ -243,6 +357,12 @@ export default {
         @include buttonStyle;
         margin: 0;
         padding: 10px 20px;
+      }
+      &.is-disabled {
+        border: 1px solid #D9D9D9;
+        background-color: #ffffff;
+        border-radius: 4px;
+        color: #999999;
       }
     }
   }

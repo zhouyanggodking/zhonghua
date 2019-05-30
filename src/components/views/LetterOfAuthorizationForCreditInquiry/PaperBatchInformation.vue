@@ -96,10 +96,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "纸质版授权书批次识别结果",
-      breadCrumbList: ["征信查询授权书识别结果",
-        "纸质版批次信息",
-        "纸质版批次详情",
-        ],
+      breadCrumbList: ['首页', '征信查询授权书', '识别结果', '纸质版批次信息'],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       checkStatusList: [

@@ -32,7 +32,9 @@
 
 <style>
   .uploader-list {
+    width: 80%;
     position: relative;
+    text-align: center;
   }
   .uploader-list > ul {
     list-style: none;

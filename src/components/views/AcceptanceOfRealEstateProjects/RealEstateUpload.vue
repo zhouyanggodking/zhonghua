@@ -2,7 +2,7 @@
   <div class="real-estate-upload">
     <bread-crumb :data="breadCrumbList" currentTitle="文件上传"></bread-crumb>
     <div class="upload-main">
-      <file-upload fileType="1" class="file-upload-box"></file-upload>
+      <file-upload @change="uploadSuccess" fileType="1" class="file-upload-box"></file-upload>
       <div class="filed-edit">
         <div class="title">提取字段编辑</div>
         <div class="add-filed-btn">
@@ -123,7 +123,7 @@
       </span>
     </el-dialog>
     <div class="real-estate-upload-footer">
-      <el-button class="return-back">返回</el-button>
+      <el-button class="return-back" @click="goBack">返回</el-button>
       <el-button class="start-identify">开始识别 </el-button>
     </div>
   </div>
@@ -150,7 +150,7 @@ export default {
       formLabelWidth: '120px',
       activeName: 'filedEdit',
       breadCrumbList: [
-        '动产项目承兑', '文件上传'
+        '首页', '动产项目承兑', '文件上传'
       ],
       addFiledform: {
         standardName: '',
@@ -176,6 +176,12 @@ export default {
     };
   },
   methods: {
+    uploadSuccess() {
+      this.fetchHistoryList();
+    },
+    goBack() {
+      this.$router.go(-1);
+    },
     toggleFiledList() {
       this.isShowFiledList = !this.isShowFiledList;
     },
@@ -477,7 +483,7 @@ export default {
     padding: 24px  0;
     background-color: #ffffff;
     text-align: right;
-    z-index: 999;
+    z-index: 9999;
     /deep/ {
       .el-button {
         &.return-back {

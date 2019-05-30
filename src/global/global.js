@@ -1,4 +1,4 @@
-// const global_ = 'http://10.17.16.91:8080'
+// const global_ = 'http://49.4.79.11:8181';
 const global_ = 'http://10.17.17.151:8080';
 const USERID = 1;
 const DEPARTMENT_LIST = [

@@ -1,7 +1,7 @@
 <template>
   <div class="index-page">
     <div class="index-logo">
-      某某某，欢迎登录智鉴通系统!
+      {{userName}}，欢迎登录智鉴通系统!
     </div>
     <div class="files-count-group">
       <div class="single-file" :class="{'upload': item.type==='upload', 'download': item.type==='download'}" v-for="(item, index) in filesCountList" :key="index">
@@ -13,8 +13,16 @@
         <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 5">
         <div class="text">
           <p class="title">{{item.title}}</p>
-          <p class="count" v-if="item.type === 'upload'">已上传资料<span>{{item.count}}</span>份</p>
-          <p class="count" v-else>已提取完成资料<span>{{item.count}}</span>份</p>
+          <p class="count" v-if="item.type === 'upload'">已上传资料
+            <span v-if="index === 0">{{paymentFilesCount.fileCountTotal || 0}}</span>
+            <span v-if="index === 2">{{eleFilesCount.fileCountTotal || 0}}</span>
+            <span v-if="index === 4">{{paperFilesCount.fileCountTotal || 0}}</span>
+            份</p>
+          <p class="count" v-else>已提取完成资料
+            <span v-if="index === 1">{{paymentFilesCount.recognizeFileCountTotal || 0}}</span>
+            <span v-if="index === 3">{{eleFilesCount.recognizeFileCountTotal || 0}}</span>
+            <span v-if="index === 5">{{paperFilesCount.recognizeFileCountTotal || 0}}</span>
+            份</p>
         </div>
         <div v-if="item.type === 'upload'">
           <router-link v-if="index === 0" to="/realEstateUpload">
@@ -56,9 +64,16 @@
   </div>
 </template>
 <script>
+import LocalStorageHelper from '@/helpers/localStorageHelper'; 
+import {getFileCounts} from '@/rest/indexApi';
+import {USERID} from '@/global/global';
+
+const USERNAME = 'USERNAME';
+
 export default {
   data() {
     return {
+      userName: '',
       filesCountList: [
         {
           title: '付款申请上传',
@@ -90,9 +105,29 @@ export default {
           type: 'download',
           count: 10
         }
-      ]
+      ],
+      paymentFilesCount: {},
+      eleFilesCount: {},
+      paperFilesCount: {}
     };
-  }
+  },
+  methods: {
+    fetFilesCounts() {
+      const params = {
+        userId: USERID,
+        businessTypeId: ''
+      };
+      getFileCounts(params).then(res => {
+        this.paymentFilesCount = res.filter(item => item.businessTypeId === 1)[0];
+        this.eleFilesCount = res.filter(item => item.businessTypeId === 3)[0];
+        this.paperFilesCount = res.filter(item => item.businessTypeId === 4)[0];
+      })
+    }
+  },
+  mounted() {
+    this.userName = LocalStorageHelper.getItem(USERNAME);
+    this.fetFilesCounts();
+  },
 }
 </script>
 <style lang="scss" scoped>
@@ -114,9 +149,6 @@ p {
     background-size: cover;
   }
   .files-count-group {
-    // display: flex;
-    // justify-content: space-around;
-    // flex-wrap: wrap;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-column-gap: 20px;
@@ -126,7 +158,6 @@ p {
       align-items: center;
       justify-content: space-around;
       height: 200px;
-      // width: 572px;
       margin: 20px 0 0 0;
       img {
         width: 78px;
@@ -146,7 +177,6 @@ p {
         background-color: #ffffff;
       }
       .text {
-        // width: 180px;
         margin-left: 20px;
         .title {
           font-size: 22px;
@@ -154,12 +184,11 @@ p {
           color: #666666;
         }
         .count {
-          font-size: 22px;
+          font-size: 20px;
           color:#666666;
         }
       }
       .el-button {
-        // width: 134px;
         height: 44px;
         @include buttonStyle;
         a {
