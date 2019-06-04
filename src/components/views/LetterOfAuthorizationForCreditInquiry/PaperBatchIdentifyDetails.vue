@@ -99,7 +99,7 @@
           </div>
           <div class="question-describe">
             <div class="text">其他问题描述:</div>
-            <el-input type="textarea" placeholder="请输入内容" v-model="elecMsg.problemDescription" :rows="5"></el-input>
+            <el-input type="textarea" maxlength="100" show-word-limit placeholder="请输入内容" v-model="elecMsg.problemDescription" :rows="5"></el-input>
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
@@ -226,14 +226,16 @@ export default {
     // 驳回，确定
     rejectOpinionOperate() {
       this.isDialogVisible = false;
-      if (this.elecMsg.problemType !== '' && this.elecMsg.problemDescription !== '') {
-        this.checkOrRejectFun(REJECT, this.elecMsg.problemType, this.elecMsg.problemDescription);
-        this.auditState = 0;
-      } else {
-        this.$message({
-          message: '请选择问题分类并填写问题描述!',
-          type: 'warning'
-        })
+      if (this.elecMsg) {
+        if (this.elecMsg.problemType !== '' && this.elecMsg.problemDescription !== '') {
+          this.checkOrRejectFun(REJECT, this.elecMsg.problemType, this.elecMsg.problemDescription);
+          this.auditState = 0;
+        } else {
+          this.$message({
+            message: '请选择问题分类并填写问题描述!',
+            type: 'warning'
+          })
+        }
       }
     },
     // 驳回、审核

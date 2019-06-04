@@ -94,7 +94,7 @@ export default {
         ],
         finalPrice: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^(([1-9]\d*)|0)(\.\d*)?$/, message: '金额为数字', trigger: 'blur' }
+          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
         ]
       },
       verifiedInvoiceItems: {},

@@ -1,4 +1,9 @@
 <template>
+<div 
+    v-loading="loading"
+    element-loading-text="正在解压中..."
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)">
   <uploader
     v-loading="load"
     :element-loading-text="loadingText"
@@ -14,23 +19,26 @@
     <uploader-unsupport></uploader-unsupport>
     <uploader-drop>
       <uploader-btn>
-        <img src="../../assets/imgs/upload-icon.png" alt="">
+        <div style="line-height: 18px"><img src="../../assets/imgs/upload-icon.png" alt=""></div>
         <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
         <div class="accept-type">支持.zip/.rar/.7z格式</div>
       </uploader-btn>
     </uploader-drop>
-    <uploader-list :fileList="list"></uploader-list>
+    <uploader-list></uploader-list>
   </uploader>
+</div>
 </template>
 <script>
 import {calculateMd5} from '@/utils/fileUpload.js';
 import {relocateFile, fileIsExist} from '@/rest/realEstateUploadApi';
+import {global_} from '@/global/global';
 
 export default {
   data() {
     let fileType = this.fileType;
     let timeStamp = this.timeStamp;
     return {
+      loading: false,
       identifyFileType: this.fileType,
       file_md5: null,
       uploader_file: null,
@@ -46,7 +54,7 @@ export default {
       },
       loadingText: '文件解析中...',
       options: {
-        target: 'http://10.17.17.151:8080/uploader/chunk',
+        target: `${global_}/uploader/chunk`,
         testChunks: false,
         singleFile: true,
         simultaneousUploads: 1, // 文件个数
@@ -103,40 +111,27 @@ export default {
             businessTypeId: that.identifyFileType,
             identifier: identifier
           }).then(res => {
-            if(res) {
-              that.$message({
-                message: '此文件已经上传过，请您选择其他文件',
-                type: 'warning'
-              });
-              document.querySelector('.uploader-file-status').style.visibility = 'hidden'
-              document.querySelector('.uploader-file-resume').style.visibility = 'hidden'
-            } else {
-              if (that.uploader_file) {
-                that.uploader_file.resume()
+            if(res.status === 200) {
+              if (res.data) {
+                that.$message({
+                  message: '此文件已经上传过，请您选择其他文件',
+                  type: 'warning'
+                });
+                document.querySelector('.uploader-file-status').style.visibility = 'hidden';
+                document.querySelector('.uploader-file-resume').style.visibility = 'hidden';
+              } else {
+                if (that.uploader_file) {
+                  that.uploader_file.resume()
+                }
               }
+            } else {
+              that.$message({
+                message: '文件上传错误',
+                type: 'error'
+              })
             }
-            // if (res.status === 200) {
-            //   if (res.data === true) {
-            //     // 文件没上传过 就上传
-            //     if (this.uploader_file) {
-            //       this.uploader_file.resume()
-            //     }
-            //   } else {
-            //     this.$message({
-            //       message: '此文件已经上传过，请您选择其他文件',
-            //       type: 'warning'
-            //     })
-            //     document.querySelector('.uploader-file-status').style.visibility = 'hidden'
-            //     document.querySelector('.uploader-file-resume').style.visibility = 'hidden'
-            //   }
-            // } else {
-            //   this.$message({
-            //     message: '选择文件出错',
-            //     type: 'error'
-            //   })
-            // }
           }).catch(() => {
-            this.$message({
+            that.$message({
               message: '选择文件出错',
               type: 'error'
             })
@@ -146,11 +141,13 @@ export default {
         this.$message({
           message: '文件类型错误！',
           type: 'error'
-        })
+        });
+        document.querySelector('.uploader-list').style.display = 'none';
       }
     },
     fileComplete() {
       // 先把File对象转换成Blob 然后转换成buffer进行加密
+      this.loading = true;
       let file = arguments[0].file
       let _fileName = file.name.split('.')[0]
       let _identifier = file.size + '_' + _fileName
@@ -171,13 +168,15 @@ export default {
       relocateFile(obg).then(res => {
         if (res.status === 200) {
           this.$message({
-            message: '文件上传成功',
+            message: '文件解压成功',
             type: 'success'
           });
-          this.$emit('change', 'update');
+          this.loading = false;
+          this.$emit('change', {originalFileId: res.data});
         } else {
+          this.loading = false;
           this.$message({
-            message: '文件上传失败',
+            message: '文件解压失败',
             type: 'error'
           })
         }

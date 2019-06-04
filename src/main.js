@@ -8,15 +8,16 @@ import store from './store';
 import router from './router';
 import uploader from '@/components/uploader';
 import './main.scss';
-// import axios from 'axios';
+import axios from 'axios';
 
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.use(Viewer);
 Vue.use(uploader)
 
-// axios.defaults.baseURL = 'http://49.4.79.11:8181';
-// axios.defaults.baseURL = 'http://10.145.6.121:8080';
+axios.defaults.baseURL = 'http://49.4.79.11:8181';
+// axios.defaults.baseURL = 'http://10.17.16.204:8080';
+// axios.defaults.baseURL = 'http://10.17.20.121:8080';
 
 // axios.interceptors.request.use(config => {
 //   if (config.url.indexOf('/api/login') === -1) {

@@ -88,7 +88,7 @@ export default {
           padding-left: 100px !important;
           text-align: left;
           &.is-active {
-            background: #C1B071 !important;
+            background: #094D84 !important;
             color: #ffffff !important;
           }
         }
@@ -100,12 +100,12 @@ export default {
             }
             &.is-opened {
               .el-submenu__title {
-                color: #C1B071 !important;
+                color: #094D84 !important;
               }
               .el-menu--inline {
                 >.el-menu-item {
                   &.is-active {
-                    background: #C1B071 !important;
+                    background: #094D84 !important;
                     color: #ffffff !important;
                   }
                 }
@@ -117,13 +117,13 @@ export default {
       &.is-opened {
         background-color: #121213 !important; 
         .el-submenu__title {
-          color: #C1B071 !important;
+          color: #094D84 !important;
         }
         .el-menu--inline {
           background-color: #121213 !important;
           >.el-menu-item {
             &.is-active {
-              background: #C1B071 !important;
+              background: #094D84 !important;
               color: #ffffff !important;
             }
           }
@@ -145,7 +145,7 @@ export default {
     padding-left: 60px !important;
     text-align: left;
     &.is-active {
-      background: #C1B071 !important;
+      background: #094D84 !important;
       color: #ffffff !important;
     }
     &:hover {

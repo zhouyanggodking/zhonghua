@@ -7,8 +7,8 @@
       </el-select>
       <el-input v-else :disabled="isFiledFormEdit" v-model="paymentOrderTheme"></el-input>
     </div>
-    <el-form label-position="right" label-width="120px" :model="filedResultForm">
-      <el-form-item label="发票类型:" @click.native="filedFocus('发票类型')">
+    <el-form ref="filedResultForm" label-position="right" :rules="rules" label-width="120px" :model="filedResultForm">
+      <el-form-item label="发票类型:" @click.native="filedFocus('发票类型')" prop="invoiceType">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType" placeholder="">
           <el-option label="专票" value="专票"></el-option>
           <el-option label="普票" value="普票"></el-option>
@@ -27,10 +27,10 @@
         </el-select>
         <el-input v-else :disabled="isFiledFormEdit" v-model="this.stamped[filedResultForm.stamped]"></el-input>
       </el-form-item>
-      <el-form-item label="发票号码:" @click.native="filedFocus('发票号码')">
+      <el-form-item label="发票号码:" @click.native="filedFocus('发票号码')" prop="invoiceNo">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceNo"></el-input>
       </el-form-item>
-      <el-form-item label="发票代码:" @click.native="filedFocus('发票代码')">
+      <el-form-item label="发票代码:" @click.native="filedFocus('发票代码')" prop="invoiceCode">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceCode"></el-input>
       </el-form-item>
       <el-form-item label="开票日期:" @click.native="filedFocus('开票日期')">
@@ -82,12 +82,12 @@
         </el-form-item>
       </div>
       <el-form-item label="价税合计:" @click.native="filedFocus('价税合计')">
-        <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.finalPriceUpcase"></el-input>
+        <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.finalPrice"></el-input>
       </el-form-item>
       <el-form-item label="累积已用金额:" @click.native="filedFocus('累积已用金额')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.usedPrice"></el-input>
       </el-form-item>
-      <el-form-item label="本次使用金额:" @click.native="filedFocus('本次使用金额')">
+      <el-form-item label="本次使用金额:" @click.native="filedFocus('本次使用金额')" prop="usePrice">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.usePrice"></el-input>
       </el-form-item>
       <el-form-item label="凭证联:" @click.native="filedFocus('凭证联')">
@@ -99,7 +99,7 @@
         <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.certification"></el-input>
       </el-form-item>
       <el-form-item label="备注信息:" @click.native="filedFocus('备注信息')">
-        <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.remarkInfo"></el-input>
+        <el-input type="textarea" maxlength="100" show-word-limit :disabled="isFiledFormEdit" v-model="filedResultForm.remarkInfo"></el-input>
       </el-form-item>
     </el-form>
     <div class="btn-list">
@@ -138,6 +138,23 @@ export default {
       propsData: {
         isShowContractMsg: true,
         singleFieldPosition: []
+      },
+      rules: {
+        invoiceType: [
+          { required: true, message: '请选择发票类型', trigger: 'blur' }
+        ],
+        invoiceNo: [
+          { required: true, message: '请输入发票号码', trigger: 'blur' },
+          { pattern: /^\d{8}$/, message: '发票号码为8位数字', trigger: 'blur' }
+        ],
+        invoiceCode: [
+          { required: true, message: '请输入发票代码', trigger: 'blur' },
+          { pattern: /^\d{10,12}$/, message: '发票代码为10~12位数字', trigger: 'blur' }
+        ],
+        usePrice: [
+          { required: true, message: '请输入金额', trigger: 'blur' },
+          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位内数字', trigger: 'blur' }
+        ]
       }
     };
   },
@@ -166,8 +183,12 @@ export default {
       this.isFiledFormEdit = !this.isFiledFormEdit;
     },
     handleClickSave() {
-      this.isFiledFormEdit = !this.isFiledFormEdit;
-      this.modifyInvoice();
+      // this.isFiledFormEdit = !this.isFiledFormEdit;
+      this.$refs.filedResultForm.validate(valid => {
+        if(valid) {
+          this.modifyInvoice();
+        }
+      })
     },
     carouselChange(index) {
       this.currentPage = index + 1;
@@ -210,7 +231,8 @@ export default {
         this.$message({
           message: '修改成功',
           type: 'success'
-        })
+        });
+        this.isFiledFormEdit = !this.isFiledFormEdit;
       }, () => {
         this.$message({
           message: '修改失败',
@@ -359,6 +381,16 @@ export default {
             }
             &.el-input {
               width: 100%;
+            }
+          }
+          .el-textarea {
+            &.is-disabled {
+              .el-textarea__inner {
+                border: none !important;
+                color: #333333;
+                background-color: #FAFAFA !important;
+                cursor: default;
+              }
             }
           }
         }

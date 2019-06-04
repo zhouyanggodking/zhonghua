@@ -2,9 +2,11 @@
   <div class="identify-result-detail-page">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle">
+          <div class="export-excel" @click="exportExcel">导出Excel</div>
+        </bread-crumb>
       </div>
-      <div class="export-excel" @click="exportExcel">导出Excel</div>
+      
     </div>
     <div class="identify-result-detail-page-content">
       <div class="header">
@@ -59,13 +61,13 @@
             <div class="grid-content column1">合同动态金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">{{data.contractDynamicAmount}}</div>
+            <div class="grid-content grid-result">{{formatMoney(data.contractDynamicAmount)}}</div>
           </el-col>
           <el-col :span="6">
             <div class="grid-content column1">累计已付金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">{{data.acountPayable}}</div>
+            <div class="grid-content grid-result">{{formatMoney(data.acountPayable)}}</div>
           </el-col>
         </el-row>
         <el-row>
@@ -79,7 +81,7 @@
             <div class="grid-content column1" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">应付未付金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">{{data.unpaidAmount}}</div>
+            <div class="grid-content grid-result" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">{{formatMoney(data.unpaidAmount)}}</div>
           </el-col>
         </el-row>
       </div>
@@ -99,8 +101,16 @@
             <el-table-column prop="buyyerName" label="购买方" show-overflow-tooltip></el-table-column>
             <el-table-column prop="salerName" label="销售方" show-overflow-tooltip></el-table-column>
             <el-table-column prop="createTime" label="开票日期" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="finalPrice" label="金额" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="usedPrice" label="已用金额" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="finalPrice" label="金额" show-overflow-tooltip>
+              <template slot-scope="scope">
+                {{formatMoney(scope.row.finalPrice)}}
+              </template>
+            </el-table-column>
+            <el-table-column prop="usedPrice" label="已用金额" show-overflow-tooltip>
+              <template slot-scope="scope">
+                {{formatMoney(scope.row.usedPrice)}}
+              </template>
+            </el-table-column>
             <el-table-column prop="usePrice" label="本次使用金额" show-overflow-tooltip width="120">
               <template slot-scope="scope">
                 <el-input v-model="scope.row.usePrice" @blur="onFinalPriceChange(scope.row)"></el-input>
@@ -138,7 +148,7 @@
           <div class="title">付款申请</div>
         </div>
         <div class="review-opinion_content">
-          <el-input type="textarea" :rows="4" placeholder="请输入内容" v-model="data.rejectReason"></el-input>
+          <el-input type="textarea" maxlength="100" show-word-limit :rows="4" placeholder="请输入内容" v-model="data.rejectReason"></el-input>
         </div>
       </div>
       <div class="divide-line"></div>
@@ -182,6 +192,7 @@ import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import resourceWrapper from "@/rest/resourceWrapper";
 import {global_, USERID} from '@/global/global';
+import { formatMoney } from '@/helpers/moneyHelper';
 
 const CHECK = 1;
 const REJECT = 0;
@@ -211,6 +222,9 @@ export default {
     };
   },
   methods: {
+    formatMoney(param) {
+      return formatMoney(param);
+    },
     checkInvoiceInfo(index, row) {
       this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, paymentOrderId: this.paymentOrderId, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo, index: index + 1}});
     },
@@ -360,13 +374,11 @@ export default {
   .identify-page-title {
     position: relative;
     .export-excel {
-      position: absolute;
+      align-self: flex-end;
       width: 135px;
       height: 40px;
       line-height: 40px;
       text-align: center;
-      right: 100px;
-      bottom: 30px;
       font-size: 16px;
       color: #4a90e2;
       background: #ffffff;
@@ -376,10 +388,10 @@ export default {
     }
   }
   .top-box {
-    height: 130px;
+    min-height: 130px;
     background-color: #ffffff;
     .bread-crumb {
-      padding: 14px 20px 0px;
+      padding: 14px 20px;
     }
   }
   .identify-result-detail-page-content {

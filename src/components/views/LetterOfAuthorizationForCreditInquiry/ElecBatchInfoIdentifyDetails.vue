@@ -124,7 +124,7 @@
           </div>
           <div class="question-describe">
             <div class="text">其他问题描述:</div>
-            <el-input type="textarea" placeholder="请输入内容" v-model="elecFileForm.problemDescription" :rows="5"></el-input>
+            <el-input type="textarea" maxlength="100" show-word-limit placeholder="请输入内容" v-model="elecFileForm.problemDescription" :rows="5"></el-input>
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>

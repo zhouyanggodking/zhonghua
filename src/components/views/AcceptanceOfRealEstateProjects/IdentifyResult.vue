@@ -22,7 +22,7 @@
           </div>
           <div class="search-condition_input_item">
             <div class="text">收款方</div>
-            <el-input v-model="collector" placeholder="请输入内容"></el-input>
+            <el-input v-model="receiver" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">审核状态</div>
@@ -39,7 +39,7 @@
     </div>
     <div class="identify-page-table">
       <div class="identify-page-table_btn">
-        <el-checkbox v-model="allChecked" @click="toggleSelection(tableData)">全选</el-checkbox>
+        <el-checkbox v-model="allChecked">全选</el-checkbox>
         <el-button class="btn" @click="tableDownload()">下载</el-button>
         <el-button class="btn" @click="batchReview()">批量审核</el-button>
       </div>
@@ -58,10 +58,26 @@
           <el-table-column prop="contractNo" label="合同编号" width="120"></el-table-column>
           <el-table-column prop="payer" label="付款单位" show-overflow-tooltip></el-table-column>
           <el-table-column prop="receiver" label="收款单位" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="contractDynamicAmount" label="合同动态金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="paidAmount" label="累计已付金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="acountPayable" label="本次应付金额" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="invoiceTotalPrice" label="票据总金额" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="contractDynamicAmount" label="合同动态金额" show-overflow-tooltip>
+            <template slot-scope="scope">
+              {{formatMoney(scope.row.contractDynamicAmount)}}
+            </template>
+          </el-table-column>
+          <el-table-column prop="paidAmount" label="累计已付金额" show-overflow-tooltip>
+            <template slot-scope="scope">
+              {{formatMoney(scope.row.paidAmount)}}
+            </template>
+          </el-table-column>
+          <el-table-column prop="acountPayable" label="本次应付金额" show-overflow-tooltip>
+            <template slot-scope="scope">
+              {{formatMoney(scope.row.acountPayable)}}
+            </template>
+          </el-table-column>
+          <el-table-column prop="invoiceTotalPrice" label="票据总金额" show-overflow-tooltip>
+            <template slot-scope="scope">
+              {{formatMoney(scope.row.invoiceTotalPrice)}}
+            </template>
+          </el-table-column>
           <el-table-column prop="invoiceNum" label="票据数量" show-overflow-tooltip></el-table-column>
           <el-table-column prop="auditState" label="状态" show-overflow-tooltip>
             <template slot-scope="scope">
@@ -81,6 +97,7 @@
                 class="table-btn"
                 size="mini"
                 type="danger"
+                :disabled="scope.row.auditState === 0"
                 @click="tableItemRejected(scope.row)"
               >驳回</el-button>
             </template>
@@ -133,7 +150,7 @@
     >
       <div class="reject-content">
         <div class="label-content">驳回意见</div>
-        <el-input v-model="rejectContent" placeholder="请输入内容"></el-input>
+        <el-input type="textarea" maxlength="100" show-word-limit v-model="rejectContent" placeholder="请输入内容"></el-input>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
@@ -145,6 +162,7 @@
 <script>
 import resourceWrapper from "@/rest/resourceWrapper";
 import {global_} from '@/global/global';
+import { formatMoney } from '@/helpers/moneyHelper';
 import {checkPaymentRequestOrders, checkPaymentRequestOrder} from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
@@ -203,11 +221,15 @@ export default {
   },
   watch: {
     'allChecked'() {
-      this.toggleSelection(this.tableData);
+      this.toggleSelection();
     }
   },
   methods: {
+    formatMoney(param) {
+      return formatMoney(param);
+    },
     search() {
+      this.currentPage = 1;
       this.getPaymentOrderInfos();
     },
     tableDownload() {
@@ -227,8 +249,13 @@ export default {
     batchReview() {
       if (this.multipleSelection.length) {
         this.isDialogVisible = true;
-        this.dialogHintText = "请确认是否批量通过";
-        this.dialogHintOperate = "批量通过";
+        if (this.multipleSelection.length > 1) {
+          this.dialogHintText = "请确认是否批量通过";
+          this.dialogHintOperate = "批量通过";
+        } else {
+          this.dialogHintText = "请确认是否审核通过";
+          this.dialogHintOperate = "审核通过";
+        }
       } else {
         this.$message({
           message: '请勾选要审核的对象!',
@@ -239,11 +266,10 @@ export default {
     },
     reviewPass() {},
     // 全选toggle
-    toggleSelection(data) {
-      if (data) {
-        data.forEach(data => {
-          this.$refs.multipleTable.toggleRowSelection(data);
-        });
+    toggleSelection() {
+      if (this.allChecked) {
+        this.$refs.multipleTable.clearSelection();
+        this.$refs.multipleTable.toggleAllSelection();
       } else {
         this.$refs.multipleTable.clearSelection();
       }
@@ -485,6 +511,9 @@ export default {
             }
             th.is-leaf {
               border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+              .el-checkbox__input {
+                display: none;
+              }
             }
           }
         }
@@ -534,7 +563,12 @@ export default {
         font-size: 14px;
         span {
           color: #4a90e2;
-          // margin-right: 20px;
+        }
+        &.is-disabled {
+          span {
+            color: #d9d9d9;
+          }
+          // color: #d9d9d9;
         }
       }
       .el-button--mini,
@@ -560,6 +594,7 @@ export default {
     background-color: #e9d58b;
     border-color: #e9d58b;
   }
+  
 }
 .el-button:active {
   border-color: #c1b071;
@@ -646,10 +681,11 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 123px;
+    padding: 20px 90px;
     border-top: 2px solid #ebebeb;
     border-bottom: 2px solid #ebebeb;
     .label-content {
+      flex-shrink: 0;
       font-family: PingFangSC-Semibold;
       font-size: 14px;
       color: #666666;

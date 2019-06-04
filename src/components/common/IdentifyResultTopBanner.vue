@@ -65,6 +65,7 @@ export default {
     /deep/ {
       .el-input {
         width: 40px;
+        margin: 0 4px;
         .el-input__inner {
           height: 28px;
           padding: 0 8px;
