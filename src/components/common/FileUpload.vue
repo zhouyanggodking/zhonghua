@@ -19,7 +19,7 @@
     <uploader-unsupport></uploader-unsupport>
     <uploader-drop>
       <uploader-btn>
-        <div style="line-height: 18px"><img src="../../assets/imgs/upload-icon.png" alt=""></div>
+        <div style="line-height: 18px"><img src="../../assets/imgs/upload-icon.svg" alt=""></div>
         <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
         <div class="accept-type">支持.zip/.rar/.7z格式</div>
       </uploader-btn>
@@ -195,10 +195,10 @@ export default {
   .uploader-drop {
     padding: 0;
     background: #FAFAFA;
-    border: 1px dashed rgba(0,0,0,0.15);
+    border: 2px dashed #ebebeb;
     border-radius: 4px;
     &:hover {
-      border: 1px dashed #C1B071;
+      border: 2px dashed #0094FF;
     }
     .uploader-btn {
       width: 100%;

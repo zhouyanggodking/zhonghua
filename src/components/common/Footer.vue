@@ -26,11 +26,14 @@ export default {
 </script>
 <style lang="scss" scoped>
 .el-footer {
+  position: relative;
   height: 132px !important;
   padding-left: 50px;
   background-color: #f5f7f9;
   color: #333333;
   text-align: center;
+  box-shadow: 0px -1px 5px #ccc;
+  z-index: 99999;
   .footer-items-group {
     display: flex;
     padding: 58px 0 20px 0;

@@ -343,6 +343,8 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 .usermanagement-page {
   .usermanagement-page-search {
     background: #fff;
@@ -374,13 +376,13 @@ export default {
         &.search-options {
           .search-btn {
             margin-left: 20px;
-            font-family: "PingFangSC-Semibold";
+            @include buttonStyle;
           }
           .export-excel {
             margin-left: 30px;
             font-weight: bold;
             font-size: 14px;
-            color: #C1B071;
+            color: #4A90E2;
             cursor: pointer;
           }
         }
@@ -396,7 +398,7 @@ export default {
         margin-right: 13px;
       }
       .btn {
-        font-family: "PingFangSC-Semibold";
+        @include buttonStyle;
       }
     }
     .usermanagement-page-table_content {
@@ -485,30 +487,6 @@ export default {
       }
     }
   }
-}
-/deep/ .el-button {
-  width: 135px;
-  background: #c1b071;
-  border-radius: 4px;
-  border-color: #c1b071;
-  span {
-    font-size: 14px;
-    color: #ffffff;
-  }
-  &:hover {
-    background-color: #e9d58b;
-    border-color: #e9d58b;
-  }
-}
-.el-button:active {
-  border-color: #c1b071;
-  color: #fff;
-}
-.btn {
-  margin-right: 30px;
-}
-.el-button + .el-button {
-  margin-left: 0;
 }
 /deep/ .el-table__fixed-right::before,
 .el-table__fixed::before {

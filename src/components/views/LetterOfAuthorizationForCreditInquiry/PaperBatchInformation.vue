@@ -213,6 +213,8 @@ ${formatQuery(params)}`,'_parent');
 </script>
 
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 .identify-page {
   .top-box {
     height: 130px;
@@ -265,7 +267,6 @@ ${formatQuery(params)}`,'_parent');
         .search-condition_input_item {
           display: inline-flex;
           align-items: center;
-          width: 266px;
           margin-right: 30px;
           margin-top: 20px;
           .text {
@@ -290,7 +291,7 @@ ${formatQuery(params)}`,'_parent');
         }
         .search-btn {
           margin-left: 66px;
-          font-family: "PingFangSC-Semibold";
+          @include buttonStyle;
         }
         .export-excel {
           width: 123px;
@@ -298,7 +299,7 @@ ${formatQuery(params)}`,'_parent');
           text-align: center;
           line-height: 20px;
           font-size: 14px;
-          color: #c1b071;
+          color: #4A90E2;
           cursor: pointer;
         }
       }
@@ -313,7 +314,7 @@ ${formatQuery(params)}`,'_parent');
         margin-right: 13px;
       }
       .btn {
-        font-family: "PingFangSC-Semibold";
+         @include buttonStyle;
       }
     }
     .identify-page-table_content {
@@ -387,30 +388,6 @@ ${formatQuery(params)}`,'_parent');
       margin-top: 25px;
     }
   }
-}
-/deep/ .el-button {
-  width: 135px;
-  background: #c1b071;
-  border-radius: 4px;
-  border-color: #c1b071;
-  span {
-    font-size: 14px;
-    color: #ffffff;
-  }
-  &:hover {
-    background-color: #e9d58b;
-    border-color: #e9d58b;
-  }
-}
-.el-button:active {
-  border-color: #c1b071;
-  color: #fff;
-}
-.btn {
-  margin-right: 30px;
-}
-.el-button + .el-button {
-  margin-left: 0;
 }
 .dialog-common {
   /deep/ .el-dialog {

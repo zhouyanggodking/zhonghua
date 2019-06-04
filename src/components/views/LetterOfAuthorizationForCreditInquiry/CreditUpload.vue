@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class="file-upload-example" v-if="disableUpload" @click="beforeUpload">
-        <img src="../../../assets/imgs/upload-icon.png" alt="">
+        <img src="../../../assets/imgs/upload-icon.svg" alt="">
         <div class="el-upload__text">点击选择或将文件拖拽到这里上传</div>
         <div class="accept-type">支持.zip/.rar/.7z格式</div>
       </div>
@@ -343,7 +343,7 @@ export default {
         margin: 30px 0 10px;
         font-size: 18px;
         font-weight: bold;
-        color: #9A8B7B;
+        color: #333333;
       }
       .history-pagination {
         padding: 10px 0 50px;
@@ -362,7 +362,7 @@ export default {
     /deep/ {
       .el-button {
         &.return-back {
-          @include cancleBtnStyle;
+          @include cancelBtnStyle;
           margin: 0;
         }
         &.start-identify {
@@ -370,10 +370,7 @@ export default {
           margin: 0 110px 0 30px;
         }
         &.is-disabled, &.is-disabled:hover {
-          border: 1px solid #D9D9D9;
-          background-color: #ffffff;
-          border-radius: 4px;
-          color: #999999;
+          @include disbaledButtonStyle;
         }
       }
     }

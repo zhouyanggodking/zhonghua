@@ -154,8 +154,8 @@
       <div class="divide-line"></div>
       <div class="review-btn-group">
         <el-button class="cancel-btn" @click="previous">返回</el-button>
-        <el-button :disabled="data.auditState === 1" @click="reviewPass">审核通过</el-button>
-        <el-button :disabled="data.auditState === 0" @click="reviewReject">驳回</el-button>
+        <el-button class="submit-btn" :disabled="data.auditState === 1" @click="reviewPass">审核通过</el-button>
+        <el-button class="submit-btn" :disabled="data.auditState === 0" @click="reviewReject">驳回</el-button>
       </div>
     </div>
     <el-dialog
@@ -370,6 +370,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 .identify-result-detail-page {
   .identify-page-title {
     position: relative;
@@ -530,60 +532,26 @@ export default {
     .review-btn-group {
       display: flex;
       justify-content: flex-end;
-      .el-button {
-        margin-left: 30px;
+      /deep/ {
+        .el-button {
+          &.cancel-btn {
+            @include cancelBtnStyle;
+          }
+          &.submit-btn {
+            @include buttonStyle;
+          }
+          &.is-disabled, &.is-disabled:hover {
+            @include disbaledButtonStyle;
+          }
+        }
       }
     }
   }
 }
-/deep/ .el-button {
-  width: 135px;
-  background: #c1b071;
-  border-radius: 4px;
-  border-color: #c1b071;
-  span {
-    font-size: 14px;
-    color: #ffffff;
-  }
-  &:hover {
-    background-color: #e9d58b;
-    border-color: #e9d58b;
-  }
-  &.is-disabled {
-    background-color: #d9d9d9;
-    border-color: #d9d9d9;
-  }
-}
-.el-button:active {
-  border-color: #c1b071;
-  color: #fff;
-}
-/deep/ .cancel-btn {
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  span {
-    font-family: PingFangSC-Regular;
-    font-size: 16px;
-    color: #666666 !important;
-  }
-  &:hover {
-    background-color: #fff;
-    border-color: #c1b071;
-  }
-  &:active {
-    border-color: #c1b071;
-  }
-}
-.btn {
-  margin-right: 30px;
-}
-.el-button + .el-button {
-  margin-left: 0;
-}
 .title {
   font-family: PingFangSC-Semibold;
   font-size: 18px;
-  color: #9a8b7b;
+  color: #333333;
 }
 .red-text {
   color: #d0021b !important;

@@ -53,13 +53,16 @@ export default {
     .el-pager {
       .number {
         font-size: 12px;
+        &:hover {
+          color: #0263FF;
+        }
       }
       .active {
-        color: #c1b071;
+        color: #0263FF;
       }
     }
     .el-pagination button {
-      color: #c1b071;
+      color: #333333;
     }
     .el-pagination__jump {
       font-size: 12px;

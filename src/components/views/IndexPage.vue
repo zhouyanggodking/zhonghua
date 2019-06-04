@@ -4,61 +4,44 @@
       {{userName}}，欢迎登录智鉴通系统!
     </div>
     <div class="files-count-group">
-      <div class="single-file" :class="{'upload': item.type==='upload', 'download': item.type==='download'}" v-for="(item, index) in filesCountList" :key="index">
-        <img src="../../assets/imgs/payApply.png" alt="" v-if="index === 0">
-        <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 1">
-        <img src="../../assets/imgs/zxsc.png" alt="" v-if="index === 2">
-        <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 3">
-        <img src="../../assets/imgs/fksc.png" alt="" v-if="index === 4">
-        <img src="../../assets/imgs/fkxz.png" alt="" v-if="index === 5">
-        <div class="text">
-          <p class="title">{{item.title}}</p>
-          <p class="count" v-if="item.type === 'upload'">已上传资料
-            <span v-if="index === 0">{{paymentFilesCount.fileCountTotal || 0}}</span>
-            <span v-if="index === 2">{{eleFilesCount.fileCountTotal || 0}}</span>
-            <span v-if="index === 4">{{paperFilesCount.fileCountTotal || 0}}</span>
-            份</p>
-          <p class="count" v-else>已提取完成资料
-            <span v-if="index === 1">{{paymentFilesCount.recognizeFileCountTotal || 0}}</span>
-            <span v-if="index === 3">{{eleFilesCount.recognizeFileCountTotal || 0}}</span>
-            <span v-if="index === 5">{{paperFilesCount.recognizeFileCountTotal || 0}}</span>
-            份</p>
-        </div>
-        <div v-if="item.type === 'upload'">
-          <router-link v-if="index === 0" to="/realEstateUpload">
-            <el-button class="upload" v-if="item.type === 'upload'">
-              去上传
-            </el-button>
+      <div class="count-box payment-box">
+        <div class="icon payment-icon"></div>
+        <div class="type">付款申请</div>
+        <div class="file-count">已上传资料{{paymentFilesCount.fileCountTotal || 0}}份</div>
+        <div class="btn-group">
+          <router-link to="/realEstateIdentifyResult">
+            <el-button class="download-btn">去下载</el-button>
           </router-link>
-          <router-link v-if="index === 2" to="/creditUpload">
-            <el-button class="upload" v-if="item.type === 'upload'">
-              去上传
-            </el-button>
-          </router-link>
-          <router-link v-if="index === 4" to="/creditUpload">
-            <el-button class="upload" v-if="item.type === 'upload'">
-              去上传
-            </el-button>
+          <router-link to="/realEstateUpload">
+            <el-button class="upload-btn">去上传</el-button>
           </router-link>
         </div>
-        <div v-else>
-          <router-link v-if="index === 1" to="/realEstateIdentifyResult">
-            <el-button class="download">
-              去下载
-            </el-button>
+      </div>
+      <div class="count-box ele-file-box">
+        <div class="icon ele-file-icon"></div>
+        <div class="type">电子版征信授权书</div>
+        <div class="file-count">已上传资料{{eleFilesCount.fileCountTotal || 0}}份</div>
+        <div class="btn-group">
+          <router-link to="/creditElectronicBatchInformation">
+            <el-button class="download-btn">去下载</el-button>
           </router-link>
-          <router-link v-if="index === 3" to="/creditElectronicBatchInformation">
-            <el-button class="download">
-              去下载
-            </el-button>
-          </router-link>
-          <router-link v-if="index === 5" to="/creditPaperBatchInformation">
-            <el-button class="download">
-              去下载
-            </el-button>
+          <router-link to="/creditUpload">
+            <el-button class="upload-btn">去上传</el-button>
           </router-link>
         </div>
-        
+      </div>
+      <div class="count-box paper-file-box">
+        <div class="icon paper-file-icon"></div>
+        <div class="type">纸质版征信授权书</div>
+        <div class="file-count">已上传资料{{paperFilesCount.fileCountTotal || 0}}份</div>
+        <div class="btn-group">
+          <router-link to="/creditPaperBatchInformation">
+            <el-button class="download-btn">去下载</el-button>
+          </router-link>
+          <router-link to="/creditUpload">
+            <el-button class="upload-btn">去上传</el-button>
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -145,58 +128,59 @@ p {
     font-size: 26px;
     font-weight: bold;
     color: #666666;
-    background: url('../../assets/imgs/home-first.png') no-repeat right bottom;
-    background-size: cover;
+    background: url('../../assets/imgs/logo-bg.svg') no-repeat right bottom;
+    background-size: contain;
   }
   .files-count-group {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-column-gap: 20px;
     grid-row-gap: 10px;
-    .single-file {
+    .count-box {
       display: flex;
+      margin: 20px 0 0 0;
+      padding: 50px 20px 80px;
+      flex-direction: column;
       align-items: center;
       justify-content: space-around;
-      height: 200px;
-      margin: 20px 0 0 0;
-      img {
+      background: url('../../assets/imgs/file-bg.svg') no-repeat;
+      background-position: bottom right;
+      background-color: #ffffff;
+      &>.icon {
         width: 78px;
         height: 78px;
-        flex-shrink: 0;
-        margin-left: 30px;
-        border-radius: 50%;
-      }
-      &.upload {
-        background: url('../../assets/imgs/bg-sc.png') no-repeat;
-        background-position: bottom right;
-        background-color: #ffffff;
-      }
-      &.download {
-        background: url('../../assets/imgs/bg-xz.png') no-repeat;
-        background-position: bottom right;
-        background-color: #ffffff;
-      }
-      .text {
-        margin-left: 20px;
-        .title {
-          font-size: 22px;
-          font-weight: bold;
-          color: #666666;
+        &.payment-icon {
+          background: url('../../assets/imgs/payment-icon.svg') no-repeat;
         }
-        .count {
-          font-size: 20px;
-          color:#666666;
+        &.ele-file-icon {
+          background: url('../../assets/imgs/ele-file-icon.svg') no-repeat;
+        }
+        &.paper-file-icon {
+          background: url('../../assets/imgs/paper-file-icon.svg') no-repeat;
         }
       }
-      .el-button {
-        height: 44px;
-        @include buttonStyle;
-        a {
-          color: #ffffff;
-          text-decoration: none;
-          &:active {
-            color: #ffffff;
-          }
+      &>.type {
+        margin-top: 40px;
+        font-family: PingFangSC-Semibold;
+        font-size: 22px;
+        color: #666666;
+      }
+      &>.file-count {
+        margin-top: 10px;
+        font-family: PingFangSC-Regular;
+        font-size: 20px;
+        color: #666666;
+      }
+      &>.btn-group {
+        display: flex;
+        width: 100%;
+        margin-top: 40px;
+        justify-content: space-around;
+        .download-btn {
+          @include cancelBtnStyle;
+        }
+        .upload-btn {
+          @include buttonStyle;
         }
       }
     }

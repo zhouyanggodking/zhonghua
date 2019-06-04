@@ -148,7 +148,7 @@ export default {
       .cancle-btn {
         width: 136px;
         height: 40px;
-        @include cancleBtnStyle;
+        @include cancelBtnStyle;
         margin: 0 16px;
       }
       .submit-btn {

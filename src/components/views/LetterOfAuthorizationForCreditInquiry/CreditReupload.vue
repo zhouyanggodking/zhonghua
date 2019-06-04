@@ -391,7 +391,7 @@ export default {
         .cancle-btn {
           width: 136px;
           height: 40px;
-          @include cancleBtnStyle;
+          @include cancelBtnStyle;
           margin: 0 14px;
         }
       }
@@ -421,7 +421,7 @@ export default {
     /deep/ {
       .el-button {
         &.return-back {
-          @include cancleBtnStyle;
+          @include cancelBtnStyle;
           margin: 0;
         }
         &.start-identify {
@@ -446,7 +446,7 @@ export default {
         width: 84px;
         height: 30px;
         &.cancle-btn {
-          @include cancleBtnStyle;
+          @include cancelBtnStyle;
           padding: 4px 20px;
           margin: 0 16px;
         }
@@ -472,7 +472,7 @@ export default {
             width: 136px;
             height: 40px;
             &.cancle-btn {
-              @include cancleBtnStyle;
+              @include cancelBtnStyle;
               padding: 0px;
             }
             &.submit-btn {
