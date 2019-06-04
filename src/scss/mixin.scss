@@ -1,7 +1,6 @@
 @mixin buttonStyle {
   width: 136px;
   height: 40px;
-  margin: 0 30px 0 30px;
   color: #ffffff;
   font-size: 16px;
   font-weight: normal;
@@ -22,10 +21,9 @@
   font-weight: normal;
   color: white;
 }
-@mixin cancleBtnStyle {
+@mixin cancelBtnStyle {
   width: 136px;
   height: 40px;
-  margin: 0 30px 0 30px;
   font-size: 16px;
   font-weight: normal;
   background-color: #fff;

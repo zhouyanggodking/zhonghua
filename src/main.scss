@@ -1,4 +1,5 @@
 @import './scss/mixin.scss';
+@import "~nprogress/nprogress.css";
 
 html, body{
   margin: 0;
@@ -12,40 +13,52 @@ html, body{
 * {
   box-sizing: border-box;
 }
-.el-input.is-active .el-input__inner, .el-input__inner:focus, .el-select .el-input.is-focus .el-input__inner, .el-select .el-input__inner:focus, .el-textarea__inner:focus {
-  border: 1px solid rgba(193,176,113,0.47);
-  outline: 0;
-}
-// 复选框样式
-.el-checkbox-group {
-  .el-checkbox {
-    .el-checkbox__label {
-      color: #666666;
-      font-size: 14px;
-      font-weight: normal;
-    }
-    .el-checkbox__input {
-      &.is-focus {
-        .el-checkbox__inner {
-          border-color: #C1B071;
-        }
-      }
-      .el-checkbox__inner {
-        &:hover, &:visited {
-          border-color: #C1B071;
-        }
-      }
-    }
-    &.is-checked {
-      .el-checkbox__input {
-        .el-checkbox__inner {
-          background-color: #C1B071;
-          border-color: #C1B071;
-        }
-      }
-    }
+// nprogress
+#nprogress {
+  position: absolute;
+  z-index: 30000;
+  .bar {
+    background: #45a8cc;
+    height: 4px;
+  }
+  .spinner {
+    display: none;
   }
 }
+// .el-input.is-active .el-input__inner, .el-input__inner:focus, .el-select .el-input.is-focus .el-input__inner, .el-select .el-input__inner:focus, .el-textarea__inner:focus {
+//   border: 1px solid rgba(193,176,113,0.47);
+//   outline: 0;
+// }
+// 复选框样式
+// .el-checkbox-group {
+//   .el-checkbox {
+//     .el-checkbox__label {
+//       color: #666666;
+//       font-size: 14px;
+//       font-weight: normal;
+//     }
+//     .el-checkbox__input {
+//       &.is-focus {
+//         .el-checkbox__inner {
+//           border-color: #C1B071;
+//         }
+//       }
+//       .el-checkbox__inner {
+//         &:hover, &:visited {
+//           border-color: #C1B071;
+//         }
+//       }
+//     }
+//     &.is-checked {
+//       .el-checkbox__input {
+//         .el-checkbox__inner {
+//           background-color: #C1B071;
+//           border-color: #C1B071;
+//         }
+//       }
+//     }
+//   }
+// }
 // dialog样式
 .el-dialog__wrapper {
   &.dialog-form {
@@ -55,9 +68,9 @@ html, body{
         padding: 20px 30px;
         border-bottom: 2px solid #EBEBEB;
         .el-dialog__title {
-          font-weight: bold;
+          font-family: PingFangSC-Semibold;
           font-size: 20px;
-          color: #9A8B7B;
+          color: #333333;
         }
         .el-dialog__headerbtn {
           right: 50px;
@@ -73,15 +86,16 @@ html, body{
         /deep/ {
           .el-button {
             &.cancle-btn {
-              margin-right: 40px;
-              background: #ffffff;
-              border: 1px solid #d9d9d9;
-              span {
-                font-family: PingFangSC-Regular;
-                font-size: 16px;
-                color: #666666 !important;
-              }
+              @include cancelBtnStyle;
+              padding: 0px;
             }
+            &.submit-btn {
+              @include buttonStyle;
+              padding: 0px;
+            }
+          }
+          .el-button + .el-button {
+            margin-left: 40px;
           }
         }
       }
@@ -96,7 +110,7 @@ html, body{
             width: 136px;
             height: 40px;
             &.cancle-btn {
-              @include cancleBtnStyle;
+              @include cancelBtnStyle;
               padding: 0px;
               span {
                 color: #666666;
@@ -106,6 +120,9 @@ html, body{
               @include buttonStyle;
               padding: 0px;
             }
+          }
+          .el-button + .el-button {
+            margin-left: 40px;
           }
         }
       }

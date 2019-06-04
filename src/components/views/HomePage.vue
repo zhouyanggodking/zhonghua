@@ -5,7 +5,7 @@
         <span class="iconfont">&#xe60b;</span>
       </div>
       <div class="company-logo">
-        <img src="../../assets/imgs/Wmxt.png" alt="">
+        <img src="../../assets/imgs/company-logo.png" alt="">
         <div class="company-text">财务公司</div>
       </div>
       <left-menu></left-menu>
@@ -52,12 +52,15 @@ export default {
       overflow: auto;
     }
     .el-header {
+      position: relative;
       display: flex;
       align-items: center;
       height: 88px !important;
       padding: 0 40px 0 30px;
       background-color: #ffffff;
       color: #333333;
+      box-shadow: 0px 1px 5px #ccc;
+      z-index: 99999;
       .system-name {
         margin-right: auto;
         font-size: 26px;
@@ -68,14 +71,15 @@ export default {
 
     .el-aside {
       width: 236px !important;
-      background-color: #333333;
+      background-color: #0F1322;
       text-align: center;
       .sign-in-logo {
         display: flex;
         justify-content: center;
         align-items: center;
         height: 88px;
-        background-color: #000000;
+        background: #0F1322;
+        box-shadow: 0 12px 13px 0 #0A0B0B;
         .iconfont {
           display: inline-block;
           width: 172px;
@@ -87,8 +91,8 @@ export default {
       .company-logo {
         padding: 26px 0;
         margin-bottom: 72px;
-        background-color: #333333;
-        border-bottom: 2px solid #ffffff;
+        background-color: #0F1322;
+        border-bottom: 1px solid #ffffff40;
         >img {
           width: 70px;
           height: 70px;

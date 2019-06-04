@@ -386,7 +386,7 @@ export default {
         margin: 30px 0 10px;
         font-size: 18px;
         font-weight: bold;
-        color: #9A8B7B;
+        color: #333333;
       }
       .add-filed-btn {
         /deep/ {
@@ -491,14 +491,14 @@ export default {
       }
       .add-filed {
         height: 44px;
-        line-height: 44px;
+        line-height: 40px;
         margin-top: 20px;
         border: 2px dashed #EBEBEB;
         text-align: center;
         cursor: pointer;
         &:hover {
-          border-color: #C1B071;
-          color: #C1B071;
+          border-color: #0094FF;
+          color: #0094FF;
         }
         &.add-filed-disabled {
           cursor: not-allowed;
@@ -523,7 +523,7 @@ export default {
         .cancle-btn {
           width: 136px;
           height: 40px;
-          @include cancleBtnStyle;
+          @include cancelBtnStyle;
           margin: 0 14px;
         }
       }
@@ -534,7 +534,7 @@ export default {
         margin: 30px 0 10px;
         font-size: 18px;
         font-weight: bold;
-        color: #9A8B7B;
+        color: #333333;
       }
       .history-pagination {
         padding: 10px 0 50px;
@@ -543,6 +543,8 @@ export default {
   }
   .real-estate-upload-footer {
     position: fixed;
+    display: flex;
+    justify-content: flex-end;
     bottom: 0;
     left: 236px;
     width: calc(100vw - 236px);
@@ -553,12 +555,12 @@ export default {
     /deep/ {
       .el-button {
         &.return-back {
-          @include cancleBtnStyle;
+          @include cancelBtnStyle;
           margin: 0;
         }
         &.start-identify {
           @include buttonStyle;
-          margin: 0 110px 0 30px;
+          margin: 0 100px 0 30px;
         }
         &.is-disabled, &.is-disabled:hover {
           @include disbaledButtonStyle;
@@ -570,7 +572,7 @@ export default {
     .cancle-btn {
       width: 136px;
       height: 40px;
-      @include cancleBtnStyle;
+      @include cancelBtnStyle;
       margin: 0 10px;
     }
     .submit-btn {

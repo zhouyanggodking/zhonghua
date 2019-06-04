@@ -405,7 +405,7 @@ export default {
     .el-button {
       width: 136px;
       &.back-btn {
-        @include cancleBtnStyle;
+        @include cancelBtnStyle;
         margin: 0;
       }
       &.submit-btn {
@@ -413,7 +413,7 @@ export default {
         margin: 0;
       }
       &.verify-btn {
-        @include verifyBtnStyle;
+        @include buttonStyle;
         margin: 0;
         padding: 10px 20px;
       }

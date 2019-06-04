@@ -349,7 +349,7 @@ export default {
     padding: 30px 0;
     .el-button {
       &.verify-btn {
-        @include verifyBtnStyle;
+        @include buttonStyle;
         margin: 0;
         padding: 10px 20px;
       }
@@ -358,11 +358,8 @@ export default {
         margin: 0;
         padding: 10px 20px;
       }
-      &.is-disabled {
-        border: 1px solid #D9D9D9;
-        background-color: #ffffff;
-        border-radius: 4px;
-        color: #999999;
+      &.is-disabled, &.is-disabled:hover {
+        @include disbaledButtonStyle;
       }
     }
   }

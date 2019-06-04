@@ -50,7 +50,7 @@ export default {
     margin-right: auto;
     font-size: 18px;
     font-weight: bold;
-    color: #9A8B7B;
+    color: #333333;
     line-height: 28px;
   }
   .pagination {

@@ -69,7 +69,7 @@ export default {
 .el-menu {
   font-size: 14px;
   border-right: none;
-  background-color: #333333;
+  background-color: #0F1322;
   .level-one {
     .el-submenu {
       >.el-submenu__title {
@@ -100,7 +100,7 @@ export default {
             }
             &.is-opened {
               .el-submenu__title {
-                color: #094D84 !important;
+                color: #ffffff !important;
               }
               .el-menu--inline {
                 >.el-menu-item {
@@ -117,7 +117,7 @@ export default {
       &.is-opened {
         background-color: #121213 !important; 
         .el-submenu__title {
-          color: #094D84 !important;
+          color: #ffffff !important;
         }
         .el-menu--inline {
           background-color: #121213 !important;

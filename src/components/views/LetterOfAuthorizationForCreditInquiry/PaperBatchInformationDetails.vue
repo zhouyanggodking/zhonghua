@@ -585,30 +585,6 @@ export default {
     }
   }
 }
-/deep/ .el-button {
-  width: 135px;
-  background: #c1b071;
-  border-radius: 4px;
-  border-color: #c1b071;
-  span {
-    font-size: 14px;
-    color: #ffffff;
-  }
-  &:hover {
-    background-color: #e9d58b;
-    border-color: #e9d58b;
-  }
-}
-.el-button:active {
-  border-color: #c1b071;
-  color: #fff;
-}
-.btn {
-  margin-right: 30px;
-}
-.el-button + .el-button {
-  margin-left: 0;
-}
 .dialog-common {
   /deep/ .el-dialog {
     width: 521px !important;
