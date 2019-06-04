@@ -16,7 +16,7 @@ export const getUploadHistory = (params) => {
   .then(res => {
         return res.data;
     }, (err) => {
-        return Promise.reject(err)
+        return [Promise.reject(err)]
     })
 }
 // 查询清单
@@ -106,6 +106,15 @@ export const modifyPaperFile = (params) => {
   return axios.post('/auth/estateAuthorizationFileController/modifyMatchedFile', params)
   .then(res => {
     return Promise.resolve(res);
+  }, err => {
+    return Promise.reject(err);
+  });
+}
+//提交任务
+export const startOcrJob = (params) => {
+  return axios.post('/OcrJobs/startAuthorizationOcrJob', params)
+  .then(res => {
+    return Promise.resolve(res.data);
   }, err => {
     return Promise.reject(err);
   });

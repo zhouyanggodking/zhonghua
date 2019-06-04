@@ -76,6 +76,7 @@
       </div>
       <div class="identify-page-table_content">
         <el-table
+          v-loading="isEleLoading"
           ref="multipleTable"
           :data="tableData"
           tooltip-effect="dark"
@@ -168,7 +169,7 @@
       </div>
     </div>
     <div class="search-unauth-table" v-if="activedIndex===1">
-      <el-table :data="unMatchedTableData" style="width: 100%">
+      <el-table v-loading="isUnmatchedEleLoading" :data="unMatchedTableData" style="width: 100%">
         <el-table-column type="index" label="序号" width="50"></el-table-column>
         <el-table-column prop="companySeal" label="公司章"></el-table-column>
         <el-table-column prop="personSeal" label="人名章"></el-table-column>
@@ -196,7 +197,7 @@
       <div class="dialog-content">
         <div
           class="dialog-content_icon"
-          :class="{'review-icon':dialogHintOperate==='批量审核','reject-icon':dialogHintOperate==='驳回'}"
+          :class="{'review-icon':dialogHintOperate==='批量通过' || dialogHintOperate==='审核通过','reject-icon':dialogHintOperate==='驳回'}"
         ></div>
         <div class="dialog-content_text">{{dialogHintText}}</div>
       </div>
@@ -206,6 +207,11 @@
           v-if="dialogHintOperate==='驳回'"
           type="primary"
           @click="rejectOpinion"
+        >{{dialogHintOperate}}</el-button>
+        <el-button
+          v-if="dialogHintOperate==='审核通过'"
+          type="primary"
+          @click="reviewPass"
         >{{dialogHintOperate}}</el-button>
         <el-button
           v-if="dialogHintOperate==='批量审核'"
@@ -260,6 +266,8 @@ const ELE_FILE = 0;
 export default {
   data() {
     return {
+      isEleLoading: false,
+      isUnmatchedEleLoading: false,
       searchCondition: {
         depart: '',
         companyName: '',
@@ -342,6 +350,7 @@ export default {
       this.fetchElecDetailList();
     },
     unMatchedSearch() {
+      this.unMatchedcurrentPage = 1;
       this.fetchUnmatchedElecDetailList();
     },
     onPageNumberChange(res) {
@@ -374,8 +383,13 @@ export default {
     batchReview() {
       if (this.multipleSelection.length) {
         this.isDialogVisible = true;
-        this.dialogHintText = "请确认是否批量通过";
-        this.dialogHintOperate = "批量审核";
+        if (this.multipleSelection.length > 1) {
+          this.dialogHintText = "请确认是否批量通过";
+          this.dialogHintOperate = "批量通过";
+        } else {
+          this.dialogHintText = "请确认是否审核通过";
+          this.dialogHintOperate = "审核通过";
+        }
       } else {
         this.$message({
           message: '请勾选要审核的对象!',
@@ -502,6 +516,8 @@ ${formatQuery(params)}`,'_parent');
       this.currentPage = currPage;
     },
     fetchElecDetailList() {
+      this.tableData = [];
+      this.isEleLoading = true;
       this.searchCondition.pageSize = this.pageSize;
       this.searchCondition.pageNum = this.currentPage;
       this.searchCondition.summaryId = this.summaryId;
@@ -509,9 +525,12 @@ ${formatQuery(params)}`,'_parent');
       .then(res => {
         this.tableData = res.data;
         this.totalCount = res.total;
+        this.isEleLoading = false;
       });
     },
     fetchUnmatchedElecDetailList() {
+      this.unMatchedTableData = [];
+      this.isUnmatchedEleLoading = true;
       this.unMatchedSearchCondition.pageSize = this.unMatchedPageSize;
       this.unMatchedSearchCondition.pageNum = this.unMatchedcurrentPage;
       this.unMatchedSearchCondition.summaryId = this.summaryId;
@@ -519,6 +538,7 @@ ${formatQuery(params)}`,'_parent');
       .then(res => {
         this.unMatchedTableData = res.data;
         this.unMatchedtotalCount = res.total;
+        this.isUnmatchedEleLoading = false;
       });
     }
   },

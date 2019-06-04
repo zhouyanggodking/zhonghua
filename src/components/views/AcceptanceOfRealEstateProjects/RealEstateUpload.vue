@@ -84,8 +84,8 @@
             label="识别状态"
             prop="status">
             <template slot-scope="scope">
-              <span v-if="scope.row.status === 0">未开始</span>
-              <span v-else-if="scope.row.status === 1" style="color: #4A90E2;">识别中</span>
+              <span v-if="scope.row.status === 0" style="color: #4A90E2;">识别中</span>
+              <span v-else-if="scope.row.status === null" style="color: #C0C4CC;">未识别</span>
               <span v-else-if="scope.row.status === 2" style="color: #417505;">识别成功</span>
               <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span>
             </template>
@@ -102,8 +102,15 @@
           </el-table-column>
           <el-table-column
             align="center"
-            label="上传日期"
+            label="上传时间"
             prop="uploadTime">
+          </el-table-column>
+          <el-table-column
+            align="center"
+            label="操作">
+            <template slot-scope="scope">
+              <el-button :disabled="scope.row.status !== null" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
+            </template>
           </el-table-column>
         </el-table>
         <Pagination @change="onHistoryPageNumChange" :totalCount="totalCount" class="history-pagination"></Pagination>
@@ -124,7 +131,7 @@
     </el-dialog>
     <div class="real-estate-upload-footer">
       <el-button class="return-back" @click="goBack">返回</el-button>
-      <el-button class="start-identify">开始识别 </el-button>
+      <el-button class="start-identify" :disabled="isStartOcrJob" @click="startOcrJob">提交任务 </el-button>
     </div>
   </div>
 </template>
@@ -132,9 +139,11 @@
 import BreadCrumb from '@/components/common/BreadCrumb';
 import FileUpload from '@/components/common/FileUpload';
 import Pagination from "@/components/common/Pagination";
-import {getOcrExtractTemplateFields, updateOcrExtractTemplateFields, deleteTemplateField, getUploadHistory} from '@/rest/realEstateUploadApi';
+import {getOcrExtractTemplateFields, updateOcrExtractTemplateFields, deleteTemplateField, getUploadHistory, startOcrJob} from '@/rest/realEstateUploadApi';
+import {USERID} from '@/global/global';
 
 const PAGE_SIZE = 10;
+const BUSINESS_TYPEID = 1;
 
 export default {
   data() {
@@ -172,11 +181,15 @@ export default {
       },
       tableData: [],
       readyDeleteItem: null,
-      deleteFiledId: null
+      deleteFiledId: null,
+      originalFileId: '',
+      isStartOcrJob: true
     };
   },
   methods: {
-    uploadSuccess() {
+    uploadSuccess(res) {
+      this.isStartOcrJob = false;
+      this.originalFileId = res.originalFileId;
       this.fetchHistoryList();
     },
     goBack() {
@@ -186,6 +199,7 @@ export default {
       this.isShowFiledList = !this.isShowFiledList;
     },
     removeItem(item) {
+      this.deleteFiledId = ''
       this.delDialogVisiable  = true;
       this.readyDeleteItem = item;
       if (item.id) {
@@ -194,7 +208,7 @@ export default {
     },
     handleDeleteClick() {
       const index = this.filedList.indexOf(this.readyDeleteItem);
-      if (index !== -1 && this.deleteFiledId) {
+      if (index !== -1 && this.deleteFiledId !== '') {
         this.deleteTemplateField(this.deleteFiledId);
       } else {
         this.filedList.splice(index, 1);
@@ -238,8 +252,10 @@ export default {
       this.fetchHistoryList();
     },
     fetchHistoryList() {
+      this.tableData = [];
+      this.isLoading = true;
       const params = {
-        businessTypeId: 1,
+        businessTypeId: BUSINESS_TYPEID,
         pageSize: this.pageSize,
         pageNum: this.currentPage,
         type: 1,
@@ -249,16 +265,18 @@ export default {
       .then((res) => {
         this.tableData = res.data.data;
         this.totalCount = res.data.total;
-      })
+        this.isLoading = false;
+      }
+      )
     },
     fetchTemplateFileds() {
-      this.filedList = [];
-      this.isLoading = true;
+      // this.filedList = [];
+      // this.isLoading = true;
       getOcrExtractTemplateFields(1, 1, '')
       .then((res) => {
         this.filedList = res.data;
         this.copyFiledList = JSON.parse(JSON.stringify(res.data));
-        this.isLoading = false;
+        // this.isLoading = false;
       });
     },
     updateTemplateFileds(data) {
@@ -269,18 +287,66 @@ export default {
     },
     deleteTemplateField(id) {
       deleteTemplateField(id)
-      .then(() => {
-        this.delDialogVisiable  = false;
-        this.fetchTemplateFileds();
+      .then((res) => {
+        if(res.status === 200) {
+          this.delDialogVisiable  = false;
+          this.fetchTemplateFileds();
+          this.$message({
+            message: '删除字段成功',
+            type: 'success'
+          });
+        } else {
+          this.$message({
+            message: '删除字段失败',
+            type: 'warning'
+          });
+        } 
+      })
+    },
+    handleTableStartOcrJob(row) {
+      this.originalFileId = row.id;
+      this.startOcrJob();
+    },
+    startOcrJob() {
+      const params = {
+        userId: USERID,
+        originalFileId: this.originalFileId,
+        businessTypeId: BUSINESS_TYPEID,
+        ocrExtractTemplateFieldsDtos: this.filedList,
+        // ocrExtractTemplateFieldsDtos: [
+        //   {
+        //     "businessTypeId": 1,
+        //     "createTime": "2019-05-30T06:56:52.690Z",
+        //     "createUserId": 1,
+        //     "editName": "付款主题2",
+        //     "standardName": "string",
+        //     "standardType": 1,
+        //     "status": 0,
+        //     "id":24,
+        //     "updateTime": "2019-05-30T06:56:52.690Z"
+        //   }
+        // ]
+      };
+      // console.log(params);
+      startOcrJob(params).then(res => {
+        if (res.status === 200) {
+          this.$message({
+            message: '文件已提交',
+            type: 'success'
+          });
+          this.isStartOcrJob = true;
+          this.fetchHistoryList();
+        } else {
+          this.$message({
+            message: res.message,
+            type: 'error'
+          })
+        }
+      }, err => {
         this.$message({
-          message: '删除字段成功',
-          type: 'success'
-        });
-      }, () => {
-        this.$message({
-          message: '删除字段失败',
-          type: 'warning'
-        });
+          message: err,
+          type: 'error'
+        })
       })
     }
   },
@@ -493,6 +559,9 @@ export default {
         &.start-identify {
           @include buttonStyle;
           margin: 0 110px 0 30px;
+        }
+        &.is-disabled, &.is-disabled:hover {
+          @include disbaledButtonStyle;
         }
       }
     }

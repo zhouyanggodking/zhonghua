@@ -3,7 +3,7 @@
 </template>
 <script>
 import {loadEncicleImage} from '@/helpers/zoomImage';
-// import {global_} from '@/global/global';
+import {global_} from '@/global/global';
 export default {
   data() {
     return {
@@ -49,8 +49,8 @@ export default {
   // },
   mounted() {
     loadEncicleImage().then(() => {
-      // this.imageUrl = `${global_}${this.imgSrc}`;
-      this.imageUrl = 'http://10.17.17.151:8080/test/test1.png';
+      this.imageUrl = `${global_}${this.imgSrc}`;
+      // this.imageUrl = 'http://10.17.17.151:8080/test/test1.png';
     }).catch(() => {
       this.$message({
         message: '图片错误',

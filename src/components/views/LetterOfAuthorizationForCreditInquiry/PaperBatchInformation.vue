@@ -120,13 +120,27 @@ export default {
       tableData: []
     };
   },
+  watch: {
+    'allChecked'() {
+      this.toggleSelection();
+    }
+  },
   methods: {
+    toggleSelection() {
+      if (this.allChecked) {
+        this.$refs.multipleTable.clearSelection();
+        this.$refs.multipleTable.toggleAllSelection();
+      } else {
+        this.$refs.multipleTable.clearSelection();
+      }
+    },
     onDateRangeChange(res) {
       this.startTime = res.startTime;
       this.endTime = res.endTime;
     },
     goBack() {},
     search() {
+      this.currentPage = 1;
       this.fetchTableData();
     },
     tableDownload() {
@@ -322,6 +336,9 @@ ${formatQuery(params)}`,'_parent');
             }
             th.is-leaf {
               border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+              .el-checkbox__input {
+                display: none;
+              }
             }
           }
         }
@@ -342,28 +359,6 @@ ${formatQuery(params)}`,'_parent');
                   font-size: 14px;
                   color: rgba(0, 0, 0, 0.85);
                   line-height: 22px;
-                }
-              }
-              // .el-table_1_column_1{
-              //   .cell{
-              //     display: none;
-              //   }
-              // }
-              // .el-table_1_column_2{
-              //   position: relative;
-
-              // }
-            }
-          }
-        }
-        .el-table__body-wrapper {
-          .el-table__body {
-            .el-table__row {
-              .el-table_1_column_1 {
-              }
-              .el-table_1_column_13 {
-                .cell {
-                  // display: flex;
                 }
               }
             }

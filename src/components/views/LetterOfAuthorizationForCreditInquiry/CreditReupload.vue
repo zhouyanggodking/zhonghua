@@ -104,7 +104,7 @@
     </el-dialog>
     <div class="real-estate-upload-footer">
       <el-button class="return-back">返回</el-button>
-      <el-button class="start-identify">开始识别 </el-button>
+      <el-button class="start-identify">提交任务 </el-button>
     </div>
   </div>
 </template>

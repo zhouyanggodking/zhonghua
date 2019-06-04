@@ -263,6 +263,7 @@ export default {
     },
     goBack() {},
     search() {
+      this.currentPage = 1;
       this.fetchPaperDetailList();
     },
     onPageNumberChange(res) {
@@ -352,6 +353,7 @@ export default {
     },
     fetchPaperDetailList() {
       this.isLoading = true;
+      this.tableData = [];
       this.searchCondition.pageSize = this.pageSize;
       this.searchCondition.pageNum = this.currentPage;
       this.searchCondition.summaryId = this.summaryId;

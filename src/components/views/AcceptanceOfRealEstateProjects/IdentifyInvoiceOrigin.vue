@@ -10,7 +10,6 @@
           <div class="img-group">
             <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" :initial-index="currentPage - 1" @change="imgCarouselChange">
               <el-carousel-item v-for="item in invoicesMessage.length" :key="item">
-                <!-- {{item}}{{currentPage}} -->
                 <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :imgSrc="invoicesMessage[item-1].outputLocation" :imageRotate="String(rotateAngleList[item-1])" ref="img"></zoom-image>
               </el-carousel-item>
             </el-carousel>

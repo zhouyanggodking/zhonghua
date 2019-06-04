@@ -41,7 +41,7 @@ export const uploadFile = (param) => {
 export const relocateFile = (params) => {
   return axios.post('/uploader/relocate', Qs.stringify(params))
   .then(res => {
-    return Promise.resolve(res);
+    return res.data;
   }, err => {
     return Promise.reject(err);
   })
@@ -50,7 +50,7 @@ export const relocateFile = (params) => {
 export const fileIsExist = (params) => {
   return axios.get(`/uploader/getFileByIdentifier${formatQuery(params)}`)
   .then(res => {
-    return res.data.data;
+    return res.data;
   }, err => {
     return Promise.reject(err);
   })
@@ -59,9 +59,9 @@ export const fileIsExist = (params) => {
 export const getUploadHistory = (params) => {
   return axios.get(`/uploader/history${formatQuery(params)}`)
   .then(res => {
-        return res.data;
-    }, (err) => {
-        return Promise.reject(err)
+        return res.data || [];
+    }, () => {
+        return []
     })
 }
 // 一个付款申请单下的所有发票
@@ -149,4 +149,14 @@ export const getInvoiceInfo = (params) => {
   }, err => {
     return Promise.reject(err);
   })
+}
+
+//提交任务
+export const startOcrJob = (params) => {
+  return axios.post(`/OcrJobs/startOcrJob?originalFileId=${params.originalFileId}&userId=${params.userId}&businessTypeId=${params.businessTypeId}`, params.ocrExtractTemplateFieldsDtos)
+  .then(res => {
+    return Promise.resolve(res.data);
+  }, err => {
+    return Promise.reject(err);
+  });
 }

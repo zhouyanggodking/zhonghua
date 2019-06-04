@@ -126,13 +126,27 @@ export default {
       tableData: []
     };
   },
+  watch: {
+    'allChecked'() {
+      this.toggleSelection();
+    }
+  },
   methods: {
+    toggleSelection() {
+      if (this.allChecked) {
+        this.$refs.multipleTable.clearSelection();
+        this.$refs.multipleTable.toggleAllSelection();
+      } else {
+        this.$refs.multipleTable.clearSelection();
+      }
+    },
     onDateRangeChange(res) {
       this.startTime = res.startTime;
       this.endTime = res.endTime;
     },
     goBack() {},
     search() {
+      this.currentPage = 1;
       this.fetchTableData();
     },
     tableDownload() {
@@ -344,6 +358,9 @@ ${formatQuery(params)}`,'_parent');
             }
             th.is-leaf {
               border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+              .el-checkbox__input {
+                display: none;
+              }
             }
           }
         }

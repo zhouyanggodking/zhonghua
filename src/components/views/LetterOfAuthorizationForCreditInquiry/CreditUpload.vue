@@ -16,9 +16,17 @@
             v-model="authorizationValidDate"
             type="date"
             value-format="yyyy-MM-dd"
+            v-if="!isLongTime"
             placeholder="选择日期">
           </el-date-picker>
-          <span class="long-time">长期有效</span>
+          <el-date-picker
+            v-else
+            disabled
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="选择日期">
+          </el-date-picker>
+          <el-checkbox class="long-time" v-model="isLongTime">长期有效</el-checkbox>
         </div>
       </div>
       <div class="file-upload-example" v-if="disableUpload" @click="beforeUpload">
@@ -50,8 +58,8 @@
             label="识别状态"
             prop="status">
             <template slot-scope="scope">
-              <span v-if="scope.row.status === 0">未开始</span>
-              <span v-else-if="scope.row.status === 1" style="color: #4A90E2;">识别中</span>
+              <span v-if="scope.row.status === 0" style="color: #4A90E2;">识别中</span>
+              <span v-else-if="scope.row.status === null" style="color: #C0C4CC;">未识别</span>
               <span v-else-if="scope.row.status === 2" style="color: #417505;">识别成功</span>
               <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span>
             </template>
@@ -68,16 +76,23 @@
           </el-table-column>
           <el-table-column
             align="center"
-            label="上传日期"
+            label="上传时间"
             prop="uploadTime">
+          </el-table-column>
+          <el-table-column
+            align="center"
+            label="操作">
+            <template slot-scope="scope">
+              <el-button :disabled="scope.row.status !== null" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
+            </template>
           </el-table-column>
         </el-table>
         <Pagination @change="onHistoryPageNumChange" :totalCount="totalCount" class="history-pagination"></Pagination>
       </div>
     </div>
     <div class="real-estate-upload-footer">
-      <el-button class="return-back">返回</el-button>
-      <el-button class="start-identify">开始识别 </el-button>
+      <el-button class="return-back" @click="goBack">返回</el-button>
+      <el-button class="start-identify" :disabled="isStartOcrJob" @click="handleOcrJobClick">提交任务 </el-button>
     </div>
   </div>
 </template>
@@ -85,13 +100,17 @@
 import BreadCrumb from '@/components/common/BreadCrumb';
 import FileUpload from '@/components/common/FileUpload';
 import Pagination from "@/components/common/Pagination";
-import {getUploadHistory} from '@/rest/letterOfAuthorizationElecApi';
+import {getUploadHistory, startOcrJob} from '@/rest/letterOfAuthorizationElecApi';
+import {USERID} from '@/global/global';
+import {dateFormat} from '@/helpers/dateHelper';
 
 const PAGE_SIZE = 10;
+const ELE_OR_FILE = 0;
 
 export default {
   data() {
     return {
+      isLongTime: false,
       isLoading: false,
       disableUpload: true,
       authorizationValidDate: '',
@@ -105,11 +124,18 @@ export default {
         '首页', '征信查询授权书', '文件上传'
       ],
       tableData: [],
-      readyDeleteItem: null
+      readyDeleteItem: null,
+      originalFileId: '',
+      isStartOcrJob: true
     };
   },
   methods: {
-    uploadSuccess() {
+    goBack() {
+      this.$router.go(-1);
+    },
+    uploadSuccess(res) {
+      this.isStartOcrJob = false;
+      this.originalFileId = res.originalFileId;
       this.fetchHistoryList();
     },
     toggleFiledList() {
@@ -143,8 +169,8 @@ export default {
       }
     },
     fetchHistoryList() {
-      this.isLoading = true;
       this.tableData = [];
+      this.isLoading = true;
       const params = {
         businessTypeId: this.businessTypeId,
         pageSize: this.pageSize,
@@ -158,6 +184,45 @@ export default {
         this.totalCount = res.data.total;
         this.isLoading = false;
       })
+      
+    },
+    handleOcrJobClick() {
+      this.startOcrJob();
+    },
+    handleTableStartOcrJob(row) {
+      this.originalFileId = row.id;
+      this.startOcrJob();
+    },
+    startOcrJob() {
+      const params = {
+        userId: USERID,
+        ocrJobInfo: {
+          originalFileId: this.originalFileId,
+          businessTypeId: this.businessTypeId,
+          elecOrFile: ELE_OR_FILE,
+          authorizationValidDate: dateFormat(this.authorizationValidDate)
+        }
+      };
+      startOcrJob(params).then(res => {
+        if (res.status === 200) {
+          this.$message({
+            message: '文件已提交',
+            type: 'success'
+          });
+          this.isStartOcrJob = true;
+          this.fetchHistoryList();
+        } else {
+          this.$message({
+            message: res.message,
+            type: 'error'
+          })
+        }
+      }, err => {
+        this.$message({
+          message: err,
+          type: 'error'
+        })
+      })
     }
   },
   watch: {
@@ -165,12 +230,23 @@ export default {
       this.businessTypeId = newVal;
       this.fetchHistoryList();
       if(newVal !== '' && this.authorizationValidDate !== '' && this.authorizationValidDate) {
+        this.disableUpload = false
+      } else {
         this.disableUpload = true
       }
     },
     authorizationValidDate(newVal) {
       if(newVal !== '' && this.businessTypeId !== '') {
+        this.disableUpload = false
+      } else {
         this.disableUpload = true
+      }
+    },
+    isLongTime(newVal) {
+      if(newVal) {
+        this.authorizationValidDate = '2030-01-01';
+      } else {
+        this.authorizationValidDate = '';
       }
     }
   },
@@ -213,7 +289,6 @@ export default {
           .el-input {
             .el-input__inner {
               width: 300px;
-              
             }
           }
         }
@@ -221,10 +296,16 @@ export default {
       .expiry-date {
         margin-top: 20px;
         text-align: center;
+        /deep/ {
+          .el-date-editor {
+            &.el-input {
+              width: 204px;
+            }
+          }
+        }
         .long-time {
           margin-left: 16px;
           font-size: 16px;
-          color: #4A90E2;
           cursor: pointer;
         }
       }
@@ -287,6 +368,12 @@ export default {
         &.start-identify {
           @include buttonStyle;
           margin: 0 110px 0 30px;
+        }
+        &.is-disabled, &.is-disabled:hover {
+          border: 1px solid #D9D9D9;
+          background-color: #ffffff;
+          border-radius: 4px;
+          color: #999999;
         }
       }
     }

@@ -58,13 +58,11 @@ export default {
       padding: 0 40px 0 30px;
       background-color: #ffffff;
       color: #333333;
-      // text-align: center;
-      // line-height: 60px;
       .system-name {
         margin-right: auto;
         font-size: 26px;
         font-weight: bold;
-        color: #C0AF70;
+        color: #005bac;
       }
     }
 

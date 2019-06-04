@@ -8,6 +8,7 @@
       </el-breadcrumb>
     </div>
     <div class="current-title">{{currentTitle}}</div>
+    <slot></slot>
   </div>
 </template>
 <script>
@@ -30,8 +31,8 @@ export default {
 <style lang="scss">
 .bread-crumb {
   display: flex;
-  // align-items: center;
   flex-direction: column;
+  padding: 14px 20px;
   .bread-crumb_header {
     display: flex;
     align-items: center;
@@ -59,8 +60,7 @@ export default {
     font-family: "PingFangSC-Semibold";
     font-size: 20px;
     color: #333333;
-    margin-top: 33px;
-    margin-left: 10px;
+    padding: 30px 10px;
   }
   .el-breadcrumb {
     font-size: 12px;
