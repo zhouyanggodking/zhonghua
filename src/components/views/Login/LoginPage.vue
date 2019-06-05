@@ -13,7 +13,7 @@
         </div>
         <el-form ref="signinForm" :rules="rules" :model="signinForm" label-width="60px">
           <el-form-item 
-            v-bind:class="[mobileStyle ? 'sign-in-content-form-item-input-active' : '']"
+            :class="[mobileStyle ? 'sign-in-content-form-item-input-active' : '']"
             prop="telephone">
             <span class="iconmoon">&#xe620;</span>
             <el-input 
@@ -23,7 +23,7 @@
               v-model="signinForm.telephone"></el-input>
           </el-form-item>
           <el-form-item 
-            v-bind:class="[passwordStyle ? 'sign-in-content-form-item-input-active' : '']"
+            :class="[passwordStyle ? 'sign-in-content-form-item-input-active' : '']"
             prop="password">
             <span class="iconmoon">&#xe626;</span>
             <el-input type="password" 
@@ -33,7 +33,7 @@
               v-model="signinForm.password"></el-input>
           </el-form-item>
           <el-form-item 
-            v-bind:class="['identify-code', imageurlStyle ? 'sign-in-content-form-item-input-active' : '']"
+            :class="['identify-code', imageurlStyle ? 'sign-in-content-form-item-input-active' : '']"
             prop="identifyCode">
             <span class="iconmoon">&#xe62c;</span>
             <el-input 
@@ -245,25 +245,25 @@ export default {
   .sign-in-box {
     display: flex;
     justify-content: center;
-    width: 100%;
+    min-width: 500px;
     min-height: 500px;
     background: url('../../../assets/imgs/loginBg_01.png') no-repeat;
-    background-size: 100% auto;
+    background-size: cover;
     .sign-in-logo {
       position: absolute;
-      top: 30px;
       left: 30px;
+      top: 30px;
       .iconmoon {
-        color: #005BAC;
         font-size: 36px;
+        color: #005BAC;
         cursor: pointer;
       }
     }
     .sign-in-form {
-      background: #FFFFFF;
       min-height: 500px;
       margin: 50px auto;
       padding: 30px 50px 0px;
+      background: #FFFFFF;
       .login-logo {
         display: flex;
         justify-content: center;
@@ -277,8 +277,8 @@ export default {
         margin-bottom: 18px;
         .text {
           width: 80px;
-          font-weight: bold;
           font-size: 30px;
+          font-weight: bold;
           color: #333333;
           text-align: left;
         }
@@ -305,16 +305,16 @@ export default {
           .el-form-item {
             border-bottom: 1px #D1D1D1 solid;
             .el-form-item__label {
-              line-height: 36px;
               font-size: 12px;
               text-align: left;
+              line-height: 36px;
               &::before {
                 content: '';
               }
             }
             .iconmoon {
-              color: #D1D1D1;
               font-size: 30px;
+              color: #D1D1D1;
               cursor: pointer;
             }
             .el-form-item__content {
@@ -327,8 +327,8 @@ export default {
                   line-height: 36px;
                   border: none;
                   background-color: transparent;
-                  color: #333333;
                   font-size: 16px;
+                  color: #333333;
                 }
               }
             }
@@ -349,9 +349,9 @@ export default {
               /deep/ {
                 .el-button {
                   width: 100% !important;
+                  margin: 0;
                   @include buttonStyle;
                   color:  #FFFFFF;
-                  margin: 0;
                 }
               }
             }
@@ -362,9 +362,9 @@ export default {
     .el-dialog {
       .prompt-text {
         width: 470px;
+        margin-top: 10px;
         font-size: 16px;
         text-align: center;
-        margin-top: 10px;
       }
       .text-span {
         margin: 3px;

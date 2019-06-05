@@ -26,7 +26,7 @@
           <el-carousel-item class="verify-message" name="signinTag" :key="1">
             <el-form class="signin-form" ref="signinForm" :rules="rules" :model="signinForm" label-width="80px">
               <el-form-item 
-                v-bind:class="[mobileStyle ? 'sign-in-content-form-item-input-active' : '']"
+                :class="[mobileStyle ? 'sign-in-content-form-item-input-active' : '']"
                 prop="telephone">
                 <span class="iconmoon">&#xe620;</span>
                 <el-input 
@@ -36,7 +36,7 @@
                   v-model="signinForm.telephone"></el-input>
               </el-form-item>
               <el-form-item 
-                v-bind:class="['identify-code', imageurlStyle ? 'sign-in-content-form-item-input-active' : '']"
+                :class="['identify-code', imageurlStyle ? 'sign-in-content-form-item-input-active' : '']"
                 class="identify-code" prop="identifyCode">
                 <span class="iconmoon">&#xe62c;</span>
                 <el-input 
@@ -48,7 +48,7 @@
                 <identify-code class="identify-code" @click.native="refreshCode" :identifyCode="identifyCode"></identify-code>
               </el-form-item>
               <el-form-item 
-                v-bind:class="[ phoneCodeStyle ? 'sign-in-content-form-item-input-active' : '']"
+                :class="[ phoneCodeStyle ? 'sign-in-content-form-item-input-active' : '']"
                 class="phone-identify-code" prop="phoneIentifyCode">
                 <span class="iconmoon">&#xe62c;</span>
                 <el-input 
@@ -68,7 +68,7 @@
           <el-carousel-item class="reset-pwd" name="resetPwdTag" :key="2">
             <el-form class="reset-pwd-form" ref="resetPwdForm" :rules="pwdrules" :model="resetPwdForm" label-width="80px">
               <el-form-item 
-                v-bind:class="[inputNewPwd ? 'sign-in-content-form-item-input-active' : '']"
+                :class="[inputNewPwd ? 'sign-in-content-form-item-input-active' : '']"
                 prop="password">
                 <span class="iconmoon">&#xe626;</span>
                 <el-input
@@ -79,7 +79,7 @@
                   type="password" v-model="resetPwdForm.password"></el-input>
               </el-form-item>
               <el-form-item 
-                v-bind:class="[newPwdAgain ? 'sign-in-content-form-item-input-active' : '']"
+                :class="[newPwdAgain ? 'sign-in-content-form-item-input-active' : '']"
                 prop="identifyPassword">
                 <span class="iconmoon">&#xe626;</span>
                 <el-input 
@@ -362,27 +362,29 @@ export default {
 .retrieve-password {
   width: 100%;
   height: 100%;
-  background: url('../../../assets/imgs/loginBg_01.png') no-repeat;
-  background-size: 100% 100%;
   .retrieve-pwd-content {
     display: flex;
     justify-content: center;
+    min-width: 500px;
+    min-height: 600px;
+    background: url('../../../assets/imgs/loginBg_01.png') no-repeat;
+    background-size: cover;
     .sign-in-logo {
       position: absolute;
-      top: 30px;
       left: 30px;
+      top: 30px;
       .iconmoon {
-        color: #005BAC;
         font-size: 36px;
+        color: #005BAC;
         cursor: pointer;
       }
     }
   }
   .retrieve-pwd-box {
-    background: #FFFFFF ;
     min-height: 500px;
-    margin-top: 50px ;
+    margin: 50px auto;
     padding: 30px 50px 0px;
+    background: #FFFFFF ;
     .login-logo {
       width: 50%;
       margin: 0px auto 20px;
@@ -393,8 +395,8 @@ export default {
         display: flex;
         margin-bottom: 20px;
         .text {
-          font-weight: bold;
           font-size: 30px;
+          font-weight: bold;
           color: #333333;
           text-align: left;
         }
@@ -411,9 +413,9 @@ export default {
           display: inline-block;
           width: 20px;
           margin-right: 4px;
-          color: #FFFFFF;
-          background: #999999;
           border-radius: 50%;
+          background: #999999;
+          color: #FFFFFF;
           text-align: center;
         }
         .span-dot {
@@ -449,11 +451,11 @@ export default {
               }
               .success-text {
                 margin: 20px auto 40px;
-                text-align: center;
                 font-size: 16px;
+                text-align: center;
                 >span {
-                  color: #333333;
                   font-weight: bold;
+                  color: #333333;
                   cursor: pointer;
                 }
               }
@@ -474,13 +476,13 @@ export default {
         .el-form-item {
           border-bottom: 1px #D1D1D1 solid;
           .iconmoon {
-            color: #D1D1D1;
             font-size: 30px;
+            color: #D1D1D1;
             cursor: pointer;
           }
           .el-form-item__content {
-            margin: 0px !important;
             display: flex;
+            margin: 0px !important;
             line-height: 36px;
             .el-input {
               .el-input__inner {
@@ -513,18 +515,18 @@ export default {
                 width: 155px;
                 height: 36px;
                 margin: 0px 0px 5px;
-                text-align: center;
                 background: #0565FF;
                 color: #FFFFFF ;
+                text-align: center;
                 cursor: pointer;
               }
               .count {
                 display: inline-block;
                 width: 150px;
                 height: 36px;
-                color: #FFFFFF;
                 margin: auto 0px 5px;
                 background: #6BA4FF;
+                color: #FFFFFF;
                 cursor: not-allowed;
                 >span {
                   display: inline-block;
@@ -542,9 +544,9 @@ export default {
             /deep/ {
               .el-button {
                 width: 100% !important;
+                margin: 0;
                 @include buttonStyle;
                 color: #FFFFFF ;
-                margin: 0;
               }
             }
           }
@@ -558,11 +560,11 @@ export default {
             }
             /deep/ {
               .el-button {
-                margin-top:20px !important;
                 width: 100% !important;
+                margin-top:20px !important;
+                margin: 0;
                 @include buttonStyle;
                 color: #FFFFFF  ;
-                margin: 0;
               }
             }
           }
@@ -577,9 +579,9 @@ export default {
       /deep/ {
         .el-button {
           width: 100% !important;
+          margin: 0;
           @include buttonStyle;
           color: #FFFFFF ;
-          margin: 0;
         }
       }
     }
@@ -592,10 +594,10 @@ export default {
       }
       .text-alert {
         width: 40px;
-        font-size: 20px;
-        color: #666666;
         margin-top: 15px;
         margin-bottom: 6px;
+        font-size: 20px;
+        color: #666666;
       }
       .text-massage {
         width: 100%;
