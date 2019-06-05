@@ -176,11 +176,14 @@ p {
         width: 100%;
         margin-top: 40px;
         justify-content: space-around;
+        flex-wrap: wrap;
         .download-btn {
           @include cancelBtnStyle;
+          margin: 10px 0;
         }
         .upload-btn {
           @include buttonStyle;
+          margin: 10px 0;
         }
       }
     }
