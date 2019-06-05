@@ -1,88 +1,130 @@
 <template>
   <div class="retrieve-password">
-    <div class="title">
-      <div class="divide-line">
-        <div class="line"></div>
+    <div class="retrieve-pwd-content">
+      <div class="sign-in-logo"> 
+         <span class="iconmoon">&#xe62d;</span>
       </div>
-      <div class="text">忘记密码</div>
-      <div class="divide-line">
-        <div class="line"></div>
-      </div>
-    </div>
-    <div class="login-btn">
-      已有账号? <span @click="toLoginPage">请登录</span>
-    </div>
-    <div class="retrieve-pwd-box">
-      <div class="box-tags">
-        <div :class="{'active': this.activeTag === 'signinTag'}" class="tag">
-          <span>1</span>填写验证信息
+      <div class="retrieve-pwd-box">
+        <div class="login-logo">
+            <img src="../../../assets/imgs/loginLogo.png" alt>
         </div>
-        <div :class="{'active': this.activeTag === 'resetPwdTag'}" class="tag">
-          <span>2</span>重新设置密码
+        <div class="retrieve-pwd-text">
+          <div class="text">忘记密码</div>
         </div>
-        <div :class="{'active': this.activeTag === 'successTag'}" class="tag">
-          <span>3</span>修改完成
-        </div>
-      </div>
-      <el-carousel ref="restPwdContainer" :autoplay="false" indicator-position="none" arrow="nerver">
-        <el-carousel-item class="verify-message" name="signinTag" :key="1">
-          <el-form class="signin-form" ref="signinForm" :rules="rules" :model="signinForm" label-width="80px">
-            <el-form-item label="手机号" prop="telephone">
-              <el-input v-model="signinForm.telephone"></el-input>
-            </el-form-item>
-            <el-form-item class="identify-code" label="图形验证码" prop="identifyCode">
-              <el-input v-model="signinForm.identifyCode"></el-input>
-              <identify-code class="identify-code" @click.native="refreshCode" :identifyCode="identifyCode"></identify-code>
-            </el-form-item>
-            <el-form-item class="phone-identify-code" label="手机验证码" prop="phoneIentifyCode">
-              <el-input v-model="signinForm.phoneIentifyCode"></el-input>
-              <span v-if="count<=0" class="phone-code" @click="getPhoneIdentifyCode">获取验证码</span>
-              <span v-else class="count"><span>{{count}}</span>s后重新获取</span>
-            </el-form-item>
-            <el-form-item class="sign-in-btn">
-              <el-button @click="handleNextStepClick">下一步</el-button>
-            </el-form-item>
-          </el-form>
-        </el-carousel-item>
-        <el-carousel-item class="reset-pwd" name="resetPwdTag" :key="2">
-          <el-form class="reset-pwd-form" ref="resetPwdForm" :rules="pwdrules" :model="resetPwdForm" label-width="80px">
-            <el-form-item label="输入新密码" prop="password">
-              <el-input type="password" v-model="resetPwdForm.password"></el-input>
-            </el-form-item>
-            <el-form-item label="验证新密码" prop="identifyPassword">
-              <el-input type="password" v-model="resetPwdForm.identifyPassword"></el-input>
-            </el-form-item>
-            <el-form-item class="sign-in-btn">
-              <el-button @click="handleSigninClick">提交</el-button>
-            </el-form-item>
-          </el-form>
-        </el-carousel-item>
-        <el-carousel-item class="complete-done" name="successTag" :key="3">
-          <div class="success-icon"></div>
-          <div class="success-text">
-            密码修改成功, <span @click="toLoginPage">立即登录</span>
+        <div class="box-tags">
+          <div :class="{'active': this.activeTag === 'signinTag'}" class="tag">
+            <span class="span-index">1</span>填写验证信息<span class="span-dot">···</span>
           </div>
-        </el-carousel-item>
-      </el-carousel>
-      <el-dialog
-          :visible.sync="isErrorDialogVisible"
-          :show-close="false"
-          class="confirmDialog"
-          width="520px"
-          center>
-          <div class="icon"></div>
-          <div class="dialog-content">
-            <div class="text-alert">提示</div>
-            <div class="text-massage">手机验证码输入错误，请重新输入</div>
+          <div :class="{'active': this.activeTag === 'resetPwdTag'}" class="tag">
+            <span class="span-index">2</span>重新设置密码<span class="span-dot">···</span>
           </div>
-          <span slot="footer" class="dialog-footer">
-            <el-button class="submit-btn"  type="primary" @click="isErrorDialogVisible = false">确定</el-button>
-          </span>
-        </el-dialog>
+          <div :class="{'active': this.activeTag === 'successTag'}" class="tag">
+            <span class="span-index">3</span>成功
+          </div>
+        </div>
+        <el-carousel ref="restPwdContainer" :autoplay="false" indicator-position="none" arrow="nerver">
+          <el-carousel-item class="verify-message" name="signinTag" :key="1">
+            <el-form class="signin-form" ref="signinForm" :rules="rules" :model="signinForm" label-width="80px">
+              <el-form-item 
+                v-bind:class="[mobileStyle ? 'sign-in-content-form-item-input-active' : '']"
+                prop="telephone">
+                <span class="iconmoon">&#xe620;</span>
+                <el-input 
+                  placeholder="请输入手机号"
+                  @blur="leaveMobile"
+                  @focus="enterMobile"
+                  v-model="signinForm.telephone"></el-input>
+              </el-form-item>
+              <el-form-item 
+                v-bind:class="['identify-code', imageurlStyle ? 'sign-in-content-form-item-input-active' : '']"
+                class="identify-code" prop="identifyCode">
+                <span class="iconmoon">&#xe62c;</span>
+                <el-input 
+                  placeholder="请输入图像验证码"
+                  maxlength="4"
+                  @focus="enterImageUrl"
+                  @blur="leaveImageUrl"
+                  v-model="signinForm.identifyCode"></el-input>
+                <identify-code class="identify-code" @click.native="refreshCode" :identifyCode="identifyCode"></identify-code>
+              </el-form-item>
+              <el-form-item 
+                v-bind:class="[ phoneCodeStyle ? 'sign-in-content-form-item-input-active' : '']"
+                class="phone-identify-code" prop="phoneIentifyCode">
+                <span class="iconmoon">&#xe62c;</span>
+                <el-input 
+                  placeholder="请输入手机验证码"
+                  maxlength="4"
+                  @focus="enterPhoneCode"
+                  @blur="leavePhoneCode"
+                  v-model="signinForm.phoneIentifyCode"></el-input>
+                <span v-if="count<=0" class="phone-code" @click="getPhoneIdentifyCode">获取验证码</span>
+                <span v-else class="count"><span>{{count}}</span>s后重新获取</span>
+              </el-form-item>
+              <el-form-item class="sign-in-btn">
+                <el-button @click="handleNextStepClick">下一步</el-button>
+              </el-form-item>
+            </el-form>
+          </el-carousel-item>
+          <el-carousel-item class="reset-pwd" name="resetPwdTag" :key="2">
+            <el-form class="reset-pwd-form" ref="resetPwdForm" :rules="pwdrules" :model="resetPwdForm" label-width="80px">
+              <el-form-item 
+                v-bind:class="[inputNewPwd ? 'sign-in-content-form-item-input-active' : '']"
+                prop="password">
+                <span class="iconmoon">&#xe626;</span>
+                <el-input
+                  placeholder="请输入新密码"
+                  maxlength="6"
+                  @focus="enterInputNewPwd"
+                  @blur="leaveInputNewPwd"
+                  type="password" v-model="resetPwdForm.password"></el-input>
+              </el-form-item>
+              <el-form-item 
+                v-bind:class="[newPwdAgain ? 'sign-in-content-form-item-input-active' : '']"
+                prop="identifyPassword">
+                <span class="iconmoon">&#xe626;</span>
+                <el-input 
+                  placeholder="验证新密码"
+                  maxlength="6"
+                  @focus="enterNewPwdAgain"
+                  @blur="leaveNewPwdAgain"
+                  type="password" v-model="resetPwdForm.identifyPassword"></el-input>
+              </el-form-item>
+              <el-form-item class="sign-in-btn">
+                <el-button @click="handleSigninClick">确定</el-button>
+              </el-form-item>
+            </el-form>
+          </el-carousel-item>
+          <el-carousel-item class="complete-done" name="successTag" :key="3">
+            <div class="success-icon"></div>
+            <div class="success-text">
+              <span>密码设置成功</span>
+            </div>
+            <div class="to-login-btn">
+              <el-button @click="toLoginPage">立即登陆</el-button>
+            </div>
+          </el-carousel-item>
+        </el-carousel>
+        <el-dialog
+            :visible.sync="isErrorDialogVisible"
+            :show-close="false"
+            class="confirmDialog"
+            width="520px"
+            center>
+            <div class="icon"></div>
+            <div class="dialog-content">
+              <div class="text-alert">提示</div>
+              <div class="text-massage">手机验证码输入错误，请重新输入</div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+              <el-button class="submit-btn"  type="primary" @click="isErrorDialogVisible = false">确定</el-button>
+            </span>
+          </el-dialog>
+      </div>
     </div>
   </div>
 </template>
 <script>
+import '../../../assets/fonts/iconfont.css';
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { clearInterval } from 'timers';
 import { getPhoneVerifyCode, verifyTelephoneCode, resetPassword } from "@/rest/userManagmentPageApi";
@@ -123,6 +165,11 @@ export default {
       }
     };
     return {
+      mobileStyle: false,
+      imageurlStyle: false,
+      phoneCodeStyle: false,
+      inputNewPwd: false,
+      newPwdAgain: false,
       isErrorDialogVisible: false,
       activeTag: 'signinTag',
       count: 0,
@@ -171,6 +218,37 @@ export default {
     }; 
   },
   methods: {
+    enterMobile() {
+      this.mobileStyle = true
+    },
+    leaveMobile() {
+      this.mobileStyle = false
+    },
+    enterImageUrl() {
+      this.imageurlStyle = true
+    },
+    leaveImageUrl() {
+      this.imageurlStyle = false
+    },
+    enterPhoneCode() {
+      this.phoneCodeStyle = true
+    },
+    leavePhoneCode() {
+      this.phoneCodeStyle = false
+    },
+    enterInputNewPwd() {
+      this.inputNewPwd = true
+    },
+    leaveInputNewPwd() {
+      this.inputNewPwd = false
+    },
+    enterNewPwdAgain() {
+      this.newPwdAgain = true
+    },
+    leaveNewPwdAgain() {
+      this.newPwdAgain = false
+    },
+
     randomNum(min, max) {
       return Math.floor(Math.random() * (max - min) + min);
     },
@@ -284,71 +362,73 @@ export default {
 .retrieve-password {
   width: 100%;
   height: 100%;
-  background: url('../../../assets/imgs/WechatIMG10.jpeg') no-repeat;
+  background: url('../../../assets/imgs/loginBg_01.png') no-repeat;
   background-size: 100% 100%;
-  .title {
+  .retrieve-pwd-content {
     display: flex;
-    width: 50%;
-    margin: 0px auto 20px;
-    padding-top: 86px;
-    .divide-line {
-      display: flex;
-      align-items: center;
-      width: 40%;
-      .line {
-        height: 1px;
-        width: 100%;
-        border: 0.5px rgba(255, 255, 255, 0.6) solid;
+    justify-content: center;
+    .sign-in-logo {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      .iconmoon {
+        color: #005BAC;
+        font-size: 36px;
+        cursor: pointer;
       }
-    }
-    .text {
-      width: 196px;
-      font-size: 22px;
-      color: #ffffff;
-      text-align: center;
-    }
-  }
-  .login-btn {
-    width: 50%;
-    margin: 0px auto 20px;
-    line-height: 24px;
-    font-size: 14px;
-    text-align: center;
-    color: rgba(255,255,255,0.85);
-    >span {
-      color:#C1B071;
-      cursor: pointer;
     }
   }
   .retrieve-pwd-box {
-    width: 866px;
-    margin: 0 auto;
-    color: #ffffff;
+    background: #FFFFFF ;
+    min-height: 500px;
+    margin-top: 50px ;
+    padding: 30px 50px 0px;
+    .login-logo {
+      width: 50%;
+      margin: 0px auto 20px;
+      line-height: 24px;
+      text-align: center;
+    }
+    .retrieve-pwd-text {
+        display: flex;
+        margin-bottom: 20px;
+        .text {
+          font-weight: bold;
+          font-size: 30px;
+          color: #333333;
+          text-align: left;
+        }
+      }
     .box-tags {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      color: #999999;
       .tag {
         display: flex;
         align-items: center;
-        padding: 0 46px 10px;
-        color: rgba(255,255,255,0.85);
-        >span {
+        .span-index {
           display: inline-block;
-          width: 16px;
-          height: 16px;
+          width: 20px;
           margin-right: 4px;
-          font-size: 13px;
-          border: 1px solid rgba(255,255,255,0.85);
+          color: #FFFFFF;
+          background: #999999;
           border-radius: 50%;
           text-align: center;
         }
-        &.active {
-          color: rgba(255,255,255,0.85);
-          border-bottom: 2px solid rgba(255,255,255,0.85);
-          >span {
-            border-color: rgba(255,255,255,0.85);
-          }
+        .span-dot {
+          margin-left: 8px;
+          letter-spacing: 4px;
+          color: #999999;
+        }
+      }
+      .active {
+        color: #4A90E2;
+        .span-index {
+          background: #4A90E2 ;
+        }
+        .span-dot {
+          color: #4A90E2 ;
         }
       }
     }
@@ -364,15 +444,15 @@ export default {
                 width: 80px;
                 height: 86px;
                 margin: 50px auto 0;
-                background: url('../../../assets/imgs/success.png') no-repeat;
+                background: url('../../../assets/imgs/success-colorful.svg') no-repeat;
                 background-size: cover;
               }
               .success-text {
-                margin-top: 30px;
+                margin: 20px auto 40px;
                 text-align: center;
-                font-size: 14px;
+                font-size: 16px;
                 >span {
-                  color: #C1B071;
+                  color: #333333;
                   font-weight: bold;
                   cursor: pointer;
                 }
@@ -384,20 +464,23 @@ export default {
     }
     /deep/ {
       .el-form {
-        width: 360px;
-        margin: 0 auto;
-        .el-form-item {
-          border-bottom: 1px rgba(255, 255, 255, 0.5) solid;
-          .el-form-item__label {
-            line-height: 36px;
-            font-size: 12px;
-            color: #ffffff;
-            text-align: left;
-            &::before {
-              content: '';
+        .sign-in-content-form-item-input-active {
+            border-bottom: 2px #4a90e2 solid !important;
+            .iconmoon {
+              font-size: 30px;
+              color: #4a90e2 !important;
             }
           }
+        .el-form-item {
+          border-bottom: 1px #D1D1D1 solid;
+          .iconmoon {
+            color: #D1D1D1;
+            font-size: 30px;
+            cursor: pointer;
+          }
           .el-form-item__content {
+            margin: 0px !important;
+            display: flex;
             line-height: 36px;
             .el-input {
               .el-input__inner {
@@ -405,19 +488,19 @@ export default {
                 line-height: 36px;
                 border: none;
                 background-color: transparent;
-                color: #ffffff;
               }
             }
           }
         }
         &.signin-form {
-          margin-top: 50px;
+          margin-top: 40px;
           .identify-code {
             .el-form-item__content {
               display: flex;
               align-items: center;
               .identify-code {
                 height: 36px;
+                margin-bottom: 5px;
               }
             }
           }
@@ -427,16 +510,21 @@ export default {
               align-items: center;
               .phone-code {
                 display: inline-block;
-                width: 120px;
+                width: 155px;
                 height: 36px;
-                color: #C1B071;
+                margin: 0px 0px 5px;
+                text-align: center;
+                background: #0565FF;
+                color: #FFFFFF ;
                 cursor: pointer;
               }
               .count {
                 display: inline-block;
-                width: 144px;
+                width: 150px;
                 height: 36px;
-                color: #C1B071;
+                color: #FFFFFF;
+                margin: auto 0px 5px;
+                background: #6BA4FF;
                 cursor: not-allowed;
                 >span {
                   display: inline-block;
@@ -453,16 +541,16 @@ export default {
             }
             /deep/ {
               .el-button {
-                width: 100%;
+                width: 100% !important;
                 @include buttonStyle;
-                color: #000000;
+                color: #FFFFFF ;
                 margin: 0;
               }
             }
           }
         }
         &.reset-pwd-form {
-          margin-top: 50px;
+          margin-top: 40px;
           .sign-in-btn {
             border: none;
             .el-form-item__content {
@@ -470,13 +558,28 @@ export default {
             }
             /deep/ {
               .el-button {
-                width: 100%;
+                margin-top:20px !important;
+                width: 100% !important;
                 @include buttonStyle;
-                color: #000000;
+                color: #FFFFFF  ;
                 margin: 0;
               }
             }
           }
+        }
+      }
+    }
+    .to-login-btn {
+      border: none;
+      .el-form-item__content {
+        margin-left: 0 !important;
+      }
+      /deep/ {
+        .el-button {
+          width: 100% !important;
+          @include buttonStyle;
+          color: #FFFFFF ;
+          margin: 0;
         }
       }
     }
@@ -490,7 +593,7 @@ export default {
       .text-alert {
         width: 40px;
         font-size: 20px;
-        color: #9A8B7B;
+        color: #666666;
         margin-top: 15px;
         margin-bottom: 6px;
       }

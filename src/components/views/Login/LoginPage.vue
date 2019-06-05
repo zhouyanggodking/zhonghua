@@ -1,28 +1,47 @@
 <template>
   <div class="login-page">
     <div class="sign-in-box">
-      <div class="sign-in-logo">
-        <span class="iconfont">&#xe60b;</span>
+      <div class="sign-in-logo"> 
+         <span class="iconmoon">&#xe62d;</span>
       </div>
       <div class="sign-in-form">
+        <div class="login-logo">
+          <img src="../../../assets/imgs/loginLogo.png" alt>
+        </div>
         <div class="sign-in-text">
-          <div class="divide-line">
-            <div class="line"></div>
-          </div>
           <div class="text">登录</div>
-          <div class="divide-line">
-            <div class="line"></div>
-          </div>
         </div>
         <el-form ref="signinForm" :rules="rules" :model="signinForm" label-width="60px">
-          <el-form-item label="手机号" prop="telephone">
-            <el-input v-model="signinForm.telephone"></el-input>
+          <el-form-item 
+            v-bind:class="[mobileStyle ? 'sign-in-content-form-item-input-active' : '']"
+            prop="telephone">
+            <span class="iconmoon">&#xe620;</span>
+            <el-input 
+              placeholder="请输入手机号"
+              @blur="leaveMobile"
+              @focus="enterMobile"
+              v-model="signinForm.telephone"></el-input>
           </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="signinForm.password"></el-input>
+          <el-form-item 
+            v-bind:class="[passwordStyle ? 'sign-in-content-form-item-input-active' : '']"
+            prop="password">
+            <span class="iconmoon">&#xe626;</span>
+            <el-input type="password" 
+              placeholder="请输入密码"
+              @blur="leavePassword"
+              @focus="enterPassword"
+              v-model="signinForm.password"></el-input>
           </el-form-item>
-          <el-form-item class="identify-code" label="验证码" prop="identifyCode">
-            <el-input v-model="signinForm.identifyCode"></el-input>
+          <el-form-item 
+            v-bind:class="['identify-code', imageurlStyle ? 'sign-in-content-form-item-input-active' : '']"
+            prop="identifyCode">
+            <span class="iconmoon">&#xe62c;</span>
+            <el-input 
+              placeholder="请输入验证码"
+              maxlength="4"
+              @focus="enterImageUrl"
+              @blur="leaveImageUrl"
+              v-model="signinForm.identifyCode"></el-input>
             <identify-code class="identify-code" @click.native="refreshCode" :identifyCode="identifyCode"></identify-code>
           </el-form-item>
           <div class="forget-pwd">
@@ -65,12 +84,11 @@
         </el-dialog>
       </div>
     </div>
-    <Footer></Footer>
   </div>
 </template>
 <script>
 import '../../../assets/iconfont/iconfont.css';
-import Footer from '@/components/common/Footer';
+import '../../../assets/fonts/iconfont.css';
 import IdentifyCode from '@/components/common/IdentifyCode';
 import { login } from "@/rest/authQuery";
 
@@ -98,6 +116,9 @@ export default {
       }
     };
     return {
+      mobileStyle: false,
+      passwordStyle: false,
+      imageurlStyle: false,
       isLoginDisabled: false,
       loginErrorCount: 0,
       isErrorDialogVisible: false,
@@ -127,6 +148,24 @@ export default {
     };
   },
   methods: {
+    enterMobile() {
+      this.mobileStyle = true
+    },
+    leaveMobile() {
+      this.mobileStyle = false
+    },
+    enterPassword() {
+      this.passwordStyle = true
+    },
+    leavePassword() {
+      this.passwordStyle = false
+    },
+    enterImageUrl() {
+      this.imageurlStyle = true
+    },
+    leaveImageUrl() {
+      this.imageurlStyle = false
+    },
     randomNum(min, max) {
       return Math.floor(Math.random() * (max - min) + min);
     },
@@ -192,7 +231,6 @@ export default {
     this.refreshCode();
   },
   components: {
-    Footer,
     IdentifyCode
   }
 }
@@ -207,40 +245,42 @@ export default {
   .sign-in-box {
     display: flex;
     justify-content: center;
-    height: calc(100vh - 100px);
-    background: url('../../../assets/imgs/signinBackground.jpg') no-repeat;
-    background-size: 100% 100%;
+    width: 100%;
+    min-height: 500px;
+    background: url('../../../assets/imgs/loginBg_01.png') no-repeat;
+    background-size: 100% auto;
     .sign-in-logo {
       position: absolute;
       top: 30px;
       left: 30px;
-      .iconfont {
-        color: #c1b071;
+      .iconmoon {
+        color: #005BAC;
         font-size: 36px;
         cursor: pointer;
       }
     }
     .sign-in-form {
-      width: 26%;
-      padding-top: 50px;
+      background: #FFFFFF;
+      min-height: 500px;
+      margin: 50px auto;
+      padding: 30px 50px 0px;
+      .login-logo {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 20px;
+        .img {
+          width: 202.5px;
+        }
+      }
       .sign-in-text {
         display: flex;
-        margin-bottom: 20px;
-        .divide-line {
-          display: flex;
-          align-items: center;
-          width: 40%;
-          .line {
-            height: 1px;
-            width: 100%;
-            border: 0.5px rgba(255, 255, 255, 0.6) solid;
-          }
-        }
+        margin-bottom: 18px;
         .text {
           width: 80px;
-          font-size: 22px;
-          color: #ffffff;
-          text-align: center;
+          font-weight: bold;
+          font-size: 30px;
+          color: #333333;
+          text-align: left;
         }
       }
       /deep/ {
@@ -250,31 +290,45 @@ export default {
             justify-content: flex-end;
             margin-bottom: 20px;
             >span {
-              font-size: 14px;
-              color: rgba(255,255,255,0.85);
+              font-size: 16px;
+              color: #999999 ;
               cursor: pointer;
             }
           }
+          .sign-in-content-form-item-input-active {
+            border-bottom: 2px #4a90e2 solid !important;
+            .iconmoon {
+              font-size: 30px;
+              color: #4a90e2 !important;
+            }
+          }
           .el-form-item {
-            border-bottom: 1px rgba(255, 255, 255, 0.5) solid;
+            border-bottom: 1px #D1D1D1 solid;
             .el-form-item__label {
               line-height: 36px;
               font-size: 12px;
-              color: #ffffff;
               text-align: left;
               &::before {
                 content: '';
               }
             }
+            .iconmoon {
+              color: #D1D1D1;
+              font-size: 30px;
+              cursor: pointer;
+            }
             .el-form-item__content {
-              line-height: 36px;
+              display: flex;
+              margin: 0px !important;
+              line-height: 50px;
               .el-input {
                 .el-input__inner {
                   height: 36px;
                   line-height: 36px;
                   border: none;
                   background-color: transparent;
-                  color: #ffffff;
+                  color: #333333;
+                  font-size: 16px;
                 }
               }
             }
@@ -294,9 +348,9 @@ export default {
               }
               /deep/ {
                 .el-button {
-                  width: 100%;
+                  width: 100% !important;
                   @include buttonStyle;
-                  color: #000000;
+                  color:  #FFFFFF;
                   margin: 0;
                 }
               }
