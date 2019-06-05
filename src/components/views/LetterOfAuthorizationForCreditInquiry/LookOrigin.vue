@@ -188,6 +188,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 .identify-result-detail-page {
   .top-box {
     height: 130px;
@@ -319,7 +321,11 @@ export default {
             justify-content: flex-end;
             padding: 30px 0px;
             .modify-btn {
+              @include buttonStyle;
               margin-left: 40px;
+            }
+            .cancel-btn {
+              @include cancelBtnStyle;
             }
           }
         }
@@ -327,50 +333,10 @@ export default {
     }
   }
 }
-/deep/ .el-button {
-  width: 135px;
-  background: #c1b071;
-  border-radius: 4px;
-  border-color: #c1b071;
-  span {
-    font-size: 14px;
-    color: #ffffff;
-  }
-  &:hover {
-    background-color: #e9d58b;
-    border-color: #e9d58b;
-  }
-}
-.el-button:active {
-  border-color: #c1b071;
-  color: #fff;
-}
-/deep/ .cancel-btn {
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  span {
-    font-family: PingFangSC-Regular;
-    font-size: 16px;
-    color: #666666 !important;
-  }
-  &:hover {
-    background-color: #fff;
-    border-color: #d9d9d9;
-  }
-  &:active {
-    border-color: #d9d9d9;
-  }
-}
-.btn {
-  margin-right: 30px;
-}
-.el-button + .el-button {
-  margin-left: 0;
-}
 .title {
   font-family: PingFangSC-Semibold;
   font-size: 18px;
-  color: #9a8b7b;
+  color: #333333;
 }
 .red-text {
   color: #d0021b;

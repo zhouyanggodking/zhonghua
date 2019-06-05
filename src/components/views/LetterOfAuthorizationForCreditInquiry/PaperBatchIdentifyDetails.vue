@@ -401,7 +401,7 @@ export default {
           .title {
             font-family: PingFangSC-Semibold;
             font-size: 18px;
-            color: #9a8b7b;
+            color: #333333;
           }
           .look-origin {
             font-size: 16px;
@@ -536,7 +536,7 @@ export default {
       .review-opinion_title {
         font-family: PingFangSC-Semibold;
         font-size: 18px;
-        color: #9a8b7b;
+        color: #333333;
         margin-bottom: 10px;
       }
       .review-opinion_content {

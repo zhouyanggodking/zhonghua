@@ -1,8 +1,8 @@
 <template>
   <el-menu
     :default-active="activeMenu"
-    :router="userRouter"
-    :unique-opened="uniqueOpened"
+    :router="true"
+    :unique-opened="true"
     text-color="rgba(255,255,255,0.60)"
     active-text-color="#ffffff"
     class="el-menu-vertical-demo">
@@ -34,8 +34,6 @@ export default {
   data() {
     return {
       activeMenu: '/',
-      uniqueOpened: true,
-      userRouter: true,
       menuList: []
     };
   },
@@ -71,6 +69,12 @@ export default {
   border-right: none;
   background-color: #0F1322;
   .level-one {
+    .el-menu-item {
+      &.is-active {
+        padding-left: 56px !important;
+        border-left: 4px solid #0094FF;
+      }
+    }
     .el-submenu {
       >.el-submenu__title {
         height: 36px !important;
@@ -88,11 +92,19 @@ export default {
           padding-left: 100px !important;
           text-align: left;
           &.is-active {
+            padding-left: 96px !important;
             background: #094D84 !important;
             color: #ffffff !important;
+            border-left: 4px solid #0094FF;
           }
         }
         .level-two {
+          .el-menu-item {
+            &.is-active {
+              // padding-left: 56px !important;
+              border-left: 4px solid #0094FF;
+            }
+          }
           .el-submenu {
             .el-submenu__title {
               color: rgba(255, 255, 255, 0.6) !important;

@@ -319,7 +319,7 @@ export default {
       padding: 70px 0 50px;
       border: none;
       text-align: center;
-      border: 1px dashed rgba(0, 0, 0, 0.15);
+      border: 2px dashed #ebebeb;
       border-radius: 2px;
       background-color: #FAFAFA;
       cursor: pointer;
@@ -334,7 +334,7 @@ export default {
         line-height: 22px;
       }
       &:hover {
-        border-color: #C1B071;
+        border: 2px dashed #0094FF;
       }
     }
     .upload-history {

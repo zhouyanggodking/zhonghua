@@ -380,7 +380,7 @@ export default {
           }
           .export-excel {
             margin-left: 30px;
-            font-weight: bold;
+            font-weight: normal;
             font-size: 14px;
             color: #4A90E2;
             cursor: pointer;

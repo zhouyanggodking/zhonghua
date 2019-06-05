@@ -128,8 +128,8 @@
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button :disabled="auditState === 1" @click="reviewPass">审核通过</el-button>
-            <el-button :disabled="auditState === 0" @click="reviewReject">驳回</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 1" @click="reviewPass">审核通过</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 0" @click="reviewReject">驳回</el-button>
           </div>
         </div>
       </div>
@@ -367,6 +367,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 .elec-batch-info-indentify-page-details {
   .top-box {
     height: 130px;
@@ -427,7 +429,7 @@ export default {
           .title {
             font-family: PingFangSC-Semibold;
             font-size: 18px;
-            color: #9a8b7b;
+            color: #333333;
           }
           .look-origin {
             font-size: 16px;
@@ -501,6 +503,7 @@ export default {
             justify-content: flex-end;
             .modify-btn {
               margin-left: 40px;
+              @include buttonStyle;
             }
           }
           .item {
@@ -532,7 +535,7 @@ export default {
       .review-opinion_title {
         font-family: PingFangSC-Semibold;
         font-size: 18px;
-        color: #9a8b7b;
+        color: #333333;
         margin-bottom: 10px;
       }
       .review-opinion_content {
@@ -553,56 +556,16 @@ export default {
           display: flex;
           justify-content: flex-end;
           margin-top: 30px;
-          .el-button {
-            margin-left: 30px;
+          .submit-btn {
+            @include buttonStyle;
+            margin-left: 40px;
+          }
+          .cancel-btn {
+            @include cancelBtnStyle;
           }
         }
       }
     }
-  }
-}
-/deep/ .el-button {
-  width: 135px;
-  background: #c1b071;
-  border-radius: 4px;
-  border-color: #c1b071;
-  span {
-    font-size: 14px;
-    color: #ffffff;
-  }
-  &:hover {
-    background-color: #e9d58b;
-    border-color: #e9d58b;
-  }
-  &.is-disabled {
-    background-color: #d9d9d9;
-    border-color: #d9d9d9;
-  }
-}
-.el-button:active {
-  border-color: #c1b071;
-  color: #fff;
-}
-.btn {
-  margin-right: 30px;
-}
-.el-button + .el-button {
-  margin-left: 0;
-}
-/deep/ .cancel-btn {
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  span {
-    font-family: PingFangSC-Regular;
-    font-size: 16px;
-    color: #666666 !important;
-  }
-  &:hover {
-    background-color: #fff;
-    border-color: #c1b071;
-  }
-  &:active {
-    border-color: #c1b071;
   }
 }
 .dialog-common {

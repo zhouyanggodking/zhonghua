@@ -24,11 +24,18 @@ const PROBLEM_LIST = [
   {id: 7, name: '授权书无签署日期'},
   {id: 8, name: '授权书已过期'},
   {id: 9, name: '其他'}
+];
+const INVOICE_TYPE = [
+  {id: '01', name: '增值税专用发票'},
+  {id: '04', name: '增值税普通发票'},
+  {id: '10', name: '增值税普通发票(电子)'},
+  {id: '11', name: '增值税普通发票(卷式)'}
 ]
 export {
   global_,
   USERID,
   DEPARTMENT_LIST,
   CHECK_STATUS_LIST,
-  PROBLEM_LIST
+  PROBLEM_LIST,
+  INVOICE_TYPE
 }
