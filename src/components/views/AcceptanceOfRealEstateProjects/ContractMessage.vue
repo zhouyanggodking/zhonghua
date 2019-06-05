@@ -10,8 +10,7 @@
     <el-form ref="filedResultForm" label-position="right" :rules="rules" label-width="120px" :model="filedResultForm">
       <el-form-item label="发票类型:" @click.native="filedFocus('发票类型')" prop="invoiceType">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType" placeholder="">
-          <el-option label="专票" value="专票"></el-option>
-          <el-option label="普票" value="普票"></el-option>
+          <el-option v-for="(item, index) in invoiceType" :key="index" :label="item.name" :value="item.id"></el-option>
         </el-select>
         <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType"></el-input>
       </el-form-item>
@@ -112,7 +111,7 @@
 </template>
 <script>
 import { modifyInvoice } from '@/rest/realEstateUploadApi';
-import {USERID} from '@/global/global';
+import { USERID, INVOICE_TYPE } from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
 
 export default {
@@ -124,6 +123,7 @@ export default {
       paymentOrderTheme: '',
       paymentRequestOrderId: 1,
       invoiceId: null,
+      invoiceType: INVOICE_TYPE,
       stamped: ['否', '是'],
       verification: ['未通过', '通过', '未验真'],
       isFiledFormEdit: true,
