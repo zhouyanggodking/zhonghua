@@ -128,8 +128,9 @@ p {
     font-size: 26px;
     font-weight: bold;
     color: #666666;
-    background: url('../../assets/imgs/logo-bg.svg') no-repeat right bottom;
-    background-size: contain;
+    background: url('../../assets/imgs/logo-bg.svg') #ffffff no-repeat right bottom;
+    background-size: 100%;
+    background-position: bottom;
   }
   .files-count-group {
     display: grid;
