@@ -6,7 +6,7 @@
       </div>
       <div class="sign-in-form">
         <div class="login-logo">
-          <img src="../../../assets/imgs/loginLogo.png" alt>
+          <img width="200px" src="../../../assets/imgs/loginLogo.png" alt>
         </div>
         <div class="sign-in-text">
           <div class="text">登录</div>
@@ -245,8 +245,10 @@ export default {
   .sign-in-box {
     display: flex;
     justify-content: center;
+    align-items: center;
     min-width: 500px;
-    min-height: 500px;
+    // min-height: 500px;
+    height: 100%;
     background: url('../../../assets/imgs/loginBg_01.png') no-repeat;
     background-size: cover;
     .sign-in-logo {
@@ -260,17 +262,15 @@ export default {
       }
     }
     .sign-in-form {
-      min-height: 500px;
-      margin: 50px auto;
-      padding: 30px 50px 0px;
+      width: 610px;
+      height: 610px;
+      padding: 50px 88px;
       background: #FFFFFF;
+      box-shadow: 0 11px 38px 0 rgba(64, 140, 251, 0.2);
       .login-logo {
         display: flex;
         justify-content: center;
-        padding-bottom: 20px;
-        .img {
-          width: 202.5px;
-        }
+        padding-bottom: 50px;
       }
       .sign-in-text {
         display: flex;
