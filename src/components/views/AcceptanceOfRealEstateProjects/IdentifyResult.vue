@@ -264,7 +264,6 @@ export default {
       }
       
     },
-    reviewPass() {},
     // 全选toggle
     toggleSelection() {
       if (this.allChecked) {
@@ -311,16 +310,20 @@ export default {
         userId: 1
       };
       checkPaymentRequestOrders(params).then(() => {
-        this.$message({
-          message: '审核完成',
-          type: 'success'
-        });
+        if (res.data.status === 200) {
+          this.$message({
+            message: '审核完成!',
+            type: 'success'
+          });
         this.getPaymentOrderInfos();
-      }, () => {
-        this.$message({
-          message: '审核失败',
-          type: 'warning'
-        })
+          this.dialogVisible = false;
+          this.getPaymentOrderInfos();
+        } else {
+          this.$message({
+            message: '审核失败!',
+            type: 'warning'
+          })
+        }
       })
     },
     // 驳回
@@ -337,19 +340,28 @@ export default {
           rejectReason: this.rejectContent
         }
       };
-      checkPaymentRequestOrder(params).then(() => {
-        this.$message({
-          message: '驳回成功',
-          type: 'success'
+      if (this.rejectContent !== '') {
+        checkPaymentRequestOrder(params).then((res) => {
+          if (res.data.status === 200) {
+            this.$message({
+              message: '驳回成功!',
+              type: 'success'
+            });
+            this.dialogVisible = false;
+            this.getPaymentOrderInfos();
+          } else {
+            this.$message({
+              message: '驳回失败!',
+              type: 'warning'
+            })
+          }
         });
-        this.dialogVisible = false;
-        this.getPaymentOrderInfos();
-      },() => {
+      } else {
         this.$message({
-          message: '驳回失败',
+          message: '请填写驳回原因!',
           type: 'warning'
         })
-      });
+      }
     },
     handleClose() {
       this.dialogVisible = false;
@@ -694,7 +706,7 @@ export default {
   .el-dialog__header {
     .el-dialog__title {
       font-size: 20px;
-      color: #9a8b7b;
+      color: #333333;
     }
     .el-dialog__headerbtn {
       font-size: 30px;

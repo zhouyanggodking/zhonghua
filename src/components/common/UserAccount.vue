@@ -174,7 +174,7 @@ export default {
     align-items: center;   
     padding: 0 0.75rem;
     &:hover {      
-      color: #C0AF70;  
+      color: #005bac;  
       background-color: rgba(239, 243, 245, 0.5);
     }
     &.logout {

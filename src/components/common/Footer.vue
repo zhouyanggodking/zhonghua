@@ -33,7 +33,6 @@ export default {
   color: #333333;
   text-align: center;
   box-shadow: 0px -1px 5px #ccc;
-  z-index: 99999;
   .footer-items-group {
     display: flex;
     padding: 58px 0 20px 0;

@@ -44,11 +44,8 @@ export default {
 
 <style lang="scss" scoped>
   body > .el-container {
-    // position: relative
     height: 100%;
     .content{
-      // width: calc( 100% -236px);
-      // min-width: 1200px;
       overflow: auto;
     }
     .el-header {
@@ -60,7 +57,6 @@ export default {
       background-color: #ffffff;
       color: #333333;
       box-shadow: 0px 1px 5px #ccc;
-      z-index: 99999;
       .system-name {
         margin-right: auto;
         font-size: 26px;
