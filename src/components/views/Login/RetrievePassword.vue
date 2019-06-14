@@ -100,7 +100,7 @@
               <span>密码设置成功</span>
             </div>
             <div class="to-login-btn">
-              <el-button @click="toLoginPage">立即登陆</el-button>
+              <el-button @click="toLoginPage">立即登录</el-button>
             </div>
           </el-carousel-item>
         </el-carousel>
