@@ -58,10 +58,15 @@
             label="识别状态"
             prop="status">
             <template slot-scope="scope">
-              <span v-if="scope.row.status === 0" style="color: #4A90E2;">识别中</span>
+              <!-- <span v-if="scope.row.status === 0" style="color: #4A90E2;">识别中</span>
               <span v-else-if="scope.row.status === null" style="color: #C0C4CC;">未识别</span>
               <span v-else-if="scope.row.status === 2" style="color: #417505;">识别成功</span>
-              <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span>
+              <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span> -->
+              <span v-if="scope.row.status === 1" style="color: #4A90E2;">进行中</span>
+              <span v-else-if="scope.row.status === 0" style="color: #C0C4CC;">未开始</span>
+              <span v-else-if="scope.row.status === 2" style="color: #417505;">运行成功</span>
+              <span v-else-if="scope.row.status === -1" style="color: #D0021B;">运行失败</span>
+              <span v-else-if="scope.row.status === -2" style="color: #D0021B;">上传失败</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -83,7 +88,7 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button :disabled="scope.row.status !== null" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
+              <el-button :disabled="scope.row.status !== null && scope.row.status !== -2" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -105,7 +110,6 @@ import {USERID} from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
 
 const PAGE_SIZE = 10;
-const ELE_OR_FILE = 0;
 
 export default {
   data() {
@@ -191,6 +195,7 @@ export default {
     },
     handleTableStartOcrJob(row) {
       this.originalFileId = row.id;
+      this.authorizationValidDate = row.authorizationValidDate;
       this.startOcrJob();
     },
     startOcrJob() {
@@ -199,7 +204,7 @@ export default {
         ocrJobInfo: {
           originalFileId: this.originalFileId,
           businessTypeId: this.businessTypeId,
-          elecOrFile: ELE_OR_FILE,
+          elecOrFile: this.businessTypeId === '3' ? 0 : 1,
           authorizationValidDate: dateFormat(this.authorizationValidDate)
         }
       };

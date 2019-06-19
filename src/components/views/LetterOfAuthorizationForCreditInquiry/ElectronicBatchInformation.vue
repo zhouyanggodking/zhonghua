@@ -41,7 +41,7 @@
         >
           <el-table-column fixed type="selection" width="30"></el-table-column>
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column prop="applyDate" label="申请日期" width="120"></el-table-column>
+          <el-table-column prop="applyDate" label="包名称" width="120"></el-table-column>
           <el-table-column prop="submitOnApply" label="申请日提交" width="120"></el-table-column>
           <el-table-column prop="submitNotOnApply" label="非申请日提交" show-overflow-tooltip></el-table-column>
           <el-table-column prop="uploadFileNum" label="上传文件数量" show-overflow-tooltip></el-table-column>
@@ -49,7 +49,7 @@
             <template slot-scope="scope">
               <span v-if="scope.row.state === '0'">驳回</span>
               <span v-else-if="scope.row.state === '1'" style="color: #417505;">已审核</span>
-              <span v-else-if="scope.row.state === '2'" style="color: #F5A623;">未审核</span>
+              <span v-else-if="scope.row.state === '2' || scope.row.state === null" style="color: #F5A623;">未审核</span>
             </template>
           </el-table-column>
           <el-table-column prop="createUser" label="上传人员" show-overflow-tooltip></el-table-column>
@@ -76,7 +76,7 @@ import {getEstateElecAuthorizationSummaryInfos} from "@/rest/letterOfAuthorizati
 import BreadCrumb from "@/components/common/BreadCrumb";
 import DateRange from "@/components/common/DateRange";
 import Pagination from "@/components/common/Pagination";
-import {global_} from "@/global/global";
+import {global_upload} from "@/global/global";
 import {formatQuery} from '@/helpers/formatGetParams';
 
 const PAGE_SIZE = 10;
@@ -102,7 +102,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "电子版授权书批次识别结果",
-      breadCrumbList: ['首页', "征信查询授权书", "识别结果", "电子版批次信息"],
+      breadCrumbList: ['首页', "征信查询授权书", "识别结果", "电子版批次详情"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       checkStatusList: [
@@ -156,7 +156,7 @@ export default {
           userId: 1,
           elecOrFile: this.elecOrFile
         };
-        window.open(`${global_}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
+        window.open(`${global_upload}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
 ${formatQuery(params)}`,'_parent');
       } else {
         this.$message({
@@ -172,7 +172,7 @@ ${formatQuery(params)}`,'_parent');
     },
     batchReviewPass() {},
     tableItemDetails(row) {
-      this.$router.push({ name: "credit-auth-elect-result-details", query: { id: row.id } });
+      this.$router.push({ name: "credit-auth-elect-result-details", query: { id: row.id, batchNo: row.applyDate } });
     },
     exportExcel() {
       const params = {
@@ -182,7 +182,7 @@ ${formatQuery(params)}`,'_parent');
         userId: 1,
         elecOrFile: this.elecOrFile
       }
-      window.open(`${global_}/auth/estateAuthorizationSummaryController/exportToExcel
+      window.open(`${global_upload}/auth/estateAuthorizationSummaryController/exportToExcel
 ${formatQuery(params)}`,'_parent');
     },
     reviewPass() {
@@ -202,7 +202,7 @@ ${formatQuery(params)}`,'_parent');
     onPageNumberChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
-      this.getPaymentOrderInfos();
+      this.fetchTableData();
     },
     fetchTableData() {
       this.isLoading = true;

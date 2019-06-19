@@ -159,7 +159,7 @@ export default {
       formLabelWidth: '120px',
       activeName: 'filedEdit',
       breadCrumbList: [
-        '首页', '动产项目承兑', '文件上传'
+        '首页', '地产项目承兑', '文件上传'
       ],
       addFiledform: {
         standardName: '',

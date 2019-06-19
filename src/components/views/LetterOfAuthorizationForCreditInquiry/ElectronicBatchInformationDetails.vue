@@ -19,9 +19,7 @@
         <div class="search-condition_input">
           <div class="search-condition_input_item">
             <div class="text">部门</div>
-            <el-select v-model="searchCondition.depart" placeholder="请选择">
-              <el-option v-for="(item, index) in departmentList" :key="index" :label="item.departmentName" :value="item.id"></el-option>
-            </el-select>
+            <el-input v-model="searchCondition.depart" placeholder="请输入部门名称"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">公司名称</div>
@@ -35,16 +33,16 @@
             <div class="text">公司名称一致</div>
             <el-select v-model="searchCondition.companySealMatch" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
-              <el-option label="否是" value="0"></el-option>
-              <el-option label="全部" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+              <el-option label="是" value="1"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item">
             <div class="text">是否法人</div>
             <el-select v-model="searchCondition.corporateStamp" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
-              <el-option label="否是" value="0"></el-option>
-              <el-option label="全部" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+              <el-option label="是" value="1"></el-option>
             </el-select>
           </div>
           <div class="search-condition_input_item">
@@ -103,11 +101,7 @@
           </el-table-column>
           <el-table-column prop="submitDate" label="授权提交时间" show-overflow-tooltip></el-table-column>
           <el-table-column prop="signTime" label="签署时间" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="authorizationValidDateLegal" label="授权有效期" show-overflow-tooltip>
-            <template slot-scope="scope">
-              <span v-if="scope.row.authorizationValidDateLegal === 0">大于等于申请日期</span>
-              <span v-else-if="scope.row.authorizationValidDateLegal === 1">小于申请日期</span>
-            </template>
+          <el-table-column prop="authorizationValidDate" label="授权有效期" show-overflow-tooltip>
           </el-table-column>
           <el-table-column prop="auditState" label="审核状态" show-overflow-tooltip>
             <template slot-scope="scope">
@@ -258,7 +252,7 @@ import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import DateRange from "@/components/common/DateRange";
 import {formatQuery} from '@/helpers/formatGetParams';
-import {DEPARTMENT_LIST, USERID, CHECK_STATUS_LIST, global_, PROBLEM_LIST} from '@/global/global';
+import { USERID, CHECK_STATUS_LIST, global_upload, PROBLEM_LIST} from '@/global/global';
 
 const PAGE_SIZE = 10;
 const ELE_FILE = 0;
@@ -313,7 +307,6 @@ export default {
       auditState: CHECK_STATUS_LIST,
       activedIndex: 0,
       topBtnGroup: ["查询清单", "未匹配查询清单授权书"],
-      departmentList: DEPARTMENT_LIST,
       allChecked: false,
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
@@ -329,7 +322,7 @@ export default {
       totalCount: 0,
       unMatchedtotalCount: 0,
       currentTitle: "识别结果",
-      breadCrumbList: ["征信查询授权书","识别结果","电子版批次信息"],
+      breadCrumbList: ["征信查询授权书","识别结果","电子版批次详情"],
       pageSize: PAGE_SIZE,
       unMatchedPageSize: PAGE_SIZE,
       tableData: [],
@@ -347,6 +340,7 @@ export default {
     },
     goBack() {},
     search() {
+      this.currentPage = 1;
       this.fetchElecDetailList();
     },
     unMatchedSearch() {
@@ -372,7 +366,7 @@ export default {
           summaryId: this.summaryId,
           userId: USERID
         };
-        window.open(`${global_}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById${formatQuery(params)}`,'_parent');
+        window.open(`${global_upload}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById${formatQuery(params)}`,'_parent');
       } else {
         this.$message({
           message: '请勾选要下载的对象!',
@@ -435,7 +429,7 @@ export default {
     tableItemDetails(row) {
       this.$router.push({
         name: "elec-batch-info-identify-details",
-        query: { id: row.id, auditState: row.auditState }
+        query: { id: row.id, auditState: row.auditState, batchNo: this.$route.query.batchNo }
       });
     },
     // 驳回
@@ -475,12 +469,12 @@ export default {
       const params = this.searchCondition;
       params.pageNum = this.currentPage;
       params.pageSize = this.pageSize;
-      window.open(`${global_}/auth/estateAuthorizationExcelController/exportExcelRecords${formatQuery(params)}`,'_parent');
+      window.open(`${global_upload}/auth/estateAuthorizationExcelController/exportExcelRecords${formatQuery(params)}`,'_parent');
     },
     // 导出为匹配详情
     exportUnmatchedExcel() {
       const params = this.unMatchedSearchCondition;
-      window.open(`${global_}/auth/estateAuthorizationFileController/exportUnmatchedFilesToExcel
+      window.open(`${global_upload}/auth/estateAuthorizationFileController/exportUnmatchedFilesToExcel
 ${formatQuery(params)}`,'_parent');
     },
     tableItemReview() {

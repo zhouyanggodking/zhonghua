@@ -32,7 +32,7 @@ export default {
   background-color: #f5f7f9;
   color: #333333;
   text-align: center;
-  box-shadow: 0px -1px 5px #ccc;
+  // box-shadow: 0px -1px 5px #ccc;
   .footer-items-group {
     display: flex;
     padding: 58px 0 20px 0;

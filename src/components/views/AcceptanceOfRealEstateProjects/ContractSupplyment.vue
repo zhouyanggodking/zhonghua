@@ -133,13 +133,16 @@ export default {
       this.$refs.contractSupplymentForm.validate(valid => {
         if(valid) {
           verifyInvoice(params).then((res) => {
-            this.verifiedInvoiceItems = res.data;
-            this.isAddInvoice = true;
-          }, () => {
-            this.$message({
-              message: '验真错误',
-              type: 'failed'
-            })
+            if(res.status === 200) {
+              this.verifiedInvoiceItems = res.data;
+              this.isAddInvoice = true;
+              this.$message({
+                message: '验真成功',
+                type: 'success'
+              })
+            } else {
+              this.$message.error('验真错误');
+            }
           })
         }
       })

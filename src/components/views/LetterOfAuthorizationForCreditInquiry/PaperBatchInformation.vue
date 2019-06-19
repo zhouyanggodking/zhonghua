@@ -76,7 +76,7 @@ import {getEstateElecAuthorizationSummaryInfos} from "@/rest/letterOfAuthorizati
 import BreadCrumb from "@/components/common/BreadCrumb";
 import DateRange from "@/components/common/DateRange";
 import Pagination from "@/components/common/Pagination";
-import {global_} from "@/global/global";
+import {global_upload} from "@/global/global";
 import {formatQuery} from '@/helpers/formatGetParams';
 
 const PAGE_SIZE = 10;
@@ -96,7 +96,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "纸质版授权书批次识别结果",
-      breadCrumbList: ['首页', '征信查询授权书', '识别结果', '纸质版批次信息'],
+      breadCrumbList: ['首页', '征信查询授权书', '识别结果', '纸质版批次详情'],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       checkStatusList: [
@@ -150,7 +150,7 @@ export default {
           userId: 1,
           elecOrFile: this.elecOrFile
         };
-        window.open(`${global_}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
+        window.open(`${global_upload}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
 ${formatQuery(params)}`,'_parent');
       } else {
         this.$message({
@@ -170,7 +170,7 @@ ${formatQuery(params)}`,'_parent');
         userId: 1,
         elecOrFile: this.elecOrFile
       }
-      window.open(`${global_}/auth/estateAuthorizationSummaryController/exportToExcel
+      window.open(`${global_upload}/auth/estateAuthorizationSummaryController/exportToExcel
 ${formatQuery(params)}`,'_parent');
     },
     handleSelectionChange(val) {

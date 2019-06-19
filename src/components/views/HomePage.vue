@@ -17,8 +17,8 @@
       </el-header>
       <el-main>
         <router-view/>
+        <Footer></Footer>
       </el-main>
-      <Footer></Footer>
     </el-container>
   </el-container>
 </template>
@@ -56,7 +56,7 @@ export default {
       padding: 0 40px 0 30px;
       background-color: #ffffff;
       color: #333333;
-      box-shadow: 0px 1px 5px #ccc;
+      // box-shadow: 0px 1px 5px #ccc;
       .system-name {
         margin-right: auto;
         font-size: 26px;

@@ -191,7 +191,7 @@ import {checkPaymentRequestOrder, modifyInvoiceUsedprice} from "@/rest/realEstat
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import resourceWrapper from "@/rest/resourceWrapper";
-import {global_, USERID} from '@/global/global';
+import {global_upload, USERID} from '@/global/global';
 import { formatMoney } from '@/helpers/moneyHelper';
 
 const CHECK = 1;
@@ -251,7 +251,7 @@ export default {
       })
     },
     exportExcel(){
-      window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
+      window.open(`${global_upload}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
     },
     reviewPass(){
       this.isDialogVisible = true;

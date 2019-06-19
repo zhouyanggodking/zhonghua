@@ -17,7 +17,7 @@
           <div class="container">
             <div class="title">识别结果</div>
             <div class="result">
-              <el-form label-position="right" label-width="40%" :model="paymentOrderForm">
+              <el-form ref="paymentOrderForm" :rules="rules" label-position="right" label-width="40%" :model="paymentOrderForm">
                 <el-form-item label="合同名称:" @click.native="filedFocus('合同名称')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractName"></el-input>
                 </el-form-item>
@@ -43,16 +43,16 @@
                 <el-form-item label="收款单位:" @click.native="filedFocus('收款单位')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.receiver"></el-input>
                 </el-form-item>
-                <el-form-item label="本次应付金额(大写):" @click.native="filedFocus('本次应付金额(大写)')">
+                <el-form-item label="本次应付金额(大写):" @click.native="filedFocus('本次应付金额(大写)')" prop="acountPayable">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.acountPayable"></el-input>
                 </el-form-item>
-                <el-form-item label="合同动态金额(¥):" @click.native="filedFocus('合同动态金额(¥)')">
+                <el-form-item label="合同动态金额(¥):" @click.native="filedFocus('合同动态金额(¥)')" prop="contractDynamicAmount">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractDynamicAmount"></el-input>
                 </el-form-item>
-                <el-form-item label="累计已付金额(¥):" @click.native="filedFocus('累计已付金额(¥)')">
+                <el-form-item label="累计已付金额(¥):" @click.native="filedFocus('累计已付金额(¥)')" prop="paidAmount">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.paidAmount"></el-input>
                 </el-form-item>
-                <el-form-item label="应付未付金额(¥):" @click.native="filedFocus('应付未付金额(¥)')">
+                <el-form-item label="应付未付金额(¥):" @click.native="filedFocus('应付未付金额(¥)')" prop="unpaidAmount">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.unpaidAmount"></el-input>
                 </el-form-item>
               </el-form>
@@ -93,7 +93,25 @@ export default {
         contractName: ''
       },
       breadCrumbList: ["首页", "资产识别比对", "比对结果"],
-      currentTitle: "付款公司名称-合同编号-付款主题"
+      currentTitle: "付款公司名称-合同编号-付款主题",
+      rules: {
+        acountPayable: [
+          { required: true, message: '请输入金额', trigger: 'blur' },
+          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+        ],
+        contractDynamicAmount: [
+          { required: true, message: '请输入金额', trigger: 'blur' },
+          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+        ],
+        paidAmount: [
+          { required: true, message: '请输入金额', trigger: 'blur' },
+          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+        ],
+        unpaidAmount: [
+          { required: true, message: '请输入金额', trigger: 'blur' },
+          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+        ]
+      }
     };
   },
   methods: {
@@ -104,34 +122,39 @@ export default {
       this.isFiledFormEdit = !this.isFiledFormEdit;
     },
     saveFile() {
-      this.isFiledFormEdit = !this.isFiledFormEdit;
-      const mapData = {
-        id: this.paymentOrderForm.id,
-        contractName: this.paymentOrderForm.contractName,
-        contractNo: this.paymentOrderForm.contractNo,
-        paymentTitle: this.paymentOrderForm.paymentTitle,
-        payer: this.paymentOrderForm.payer,
-        receiver: this.paymentOrderForm.receiver,
-        acountPayable: this.paymentOrderForm.acountPayable,
-        contractDynamicAmount: this.paymentOrderForm.contractDynamicAmount,
-        paidAmount: this.paymentOrderForm.paidAmount,
-        unpaidAmount: this.paymentOrderForm.unpaidAmount,
-        requestDate: dateFormat(this.paymentOrderForm.requestDate)
-      };
-      const params = {
-        order: mapData,
-        userId: 1
-      }
-      resourceWrapper.modifyPaymentOrder(params).then(() => {
-        this.$message({
-          message: '修改成功',
-          type: 'success'
-        })
-      }, () => {
-        this.$message({
-          message: '修改失败',
-          type: 'failed'
-        })
+      this.$refs.paymentOrderForm.validate(valid => {
+        if(valid) {
+          const mapData = {
+          id: this.paymentOrderForm.id,
+          contractName: this.paymentOrderForm.contractName,
+          contractNo: this.paymentOrderForm.contractNo,
+          paymentTitle: this.paymentOrderForm.paymentTitle,
+          payer: this.paymentOrderForm.payer,
+          receiver: this.paymentOrderForm.receiver,
+          acountPayable: this.paymentOrderForm.acountPayable,
+          contractDynamicAmount: this.paymentOrderForm.contractDynamicAmount,
+          paidAmount: this.paymentOrderForm.paidAmount,
+          unpaidAmount: this.paymentOrderForm.unpaidAmount,
+          requestDate: dateFormat(this.paymentOrderForm.requestDate)
+        };
+        const params = {
+          order: mapData,
+          userId: 1
+        }
+        resourceWrapper.modifyPaymentOrder(params).then((res) => {
+          if (res.status === 200) {
+            this.$message({
+              message: '修改成功',
+              type: 'success'
+            });
+            this.isFiledFormEdit = !this.isFiledFormEdit;
+          } else {
+            this.$message({
+              message: '修改失败',
+              type: 'failed'
+            })
+          }})
+        }
       })
     },
     getPaymentDetailData(){

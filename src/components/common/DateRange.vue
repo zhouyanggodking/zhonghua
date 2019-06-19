@@ -30,8 +30,8 @@ export default {
   methods: {
     onDateChange() {
       this.$emit('change', {
-        startTime: this.startTime,
-        endTime: this.endTime
+        startTime: this.startTime || '',
+        endTime: this.endTime || ''
       })
     }
   }

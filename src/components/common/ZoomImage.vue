@@ -1,5 +1,5 @@
 <template>
-  <encircle-image style="height:360px;" :rotate="(360 - imageRotate) || 0" :img-src="imageUrl" ref="img"></encircle-image>
+  <encircle-image v-if="imageUrl !== ''" style="height:100%;" :rotate="(360 - imageRotate) || 0" :img-src="imageUrl" ref="img"></encircle-image>
 </template>
 <script>
 import {loadEncicleImage} from '@/helpers/zoomImage';
@@ -34,23 +34,9 @@ export default {
         deep: true
       },
   },
-  // created() {
-  //   console.log('beforeCreate');
-  //   loadEncicleImage().then(() => {
-  //     console.log('start');
-  //     // this.imageUrl = `${global_}${this.imgSrc}`;
-  //     this.imageUrl = 'http://10.17.17.151:8080/test/test1.png';
-  //   }).catch(() => {
-  //     this.$message({
-  //       message: '图片错误',
-  //       type: 'failed'
-  //     })
-  //   })
-  // },
   mounted() {
     loadEncicleImage().then(() => {
-      this.imageUrl = `${global_}${this.imgSrc}`;
-      // this.imageUrl = 'http://10.17.17.151:8080/test/test1.png';
+      this.imageUrl = `${global_}/images${this.imgSrc}`;
     }).catch(() => {
       this.$message({
         message: '图片错误',
