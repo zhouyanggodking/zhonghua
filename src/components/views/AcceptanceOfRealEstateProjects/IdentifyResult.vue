@@ -132,7 +132,7 @@
         <el-button
           v-if="dialogHintOperate==='审核通过'"
           type="primary"
-          @click="reviewPass"
+          @click="batchReviewPass"
         >{{dialogHintOperate}}</el-button>
         <el-button
           v-if="dialogHintOperate==='批量通过'"
@@ -161,7 +161,7 @@
 </template>
 <script>
 import resourceWrapper from "@/rest/resourceWrapper";
-import {global_} from '@/global/global';
+import {global_upload} from '@/global/global';
 import { formatMoney } from '@/helpers/moneyHelper';
 import {checkPaymentRequestOrders, checkPaymentRequestOrder} from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
@@ -195,7 +195,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "识别结果",
-      breadCrumbList: ["首页", "资产识别比对", "识别结果"],
+      breadCrumbList: ["首页", "地产项目承兑", "识别结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       reviewStatusList: [
@@ -238,7 +238,7 @@ export default {
           ids: this.multipleSelection,
           userId: 1
         };
-        window.open(`${global_}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById?userId=${params.userId}&ids=${params.ids}`,'_parent');
+        window.open(`${global_upload}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById?userId=${params.userId}&ids=${params.ids}`,'_parent');
       } else {
         this.$message({
           message: '请勾选要下载的对象!',
@@ -286,7 +286,7 @@ export default {
         userId: this.userId,
         fileName: ''
       }
-      window.open(`${global_}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrdersToExcel?userId=${params.userId}&paymentTitle=${params.paymentTitle}&contractNo=${params.contractNo}&payer=${params.payer}&receiver=${params.receiver}&fileName=${params.fileName}`,'_parent');
+      window.open(`${global_upload}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrdersToExcel?userId=${params.userId}&paymentTitle=${params.paymentTitle}&contractNo=${params.contractNo}&payer=${params.payer}&receiver=${params.receiver}&fileName=${params.fileName}`,'_parent');
     },
     tableItemReview() {
       this.isDialogVisible = true;
@@ -309,15 +309,14 @@ export default {
         },
         userId: 1
       };
-      checkPaymentRequestOrders(params).then(() => {
+      checkPaymentRequestOrders(params).then((res) => {
         if (res.data.status === 200) {
           this.$message({
             message: '审核完成!',
             type: 'success'
           });
-        this.getPaymentOrderInfos();
-          this.dialogVisible = false;
           this.getPaymentOrderInfos();
+          this.dialogVisible = false;
         } else {
           this.$message({
             message: '审核失败!',

@@ -5,10 +5,10 @@
         <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
       </div>
     </div>
-    <div class="elect-batch-container">
-      <div class="elect-batch-row">
-        <div class="elect-batch-row_item">
-          <div class="elect-batch-row_item_header">
+    <div class="paper-batch-container">
+      <div class="paper-batch-row">
+        <div class="paper-batch-row_item">
+          <div class="paper-batch-row_item_header">
             <div class="title">Excel提取信息</div>
           </div>
           <div class="content" v-if="excelMsg">
@@ -21,11 +21,15 @@
               </el-col>
             </el-row>
           </div>
+          <div class="no-data" v-else>
+            暂无数据
+          </div>
         </div>
-        <div class="elect-batch-row_item">
-          <div class="elect-batch-row_item_header">
+        <div class="paper-batch-row_item">
+          <div class="paper-batch-row_item_header">
             <div class="title">电子文件识别结果</div>
-            <div class="look-origin" @click="lookOriginElect">查看原件</div>
+            <!-- <div class="look-origin" @click="lookOriginElect">查看原件</div> -->
+            <el-button class="look-origin" :disabled="elecMsg === null" @click="lookOriginElect">查看原件</el-button>
           </div>
           <div class="content" v-if="elecMsg">
             <el-row class="item" :gutter="10" v-for="(item,index) in elecInfoItems" :key="index">
@@ -37,15 +41,19 @@
               </el-col>
             </el-row>
           </div>
+          <div class="no-data" v-else>
+            暂无数据
+          </div>
         </div>
       </div>
-      <div class="elect-batch-row">
-        <div class="elect-batch-row_item paper-result">
-          <div class="elect-batch-row_item_header">
+      <div class="paper-batch-row">
+        <div class="paper-batch-row_item paper-result">
+          <div class="paper-batch-row_item_header">
             <div class="title">纸质文件识别结果</div>
-            <div class="look-origin" @click="lookOriginPaper">查看原件</div>
+            <!-- <div class="look-origin" @click="lookOriginPaper">查看原件</div> -->
+            <el-button class="look-origin" :disabled="paperFileForm === null" @click="lookOriginPaper">查看原件</el-button>
           </div>
-          <div class="content">
+          <div class="content" v-if="paperFileForm">
             <el-form label-position="right" label-width="40%" :model="paperFileForm">
               <div class="paper-file-form">
                 <div class="part">
@@ -81,6 +89,9 @@
               <el-button v-else class="modify-btn" @click="paperSaveFile">保存</el-button>
             </div>
           </div>
+          <div class="no-data" v-else>
+            暂无数据
+          </div>
         </div>
       </div>
       <div class="review-opinion">
@@ -88,7 +99,7 @@
         <div class="review-opinion_content">
           <div class="question-classify">
             <div class="text">问题分类:</div>
-            <el-select v-model="elecMsg.problemType" placeholder="请选择">
+            <el-select v-model="rejectForm.problemType" placeholder="请选择">
               <el-option
                 v-for="(item, index) in questionClassificationList"
                 :key="index"
@@ -99,18 +110,18 @@
           </div>
           <div class="question-describe">
             <div class="text">其他问题描述:</div>
-            <el-input type="textarea" maxlength="100" show-word-limit placeholder="请输入内容" v-model="elecMsg.problemDescription" :rows="5"></el-input>
+            <el-input type="textarea" maxlength="100" show-word-limit placeholder="请输入内容" v-model="rejectForm.problemDescription" :rows="5"></el-input>
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button :disabled="auditState === 1" @click="reviewPass">审核通过</el-button>
-            <el-button :disabled="auditState === 0" @click="reviewReject">驳回</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 1 && paperFileForm === null" @click="reviewPass">审核通过</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 0 && paperFileForm === null" @click="reviewReject">驳回</el-button>
           </div>
         </div>
       </div>
     </div>
     <el-dialog
-      class="dialog-common"
+      class="dialog-common confirmDialog"
       title
       :visible.sync="isDialogVisible"
       width="30%"
@@ -125,11 +136,13 @@
       <div slot="footer" class="dialog-footer">
         <el-button class="cancel-btn" @click="isDialogVisible = false">取消</el-button>
         <el-button
+          class="submit-btn"
           v-if="dialogHintOperate==='驳回'"
           type="primary"
           @click="rejectOpinionOperate"
         >{{dialogHintOperate}}</el-button>
         <el-button
+          class="submit-btn"
           v-if="dialogHintOperate==='审核通过'"
           type="primary"
           @click="reviewPassOpearte"
@@ -193,7 +206,7 @@ export default {
         problemDescription: ''
       },
       paperFileForm: {},
-      oldData: {},
+      oldData: {}
     };
   },
   methods: {
@@ -281,7 +294,7 @@ export default {
           personSeal: this.paperFileForm.personSeal,
           signTime: dateFormat(this.paperFileForm.signTime),
           corporateStamp: this.paperFileForm.corporateStamp,
-          problemType: this.paperFileForm.problemType,
+          problemType: this.rejectForm.problemType,
           elecOrFile: this.paperFileForm.elecOrFile,
           summaryId: this.paperFileForm.summaryId,
           problemDescription: "",
@@ -326,6 +339,13 @@ export default {
         this.elecMsg = res.elecFile;
         this.paperFileForm = res.file;
         this.oldData = JSON.parse(JSON.stringify(res.file));
+        if (res.file !== null) {
+          this.rejectForm.problemType = res.file.problemType;
+          this.rejectForm.problemDescription = res.file.problemDescription;
+        } else {
+          this.rejectForm.problemType = '';
+          this.rejectForm.problemDescription = '';
+        }
       })
     }
   },
@@ -341,6 +361,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 .elec-batch-info-indentify-page-details {
   .top-box {
     height: 130px;
@@ -377,20 +399,27 @@ export default {
       margin-left: 30px;
     }
   }
-  .elect-batch-container {
+  .paper-batch-container {
     margin-top: 30px;
-    .elect-batch-row {
+    font-size: 14px;
+    .no-data {
+      padding: 30px 30px;
+      text-align: center;
+      font-size: 30px;
+      font-weight: bold;
+    }
+    .paper-batch-row {
       display: flex;
       justify-content: space-between;
       width: 100%;
       //   height: 368px;
       margin-bottom: 20px;
-      .elect-batch-row_item {
+      .paper-batch-row_item {
         width: 49%;
         min-width: 400px;
         background: #ffffff;
         border-radius: 2px;
-        .elect-batch-row_item_header {
+        .paper-batch-row_item_header {
           display: flex;
           justify-content: space-between;
           height: 56px;
@@ -404,10 +433,18 @@ export default {
             color: #333333;
           }
           .look-origin {
+            padding: 0;
             font-size: 16px;
             color: #4a90e2;
             text-align: left;
+            border: none;
             cursor: pointer;
+            &:hover {
+              background-color: #ffffff;
+            }
+            &.is-disabled {
+              cursor: not-allowed;
+            }
           }
         }
         .content {
@@ -522,9 +559,17 @@ export default {
             display: flex;
             justify-content: flex-end;
             margin-top: 30px;
-            .el-button {
-              margin-left: 300px;
+            .modify-btn {
+              @include buttonStyle;
+              margin-left: 40px;
             }
+            // .submit-btn {
+            //   @include buttonStyle;
+            //   margin-left: 40px;
+            // }
+            // .cancel-btn {
+            //   @include cancelBtnStyle;
+            // }
           }
         }
       }
@@ -558,55 +603,17 @@ export default {
           justify-content: flex-end;
           margin-top: 30px;
           .el-button {
-            margin-left: 30px;
+            &.cancel-btn {
+              @include cancelBtnStyle;
+            }
+            &.submit-btn {
+              @include buttonStyle;
+              margin-left: 40px;
+            }
           }
         }
       }
     }
-  }
-}
-/deep/ .el-button {
-  width: 135px;
-  background: #c1b071;
-  border-radius: 4px;
-  border-color: #c1b071;
-  span {
-    font-size: 14px;
-    color: #ffffff;
-  }
-  &:hover {
-    background-color: #e9d58b;
-    border-color: #e9d58b;
-  }
-  &.is-disabled {
-    background-color: #d9d9d9;
-    border-color: #d9d9d9;
-  }
-}
-.el-button:active {
-  border-color: #c1b071;
-  color: #fff;
-}
-.btn {
-  margin-right: 30px;
-}
-.el-button + .el-button {
-  margin-left: 0;
-}
-/deep/ .cancel-btn {
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  span {
-    font-family: PingFangSC-Regular;
-    font-size: 16px;
-    color: #666666 !important;
-  }
-  &:hover {
-    background-color: #fff;
-    border-color: #c1b071;
-  }
-  &:active {
-    border-color: #c1b071;
   }
 }
 .dialog-common {

@@ -44,11 +44,11 @@ const totalMenu = [
         index: '/creditIdentifyResult',
         children: [
           {
-            name: '电子版批次信息',
+            name: '电子版批次详情',
             index: '/creditElectronicBatchInformation'
           },
           {
-            name: '纸质版批次信息',
+            name: '纸质版批次详情',
             index: '/creditPaperBatchInformation'
           }
         ]

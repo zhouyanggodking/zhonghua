@@ -10,9 +10,7 @@
         <div class="search-condition_input">
           <div class="search-condition_input_item">
             <div class="text">部门</div>
-            <el-select v-model="searchCondition.depart" placeholder="请选择">
-              <el-option v-for="(item, index) in departmentList" :key="index" :label="item.departmentName" :value="item.id"></el-option>
-            </el-select>
+            <el-input v-model="searchCondition.depart" placeholder="请输入部门名称"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">公司名称</div>
@@ -192,7 +190,7 @@ import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import DateRange from "@/components/common/DateRange";
 import {formatQuery} from '@/helpers/formatGetParams';
-import {DEPARTMENT_LIST, USERID, CHECK_STATUS_LIST, global_, PROBLEM_LIST} from '@/global/global';
+import {USERID, CHECK_STATUS_LIST, global_upload, PROBLEM_LIST} from '@/global/global';
 
 const PAGE_SIZE = 10;
 const ELE_FILE = 1;
@@ -235,7 +233,6 @@ export default {
       auditState: CHECK_STATUS_LIST,
       activedIndex: 0,
       topBtnGroup: ["查询清单", "未匹配查询清单授权书"],
-      departmentList: DEPARTMENT_LIST,
       allChecked: false,
       dialogHintText: "请确认是否驳回",
       dialogHintOperate: "驳回",
@@ -249,7 +246,7 @@ export default {
       currentPage: 1,
       totalCount: 0,
       currentTitle: "纸质版授权书批次详情",
-      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
+      breadCrumbList: ["征信查询授权书", "识别结果", "纸质版批次信息", "查询清单"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       tableData: [],
@@ -279,7 +276,7 @@ export default {
           summaryId: this.summaryId,
           userId: USERID
         };
-        window.open(`${global_}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById${formatQuery(params)}`,'_parent');
+        window.open(`${global_upload}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById${formatQuery(params)}`,'_parent');
       } else {
         this.$message({
           message: '请勾选要下载的对象!',
@@ -331,7 +328,7 @@ export default {
       const params = this.searchCondition;
       params.pageNum = this.currentPage;
       params.pageSize = this.pageSize;
-      window.open(`${global_}/auth/estateAuthorizationExcelController/exportExcelRecords${formatQuery(params)}`,'_parent');
+      window.open(`${global_upload}/auth/estateAuthorizationExcelController/exportExcelRecords${formatQuery(params)}`,'_parent');
     },
     tableItemRejected(row) {
       //this.dialogVisible = true;
@@ -378,6 +375,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/scss/mixin.scss';
+
 .paper-batch-info-page-details {
   .top-box {
     height: 130px;
@@ -468,7 +467,7 @@ export default {
         }
         .search-btn {
           margin-left: 66px;
-          font-family: "PingFangSC-Semibold";
+          @include buttonStyle;
         }
         .export-excel {
           width: 123px;
@@ -476,7 +475,7 @@ export default {
           text-align: center;
           line-height: 20px;
           font-size: 14px;
-          color: #c1b071;
+          color: #4A90E2;
           cursor: pointer;
         }
       }
@@ -491,7 +490,7 @@ export default {
         margin-right: 13px;
       }
       .btn {
-        font-family: "PingFangSC-Semibold";
+        @include buttonStyle;
       }
     }
     .identify-page-table_content {

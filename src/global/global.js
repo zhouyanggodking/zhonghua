@@ -1,4 +1,5 @@
-const global_ = 'http://49.4.79.11:8181';
+const global_ = 'http://49.4.79.11:8666';
+const global_upload = 'http://49.4.79.11:8181';
 // const global_ = 'http://10.17.17.151:8080';
 const USERID = 1;
 const DEPARTMENT_LIST = [
@@ -33,6 +34,7 @@ const INVOICE_TYPE = [
 ]
 export {
   global_,
+  global_upload,
   USERID,
   DEPARTMENT_LIST,
   CHECK_STATUS_LIST,

@@ -2,7 +2,7 @@
   <div class="elec-batch-info-indentify-page-details">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <bread-crumb :data="breadCrumbList" :currentTitle="`${batchNo}批次`"></bread-crumb>
       </div>
     </div>
     <div class="elect-batch-container">
@@ -26,12 +26,13 @@
         <div class="elect-batch-row_item">
           <div class="elect-batch-row_item_header">
             <div class="title">电子文件识别结果</div>
-            <div class="look-origin" @click="lookOriginElect">查看原件</div>
+            <el-button class="look-origin" :disabled="elecFileForm === null" @click="lookOriginElect">查看原件</el-button>
           </div>
           <div class="content" v-if="elecFileForm">
             <el-form label-position="right" label-width="40%" :model="elecFileForm">
               <el-form-item label="公司章:">
-                <el-input disabled v-model="elecFileForm.companySeal"></el-input>
+                <!-- <el-input disabled v-model="elecFileForm.companySeal"></el-input> -->
+                <el-input readonly type="textarea" resize="none" :autosize="true" v-model="elecFileForm.companySeal"></el-input>
               </el-form-item>
               <el-form-item label="人名章:">
                 <el-input disabled v-model="elecFileForm.personSeal"></el-input>
@@ -40,7 +41,7 @@
                 <el-input disabled v-model="elecFileForm.signTime"></el-input>
               </el-form-item>
               <el-form-item label="是否法人签章:">
-                <el-input disabled v-model="elecFileForm.corporateStamp"></el-input>
+                <div style="padding-left: 15px">{{elecFileForm.corporateStamp ? '是' : '否'}}</div>
               </el-form-item>
               <el-form-item label="授权有效期:">
                 <el-date-picker
@@ -65,9 +66,9 @@
         <div class="elect-batch-row_item">
           <div class="elect-batch-row_item_header">
             <div class="title">智罗盘信息</div>
-            <div class="look-origin" @click="lookCompanyInfo">查看企业详细信息</div>
+            <el-button class="look-origin" :disabled="dataBusData === null" @click="lookCompanyInfo">查看企业详细信息</el-button>
           </div>
-          <div class="content" v-if="dataBusInfoItems">
+          <div class="content" v-if="dataBusData">
             <el-row class="item" :gutter="10" v-for="(item,index) in dataBusInfoItems" :key="index">
               <el-col class="item-title" :span="10">
                 <div>{{item.value}}</div>
@@ -77,12 +78,12 @@
               </el-col>
             </el-row>
           </div>
-          <div class="content no-data" v-else>暂无数据</div>
+          <div class="content no-data" v-else>对不起，未查询到该企业信息</div>
         </div>
         <div class="elect-batch-row_item">
           <div class="elect-batch-row_item_header">
             <div class="title">纸质文件信息匹配</div>
-            <div class="look-origin" @click="lookOriginPaper">查看原件</div>
+            <el-button :disabled="paperFileForm === null" class="look-origin" @click="lookOriginPaper">查看原件</el-button>
           </div>
           <div class="content" v-if="paperFileForm">
              <el-form label-position="right" label-width="40%" :model="paperFileForm">
@@ -113,7 +114,7 @@
         <div class="review-opinion_content">
           <div class="question-classify">
             <div class="text">问题分类:</div>
-            <el-select v-model="elecFileForm.problemType" placeholder="请选择">
+            <el-select v-model="problemForm.problemType" placeholder="请选择">
               <el-option
                 v-for="(item, index) in questionClassificationList"
                 :key="index"
@@ -124,12 +125,12 @@
           </div>
           <div class="question-describe">
             <div class="text">其他问题描述:</div>
-            <el-input type="textarea" maxlength="100" show-word-limit placeholder="请输入内容" v-model="elecFileForm.problemDescription" :rows="5"></el-input>
+            <el-input type="textarea" maxlength="100" show-word-limit placeholder="请输入内容" v-model="problemForm.problemDescription" :rows="5"></el-input>
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button class="submit-btn" :disabled="auditState === 1" @click="reviewPass">审核通过</el-button>
-            <el-button class="submit-btn" :disabled="auditState === 0" @click="reviewReject">驳回</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 1 || elecFileForm === null" @click="reviewPass">审核通过</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 0 || elecFileForm === null" @click="reviewReject">驳回</el-button>
           </div>
         </div>
       </div>
@@ -194,7 +195,7 @@ export default {
         {key: 'submitDate', value: "授权书提交日期："},
         {key: 'applyDate', value: "申请日期："},
         {key: 'depart', value: "部门："},
-        {key: 'seqNo0', value: "序号："}
+        {key: 'seqNo', value: "序号："}
       ],
       dataBusInfoItems: [
         {key: 'databusCompanyName', value: "公司名称："},
@@ -205,13 +206,18 @@ export default {
       breadCrumbList: [
         "征信查询授权书",
         "识别结果",
-        "电子版批次信息",
+        "电子版批次详情",
         "查询清单"
       ],
       excelMsg: null,
       elecFileForm: {},
       paperFileForm: {},
-      dataBusData: {}
+      dataBusData: {},
+      problemForm: {
+        problemType: null,
+        problemDescription: ''
+      },
+      batchNo: ''
     };
   },
   methods: {
@@ -226,8 +232,8 @@ export default {
     rejectOpinionOperate() {
       this.isDialogVisible = false;
       this.dialogVisible = true;
-      if (this.elecFileForm.problemType !== '' && this.elecFileForm.problemDescription !== '') {
-        this.checkOrRejectFun(REJECT, this.elecFileForm.problemType, this.elecFileForm.problemDescription);
+      if (this.problemForm.problemType !== '' && this.problemForm.problemDescription !== '') {
+        this.checkOrRejectFun(REJECT, this.problemForm.problemType, this.problemForm.problemDescription);
         this.auditState = 0;
       } else {
         this.$message({
@@ -241,8 +247,8 @@ export default {
       this.isDialogVisible = false;
       this.dialogVisible = true;
       this.checkOrRejectFun(CHECK, '', '');
-      this.elecFileForm.problemType = '';
-      this.elecFileForm.problemDescription = '';
+      this.problemForm.problemType = '';
+      this.problemForm.problemDescription = '';
       this.auditState = 1;
     },
     reviewReject() {
@@ -280,7 +286,7 @@ export default {
     },
     //智罗盘 查看企业详细信息
     lookCompanyInfo() {
-      this.$router.push({ name: "look-company-info"});
+      this.$router.push({ name: "look-company-info", query: { companyName: this.dataBusData.databusCompanyName, batch: this.$route.query.batchNo}});
     },
     // 电子识别
     eleModifyFile() {
@@ -352,11 +358,19 @@ export default {
         this.elecFileForm = res.elecFile;
         this.dataBusData = res.databusInfo;
         this.paperFileForm = res.file;
+        if (res.elecFile !== null) {
+          this.problemForm.problemType = res.elecFile.problemType;
+          this.problemForm.problemDescription = res.elecFile.problemDescription;
+        } else {
+          this.problemForm.problemType = '';
+          this.problemForm.problemDescription = '';
+        }
       })
     }
   },
   mounted() {
     this.excelId = this.$route.query.id;
+    this.batchNo = this.$route.query.batchNo;
     this.auditState = Number(this.$route.query.auditState);
     this.fetchEstateAuthorizationExcelInfo();
   },
@@ -407,6 +421,7 @@ export default {
   }
   .elect-batch-container {
     margin-top: 30px;
+    font-size: 14px;
     .elect-batch-row {
       display: flex;
       justify-content: space-between;
@@ -432,10 +447,18 @@ export default {
             color: #333333;
           }
           .look-origin {
+            padding: 0;
             font-size: 16px;
             color: #4a90e2;
             text-align: left;
+            border: none;
             cursor: pointer;
+            &:hover {
+              background-color: #ffffff;
+            }
+            &.is-disabled {
+              cursor: not-allowed;
+            }
           }
         }
         .content {
@@ -473,7 +496,14 @@ export default {
                         color: #333333;
                         background-color: #ffffff;
                         cursor: default;
+                        
                       }
+                    }
+                  }
+                  .el-textarea {
+                    .el-textarea__inner {
+                      border: none;
+                      color: #333333;
                     }
                   }
                   .el-date-editor {
@@ -559,6 +589,9 @@ export default {
           .submit-btn {
             @include buttonStyle;
             margin-left: 40px;
+            &.is-disabled, &.is-disabled:hover {
+              @include disbaledButtonStyle
+            }
           }
           .cancel-btn {
             @include cancelBtnStyle;

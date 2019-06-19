@@ -2,7 +2,7 @@
   <div class="company-info-page">
     <div class="company-info-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <bread-crumb :data="breadCrumbList" :currentTitle="`${batch}批次`"></bread-crumb>
       </div>
     </div>
     <div class="company-info-page_container">
@@ -39,11 +39,15 @@
           </div>
           <div class="content_item">
             <div class="item_title">注册资本:</div>
-            <div class="item_content">{{dataBusInfo.regcap}}</div>
+            <div class="item_content">{{dataBusInfo.regcap}} (万元)</div>
           </div>
           <div class="content_item">
             <div class="item_title">所属行业:</div>
             <div class="item_content">{{dataBusInfo.industryconame}}</div>
+          </div>
+          <div class="content_item">
+            <div class="item_title">营业期限:</div>
+            <div class="item_content">{{dataBusInfo.opto}}</div>
           </div>
           <div class="content_item">
             <div class="item_title">核准日期:</div>
@@ -66,7 +70,11 @@
             <el-table-column type="index" label="序号" width="50"></el-table-column>
             <el-table-column prop="shaname" label="股东名称" width="180"></el-table-column>
             <el-table-column prop="invtype" label="股东类型" width="180"></el-table-column>
-            <el-table-column prop="subconam" label="认缴份额(万元)"></el-table-column>
+            <el-table-column prop="subconam" label="认缴份额(万元)">
+              <template slot-scope="scope">
+                {{formatMoney(scope.row.subconam)}}
+              </template>
+            </el-table-column>
             <el-table-column prop="funderatio" label="出资比例"></el-table-column>
             <el-table-column prop="condate" label="出资日期"></el-table-column>
           </el-table>
@@ -80,8 +88,9 @@
 </template>
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
-import {getDatabusMsg} from "@/rest/letterOfAuthorizationElecApi";
-import {USERID} from "@/global/global";
+import { getDatabusMsg } from "@/rest/letterOfAuthorizationElecApi";
+import { USERID } from "@/global/global";
+import { formatMoney } from '@/helpers/moneyHelper';
 
 export default {
   data() {
@@ -93,24 +102,26 @@ export default {
         {key: 'regorg', value: '登记机关:'},
         {key: 'esdate', value: '成立日期:'}
       ],
-      currentTitle: "20190404批次-金茂",
+      batch: "",
       breadCrumbList: [
-        "征信查询授权书识别结果",
+        "征信查询授权书",
+        "识别结果",
         "电子版批次信息",
-        "电子版批次详情",
-        "识别详情"
+        "电子版批次详情"
       ],
       dataBusInfo: {}
     };
   },
   methods: {
+    formatMoney(param) {
+      return formatMoney(param);
+    },
     goBack(){
       this.$router.go(-1);
     },
     fetchDataBusData() {
       const params = {
-        // companyName: this.companyName,
-        companyName: '恒大集团有限公司',
+        companyName: this.companyName,
         userId: USERID
       };
       getDatabusMsg(params)
@@ -121,6 +132,7 @@ export default {
   },
   mounted() {
     this.companyName = this.$route.query.companyName;
+    this.batch = this.$route.query.batch;
     this.fetchDataBusData();
   },
   components: {
@@ -198,7 +210,8 @@ export default {
       .company-details_content {
         margin-top: 15px;
         padding: 20px 40px;
-        background: #fafafa;
+        background: url('../../../assets/imgs/zhiluopan.png') #fafafa no-repeat;
+        background-position: center;
         .item {
           margin-bottom: 10px;
           font-size: 14px;
@@ -339,22 +352,6 @@ export default {
       width: 135px !important;
       height: 40px !important;
     }
-  }
-}
-/deep/ .cancel-btn {
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  span {
-    font-family: PingFangSC-Regular;
-    font-size: 16px;
-    color: #666666 !important;
-  }
-  &:hover {
-    background-color: #fff;
-    border-color: #d9d9d9;
-  }
-  &:active {
-    border-color: #d9d9d9;
   }
 }
 .el-table__fixed-right::before,

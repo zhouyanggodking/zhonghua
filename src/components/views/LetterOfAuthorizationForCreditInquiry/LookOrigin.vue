@@ -10,7 +10,10 @@
         <div class="left">
           <div class="title">征信授权书图像</div>
           <div class="result" id="result">
-            <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image>
+            <div v-for="(imgPath, index) in imagesSrc" :key="index">
+              <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imgPath" :imageRotate="rotateAngle" ref="img"></zoom-image>
+            </div>
+            <!-- <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image> -->
           </div>
         </div>
         <div class="right">
@@ -40,7 +43,6 @@
                       <el-option v-for="(item, index) in isStamp" :key="index" :label="item" :value="index"></el-option>
                     </el-select>
                     <el-input disabled v-else v-model="isStamp[fileMessageForm.corporateStamp]"></el-input>
-                    <!-- <div v-else>{{isStamp[fileMessageForm.corporateStamp]}}</div> -->
                   </el-form-item>
                 </el-form>
               </div>
@@ -50,7 +52,7 @@
               <div class="result">
                 <el-form label-position="right" label-width="40%" :model="fileMessageForm">
                   <el-form-item label="问题分类:" @click.native="filedFocus('是否法人签章')">
-                    <el-select v-if="!isFiledFormEdit && fileMessageForm.problemType"  v-model="fileMessageForm.problemType" placeholder="">
+                    <el-select v-if="!isFiledFormEdit"  v-model="fileMessageForm.problemType" placeholder="">
                       <el-option v-for="(item, index) in problemList" :key="index" :label="item.name" :value="item.id"></el-option>
                     </el-select>
                     <el-input disabled v-else v-model="problemMappingFun(fileMessageForm.problemType)[0].name"></el-input>
@@ -84,9 +86,7 @@ export default {
       problemList: PROBLEM_LIST,
       tableData: [],
       isStamp: ['否', '是'],
-      imagesSrc: 
-        "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
-      ,
+      imagesSrc: '',
       positionInfo: null,
       rotateAngle: '',
       singleImagePosition: null,
@@ -151,6 +151,9 @@ export default {
       getFileMessage(params)
       .then(res => {
         this.fileMessageForm = res;
+        this.fileMessageForm.problemType = this.fileMessageForm.problemType !== null ? this.fileMessageForm.problemType : 0;
+        this.fileMessageForm.corporateStamp = this.fileMessageForm.corporateStamp !== null ? this.fileMessageForm.corporateStamp : '';
+        this.imagesSrc = res.locations;
         this.oldData = JSON.parse(JSON.stringify(res));
       });
     },

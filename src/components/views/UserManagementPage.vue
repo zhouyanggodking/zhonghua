@@ -102,7 +102,7 @@
 <script>
 import Pagination from "@/components/common/Pagination";
 import { getUserList, addNewUserAccount, updateUserAccount, freezeUserAccount } from "@/rest/userManagmentPageApi";
-import {global_} from '@/global/global';
+import {global_upload} from '@/global/global';
 
 const PAGE_SIZE = 10;
 
@@ -331,7 +331,7 @@ export default {
         titles: '表头',
         name: '名字'
       }
-      window.open(`${global_}/sys/ocr/getUserExcel?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}`,'_parent')
+      window.open(`${global_upload}/sys/ocr/getUserExcel?username=${params.username}&telephone=${params.telephone}&deptId=${params.deptId}&aclId=${params.aclId}`,'_parent')
     }
   },
   mounted() {

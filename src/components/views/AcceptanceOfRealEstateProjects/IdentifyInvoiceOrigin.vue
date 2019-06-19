@@ -5,7 +5,7 @@
     </div>
     <div class="original-invoice">
       <div class="result">
-        <div class="left-img">
+        <div class="left-img" v-loading="isLoading">
           <identify-result-top-banner title="发票图像" :currentPage="currentPage" :total="invoicesMessage.length" @change="onImgPageChange"></identify-result-top-banner>
           <div class="img-group">
             <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" :initial-index="currentPage - 1" @change="imgCarouselChange">
@@ -15,7 +15,7 @@
             </el-carousel>
           </div>
         </div>
-        <div class="right-filed">
+        <div class="right-filed" v-loading="isLoading">
           <identify-result-top-banner title="识别结果" @change="onImgPageChange" :total="invoicesMessage.length" :currentPage="currentPage"></identify-result-top-banner>
           <el-carousel ref="invoiceCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" :initial-index="currentPage - 1">
             <el-carousel-item v-for="(item, index) in invoicesMessage" :key="index">
@@ -43,6 +43,7 @@ import ZoomImage from '@/components/common/ZoomImage';
 export default {
   data() {
     return {
+      isLoading: false,
       singleImagePosition: null,
       rotateAngle: null,
       locationInfos: null,
@@ -85,6 +86,8 @@ export default {
       this.singleImagePosition = [];
     },
     fetchTotalInvoices() {
+      this.isLoading = true;
+      this.invoicesMessage = [];
       const params = {
         paymentRequestId: this.paymentRequestId,
         userId: 1
@@ -96,6 +99,7 @@ export default {
           return JSON.parse(item).rotation_angle
         });
         this.rotateAngleList = rotateAngleList;
+        this.isLoading = false;
       })
     },
     // 获取付款主题

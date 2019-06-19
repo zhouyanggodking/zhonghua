@@ -31,12 +31,13 @@
 <script>
 import {calculateMd5} from '@/utils/fileUpload.js';
 import {relocateFile, fileIsExist} from '@/rest/realEstateUploadApi';
-import {global_} from '@/global/global';
+import {global_upload} from '@/global/global';
+import {dateFormat} from '@/helpers/dateHelper';
 
 export default {
   data() {
     let fileType = this.fileType;
-    let timeStamp = this.timeStamp;
+    let timeStamp = dateFormat(this.timeStamp);
     return {
       loading: false,
       identifyFileType: this.fileType,
@@ -47,14 +48,14 @@ export default {
       list: 'asd',
       fileStatusText: {
         success: '上传成功',
-        error: '出错了',
+        error: '上传失败',
         uploading: '上传中',
         paused: '暂停中',
         waiting: '等待中'
       },
       loadingText: '文件解析中...',
       options: {
-        target: `${global_}/uploader/chunk`,
+        target: `${global_upload}/uploader/chunk`,
         testChunks: false,
         singleFile: true,
         simultaneousUploads: 1, // 文件个数
@@ -68,7 +69,7 @@ export default {
           return file.size
         },
         query: function (file) {
-          let fileName = file.name.split('.')[0];
+          let fileName = (file.name).substring(0, (file.name).lastIndexOf('.'));
           return {
             identifier: file.size + '_' + fileName,
             type: 'zc',
@@ -149,14 +150,14 @@ export default {
       // 先把File对象转换成Blob 然后转换成buffer进行加密
       this.loading = true;
       let file = arguments[0].file
-      let _fileName = file.name.split('.')[0]
+      let _fileName = (file.name).substring(0, (file.name).lastIndexOf('.'))
       let _identifier = file.size + '_' + _fileName
       let servicePath = ''
       // 合并文件
       let obg = {
         userId: 1,
         businessTypeId: this.fileType,
-        authorizationValidDate: this.timeStamp,
+        authorizationValidDate: dateFormat(this.timeStamp),
         md5: this.file_md5,
         filename: file.name,
         identifier: _identifier,
