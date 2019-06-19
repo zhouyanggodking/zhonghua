@@ -6,7 +6,7 @@
       </div>
       <div class="retrieve-pwd-box">
         <div class="login-logo">
-            <img src="../../../assets/imgs/loginLogo.png" alt>
+            <img width="200px" src="../../../assets/imgs/loginLogo.png" alt>
         </div>
         <div class="retrieve-pwd-text">
           <div class="text">忘记密码</div>
@@ -100,7 +100,7 @@
               <span>密码设置成功</span>
             </div>
             <div class="to-login-btn">
-              <el-button @click="toLoginPage">立即登陆</el-button>
+              <el-button @click="toLoginPage">立即登录</el-button>
             </div>
           </el-carousel-item>
         </el-carousel>
@@ -365,8 +365,9 @@ export default {
   .retrieve-pwd-content {
     display: flex;
     justify-content: center;
+    align-items: center;
     min-width: 500px;
-    min-height: 600px;
+    height: 100%;
     background: url('../../../assets/imgs/loginBg_01.png') no-repeat;
     background-size: cover;
     .sign-in-logo {
@@ -381,15 +382,15 @@ export default {
     }
   }
   .retrieve-pwd-box {
-    min-height: 500px;
-    margin: 50px auto;
-    padding: 30px 50px 0px;
+    width: 610px;
+    height: 610px;
+    padding: 50px 88px;
     background: #FFFFFF ;
+    box-shadow: 0 11px 38px 0 rgba(64, 140, 251, 0.2);
     .login-logo {
-      width: 50%;
-      margin: 0px auto 20px;
-      line-height: 24px;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 50px;
     }
     .retrieve-pwd-text {
         display: flex;
@@ -419,7 +420,7 @@ export default {
           text-align: center;
         }
         .span-dot {
-          margin-left: 8px;
+          margin-left: 20px;
           letter-spacing: 4px;
           color: #999999;
         }
@@ -544,7 +545,7 @@ export default {
             /deep/ {
               .el-button {
                 width: 100% !important;
-                margin: 0;
+                margin-top: 20px;
                 @include buttonStyle;
                 color: #FFFFFF ;
               }
