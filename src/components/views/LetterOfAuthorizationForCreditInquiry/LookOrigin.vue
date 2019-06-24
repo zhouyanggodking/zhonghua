@@ -10,10 +10,11 @@
         <div class="left">
           <div class="title">征信授权书图像</div>
           <div class="result" id="result">
-            <div v-for="(imgPath, index) in imagesSrc" :key="index">
-              <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imgPath" :imageRotate="rotateAngle" ref="img"></zoom-image>
-            </div>
-            <!-- <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :img-src="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image> -->
+            <el-carousel ref="imgCarousel" height="100%" :autoplay="false" indicator-position="none" :initial-index="imagesSrc.length - 1" @change="onCarouselChange">
+              <el-carousel-item v-for="(imgPath, index) in imagesSrc" :key="index">
+                <zoom-image :imagePosition="index === (imagesSrc.length - 1) ? singleImagePosition : []" style="height:100%;" :img-src="imgPath" :imageRotate="rotateAngle" ref="img"></zoom-image>
+              </el-carousel-item>
+            </el-carousel>
           </div>
         </div>
         <div class="right">
@@ -22,13 +23,13 @@
               <div class="title">识别结果</div>
               <div class="result">
                 <el-form label-position="right" label-width="40%" :model="fileMessageForm">
-                  <el-form-item label="公司章:" @click.native="filedFocus('公司章')">
+                  <el-form-item label="公司章:" @click.native="filedFocus('公司章位置')">
                     <el-input :disabled="isFiledFormEdit" v-model="fileMessageForm.companySeal"></el-input>
                   </el-form-item>
-                  <el-form-item label="人名章:" @click.native="filedFocus('人名章')">
+                  <el-form-item label="人名章:" @click.native="filedFocus('人名章位置')">
                     <el-input :disabled="isFiledFormEdit" v-model="fileMessageForm.personSeal"></el-input>
                   </el-form-item>
-                  <el-form-item label="授权时间:" @click.native="filedFocus('授权时间')">
+                  <el-form-item label="签署时间:" @click.native="filedFocus('日期位置')">
                     <el-date-picker
                       v-if="!isFiledFormEdit"
                       v-model="fileMessageForm.signTime"
@@ -38,7 +39,7 @@
                     </el-date-picker>
                     <el-input disabled v-else v-model="fileMessageForm.signTime"></el-input>
                   </el-form-item>
-                  <el-form-item label="是否法人签章:" @click.native="filedFocus('是否法人签章')">
+                  <el-form-item label="是否法人签章:" @click.native="filedFocus('是否法人签章位置')">
                     <el-select v-if="!isFiledFormEdit"  v-model="fileMessageForm.corporateStamp" placeholder="">
                       <el-option v-for="(item, index) in isStamp" :key="index" :label="item" :value="index"></el-option>
                     </el-select>
@@ -51,7 +52,7 @@
               <div class="title">存在问题</div>
               <div class="result">
                 <el-form label-position="right" label-width="40%" :model="fileMessageForm">
-                  <el-form-item label="问题分类:" @click.native="filedFocus('是否法人签章')">
+                  <el-form-item label="问题分类:" @click.native="filedFocus('是否法人签章位置')">
                     <el-select v-if="!isFiledFormEdit"  v-model="fileMessageForm.problemType" placeholder="">
                       <el-option v-for="(item, index) in problemList" :key="index" :label="item.name" :value="item.id"></el-option>
                     </el-select>
@@ -76,8 +77,10 @@ import BreadCrumb from "@/components/common/BreadCrumb";
 import {getFileMessage, modifyFileMessage} from '@/rest/letterOfAuthorizationElecApi';
 import {dateFormat} from '@/helpers/dateHelper';
 import ZoomImage from '@/components/common/ZoomImage';
-import {USERID, PROBLEM_LIST} from '@/global/global';
+import { PROBLEM_LIST} from '@/global/global';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 export default {
   data() {
     return {
@@ -92,7 +95,7 @@ export default {
       singleImagePosition: null,
       textarea: "",
       isSaveBtn: false,
-      breadCrumbList: ["首页", "资产识别比对", "比对结果"],
+      breadCrumbList: [],
       currentTitle: "付款公司名称-合同编号-付款主题",
       fileMessageForm: {},
       oldData: {},
@@ -100,6 +103,9 @@ export default {
     };
   },
   methods: {
+    onCarouselChange() {
+      this.singleImagePosition = [];
+    },
     previous() {
       this.$router.go(-1);
     },
@@ -153,6 +159,7 @@ export default {
         this.fileMessageForm = res;
         this.fileMessageForm.problemType = this.fileMessageForm.problemType !== null ? this.fileMessageForm.problemType : 0;
         this.fileMessageForm.corporateStamp = this.fileMessageForm.corporateStamp !== null ? this.fileMessageForm.corporateStamp : '';
+        this.positionInfo = JSON.parse(res.info);
         this.imagesSrc = res.locations;
         this.oldData = JSON.parse(JSON.stringify(res));
       });
@@ -161,26 +168,31 @@ export default {
       const location_info = this.positionInfo[item];
       const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
           'imgUrl': this.imagesSrc,
-          'x': location_info.left,
-          'y': location_info.top,
-          'width': location_info.width,
-          'height': location_info.height,
+          'x': Number(location_info.x0),
+          'y': Number(location_info.y0),
+          'width': Number(location_info.x1) - Number(location_info.x0),
+          'height': Number(location_info.y1) - Number(location_info.y0),
           borderColor: 'red',
         }] : [{
-          'x': location_info.left,
-          'y': location_info.top,
-          'width': location_info.width,
-          'height': location_info.height,
+          'x': Number(location_info.x0),
+          'y': Number(location_info.y0),
+          'width': Number(location_info.x1) - Number(location_info.x0),
+          'height': Number(location_info.y1) - Number(location_info.y0),
           borderColor: 'red',
         }]) : [];
-        let imageUrl = location.length ? location[0].imgUrl : '';
-        if (imageUrl && imageUrl != 'undefined') {
-          this.singleImagePosition  = location;
-        }
+        // let imageUrl = location.length ? location[0].imgUrl : '';
+        // if (imageUrl && imageUrl != 'undefined') {
+        //   this.singleImagePosition  = location;
+        // }
+        this.singleImagePosition  = location;
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.fileId=this.$route.query.fileId;
+    this.breadCrumbList = this.$route.query.type === 'elec' ? [ "首页", "征信查询授权书", "识别结果", "电子版批次详情", "查询清单", "详情" ] : [ "首页", "征信查询授权书", "识别结果", "纸质版批次信息", "查询清单", "详情" ];
     this.getFileDetailData();
   },
   components: {
@@ -220,6 +232,9 @@ export default {
           margin-top: 10px;
           padding-bottom: 20px;
           border: 1px solid #ebebeb;
+          .el-carousel {
+            height: 100%;
+          }
           .result-img {
             width: 494px;
             height: 100%;

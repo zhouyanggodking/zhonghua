@@ -88,7 +88,7 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button :disabled="scope.row.status !== null && scope.row.status !== -2" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
+              <el-button v-loading.fullscreen.lock="fullscreenLoading" element-loading-text="提交任务中" :disabled="scope.row.status !== null && scope.row.status !== -2" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -97,7 +97,7 @@
     </div>
     <div class="real-estate-upload-footer">
       <el-button class="return-back" @click="goBack">返回</el-button>
-      <el-button class="start-identify" :disabled="isStartOcrJob" @click="handleOcrJobClick">提交任务 </el-button>
+      <el-button class="start-identify" v-loading.fullscreen.lock="fullscreenLoading" element-loading-text="提交任务中" :disabled="isStartOcrJob" @click="handleOcrJobClick">提交任务 </el-button>
     </div>
   </div>
 </template>
@@ -106,14 +106,16 @@ import BreadCrumb from '@/components/common/BreadCrumb';
 import FileUpload from '@/components/common/FileUpload';
 import Pagination from "@/components/common/Pagination";
 import {getUploadHistory, startOcrJob} from '@/rest/letterOfAuthorizationElecApi';
-import {USERID} from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const PAGE_SIZE = 10;
 
 export default {
   data() {
     return {
+      fullscreenLoading: false,
       isLongTime: false,
       isLoading: false,
       disableUpload: true,
@@ -180,7 +182,7 @@ export default {
         pageSize: this.pageSize,
         pageNum: this.currentPage,
         type: 1,
-        userId: 1
+        userId: USERID
       }
       getUploadHistory(params)
       .then((res) => {
@@ -199,6 +201,7 @@ export default {
       this.startOcrJob();
     },
     startOcrJob() {
+      this.fullscreenLoading = true;
       const params = {
         userId: USERID,
         ocrJobInfo: {
@@ -215,12 +218,14 @@ export default {
             type: 'success'
           });
           this.isStartOcrJob = true;
+          this.fullscreenLoading = false;
           this.fetchHistoryList();
         } else {
           this.$message({
             message: res.message,
             type: 'error'
-          })
+          });
+          this.fullscreenLoading = false;
         }
       }, err => {
         this.$message({
@@ -254,6 +259,9 @@ export default {
         this.authorizationValidDate = '';
       }
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   components: {
     BreadCrumb,
@@ -379,6 +387,14 @@ export default {
         }
       }
     }
+  }
+}
+</style>
+<style lang="scss">
+.el-loading-mask {
+  &.is-fullscreen {
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 99999 !important;
   }
 }
 </style>

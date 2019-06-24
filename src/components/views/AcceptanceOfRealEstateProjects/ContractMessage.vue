@@ -1,18 +1,18 @@
 <template>
   <div class="contract-box">
-    <div class="payment-order-theme">
+    <div class="payment-order-theme" v-if="titleInfos[0]">
       <label>关联付款主题:</label>
-      <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="paymentRequestOrderId" placeholder="">
-        <el-option v-for="(value, key, index) of titleInfos[0]" :key="index" :label="value" :value="key"></el-option>
+      <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="paymentOrderId" placeholder="">
+        <el-option v-for="(value, key, index) of titleInfos[0]" :key="index" :label="value" :value="Number(key)"></el-option>
       </el-select>
-      <el-input v-else :disabled="isFiledFormEdit" v-model="paymentOrderTheme"></el-input>
+      <el-input v-else :disabled="isFiledFormEdit" :value="titleInfos[0][paymentOrderId]"></el-input>
     </div>
     <el-form ref="filedResultForm" label-position="right" :rules="rules" label-width="120px" :model="filedResultForm">
       <el-form-item label="发票类型:" @click.native="filedFocus('发票类型')" prop="invoiceType">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType" placeholder="">
           <el-option v-for="(item, index) in invoiceType" :key="index" :label="item.name" :value="item.id"></el-option>
         </el-select>
-        <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType"></el-input>
+        <el-input v-else :disabled="isFiledFormEdit" :value="parseInvoiceType(filedResultForm.invoiceType)"></el-input>
       </el-form-item>
       <el-form-item label="验真状态:" @click.native="filedFocus('验真状态')">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.verification" placeholder="">
@@ -90,12 +90,7 @@
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.usePrice"></el-input>
       </el-form-item>
       <el-form-item label="凭证联:" @click.native="filedFocus('凭证联')">
-        <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.certification" placeholder="">
-          <el-option label="发票联" value="0"></el-option>
-          <el-option label="抵扣联" value="1"></el-option>
-          <el-option label="记账联" value="2"></el-option>
-        </el-select>
-        <el-input v-else :disabled="isFiledFormEdit" v-model="filedResultForm.certification"></el-input>
+        <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.certification"></el-input>
       </el-form-item>
       <el-form-item label="备注信息:" @click.native="filedFocus('备注信息')">
         <el-input type="textarea" maxlength="100" show-word-limit :disabled="isFiledFormEdit" v-model="filedResultForm.remarkInfo"></el-input>
@@ -110,13 +105,19 @@
   </div>
 </template>
 <script>
-import { modifyInvoice } from '@/rest/realEstateUploadApi';
-import { USERID, INVOICE_TYPE } from '@/global/global';
+import { modifyInvoice, getTotalInvoices } from '@/rest/realEstateUploadApi';
+import { INVOICE_TYPE } from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
+import { Promise } from 'q';
+
+let USERID = null;
 
 export default {
   data() {
     return {
+      paymentOrderId: null,
+      newInvoice: [],
       imagesSrc: 
         "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
       ,
@@ -153,7 +154,7 @@ export default {
         ],
         usePrice: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位内数字', trigger: 'blur' }
+          { pattern: /^(?=\d+.?\d+$|0)[\d.]{0,20}$/, message: '金额为20位内数字', trigger: 'blur' }
         ]
       }
     };
@@ -173,6 +174,11 @@ export default {
     }
   },
   methods: {
+    parseInvoiceType(target) {
+      if (this.invoiceType.filter(item => item.id === target).length) {
+        return this.invoiceType.filter(item => item.id === target)[0].name;
+      } return '暂无'
+    },
     goBack() {
       this.$router.go(-1);
     },
@@ -227,46 +233,66 @@ export default {
           }
         })
       };
-      modifyInvoice(params).then(() => {
-        this.$message({
-          message: '修改成功',
-          type: 'success'
-        });
-        this.isFiledFormEdit = !this.isFiledFormEdit;
-      }, () => {
-        this.$message({
-          message: '修改失败',
-          type: 'failed'
-        })
+      modifyInvoice(params).then((res) => {
+        if (res.status === 200) {
+          this.$message({
+            message: '修改成功',
+            type: 'success'
+          });
+          this.isFiledFormEdit = !this.isFiledFormEdit;
+          const params = {
+            paymentRequestId: this.paymentOrderId,
+            userId: USERID
+          }
+          getTotalInvoices(params).then(res => {
+            if (res.data.status === 200) {
+              this.filedResultForm = res.data.data.invoices[Number(this.index)];
+            }
+          })
+        } else {
+          this.$message({
+            message: '修改失败',
+            type: 'failed'
+          })
+        }
       })
     },
+    fetchInvoice() {
+      
+    },
     filedFocus(item) {
-      const location_info = JSON.parse(this.positionInfos[this.index]).position_info[item];
-      const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
-        'imgUrl': this.imagesSrc,
-        'x': location_info.left,
-        'y': location_info.top,
-        'width': location_info.width,
-        'height': location_info.height,
-        borderColor: 'red',
-      }] : [{
-        'x': location_info.left,
-        'y': location_info.top,
-        'width': location_info.width,
-        'height': location_info.height,
-        borderColor: 'red',
-      }]) : [];
-      let imageUrl = location.length ? location[0].imgUrl : '';
-      if (imageUrl && imageUrl != 'undefined') {
-        this.propsData.singleImagePosition = location;
-        this.$emit('change', this.propsData);
-      }
+      console.log(item);
+      // const location_info = JSON.parse(this.positionInfos[this.index]).position_info[item];
+      // const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
+      //   'imgUrl': this.imagesSrc,
+      //   'x': location_info.left,
+      //   'y': location_info.top,
+      //   'width': location_info.width,
+      //   'height': location_info.height,
+      //   borderColor: 'red',
+      // }] : [{
+      //   'x': location_info.left,
+      //   'y': location_info.top,
+      //   'width': location_info.width,
+      //   'height': location_info.height,
+      //   borderColor: 'red',
+      // }]) : [];
+      // let imageUrl = location.length ? location[0].imgUrl : '';
+      // if (imageUrl && imageUrl != 'undefined') {
+      //   this.propsData.singleImagePosition = location;
+      //   this.$emit('change', this.propsData);
+      // }
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.invoiceId = this.$route.query.id;
     this.paymentOrderTheme = this.$route.query.title;
+    this.paymentOrderId = Number(this.$route.query.paymentOrderId);
     this.filedResultForm = JSON.parse(JSON.stringify(this.contractData));
+    this.filedResultForm.invoiceType = (this.filedResultForm.invoiceType).padStart(2, '0');
     this.paymentRequestOrderId = this.$route.query.paymentOrderId;
   }
 };

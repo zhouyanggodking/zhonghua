@@ -89,8 +89,10 @@
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
 import { getDatabusMsg } from "@/rest/letterOfAuthorizationElecApi";
-import { USERID } from "@/global/global";
 import { formatMoney } from '@/helpers/moneyHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
+
+let USERID = null;
 
 export default {
   data() {
@@ -129,6 +131,9 @@ export default {
         this.dataBusInfo = res.info;
       })
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.companyName = this.$route.query.companyName;

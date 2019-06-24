@@ -83,7 +83,7 @@
             <template slot-scope="scope">
               <span v-if="scope.row.auditState === 0">驳回</span>
               <span v-else-if="scope.row.auditState === 1" style="color: #417505;">已审核</span>
-              <span v-else-if="scope.row.auditState === 2" style="color: #F5A623;">未审核</span>
+              <span v-else-if="scope.row.auditState === 2 || scope.row.auditState === null" style="color: #F5A623;">未审核</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="165" fixed="right">
@@ -109,7 +109,7 @@
       </div>
     </div>
     <el-dialog
-      class="dialog-common"
+      class="dialog-common confirmDialog"
       title
       :visible.sync="isDialogVisible"
       width="30%"
@@ -127,22 +127,25 @@
         <el-button
           v-if="dialogHintOperate==='驳回'"
           type="primary"
+          class="submit-btn"
           @click="rejectOpinion"
         >{{dialogHintOperate}}</el-button>
         <el-button
           v-if="dialogHintOperate==='审核通过'"
           type="primary"
+          class="submit-btn"
           @click="batchReviewPass"
         >{{dialogHintOperate}}</el-button>
         <el-button
           v-if="dialogHintOperate==='批量通过'"
           type="primary"
+          class="submit-btn"
           @click="batchReviewPass"
         >{{dialogHintOperate}}</el-button>
       </div>
     </el-dialog>
     <el-dialog
-      class="dialog"
+      class="dialog confirmDialog"
       :title="dialogTitle"
       :visible.sync="dialogVisible"
       width="30%"
@@ -154,19 +157,21 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleRejectClick">驳 回</el-button>
+        <el-button type="primary" class="submit-btn" @click="handleRejectClick">驳 回</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
 import resourceWrapper from "@/rest/resourceWrapper";
-import {global_upload} from '@/global/global';
+import { global_upload} from '@/global/global';
 import { formatMoney } from '@/helpers/moneyHelper';
 import {checkPaymentRequestOrders, checkPaymentRequestOrder} from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const PAGE_SIZE = 10;
 const CHECK = 1;
 const REJECT = 0;
@@ -181,7 +186,7 @@ export default {
       receiver:'',
       auditState: '',
       rejectId: null,
-      userId:1,
+      userId: USERID,
       pageNum:1,
       allChecked: false,
       dialogHintText: "请确认是否驳回",
@@ -236,7 +241,7 @@ export default {
       if (this.multipleSelection.length) {
         const params = {
           ids: this.multipleSelection,
-          userId: 1
+          userId: USERID
         };
         window.open(`${global_upload}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById?userId=${params.userId}&ids=${params.ids}`,'_parent');
       } else {
@@ -307,7 +312,7 @@ export default {
           ids: this.multipleSelection,
           auditState: CHECK,
         },
-        userId: 1
+        userId: USERID
       };
       checkPaymentRequestOrders(params).then((res) => {
         if (res.data.status === 200) {
@@ -332,7 +337,7 @@ export default {
     },
     handleRejectClick() {
       const params = {
-        userId: 1,
+        userId: USERID,
         order: {
           auditState: REJECT,
           id: this.rejectId,
@@ -394,7 +399,10 @@ export default {
       })
     }
   },
-  mounted(){
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
+  },
+  mounted() {
     this.getPaymentOrderInfos();
   },
   components: {

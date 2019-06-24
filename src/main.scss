@@ -109,12 +109,10 @@ html, body{
           .el-button {
             width: 136px;
             height: 40px;
-            &.cancle-btn {
+            &.cancel-btn {
               @include cancelBtnStyle;
               padding: 0px;
-              span {
-                color: #666666;
-              }
+              color: #0A74D8;
             }
             &.submit-btn {
               @include buttonStyle;

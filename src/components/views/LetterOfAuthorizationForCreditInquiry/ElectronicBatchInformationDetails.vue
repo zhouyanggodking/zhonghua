@@ -46,7 +46,7 @@
             </el-select>
           </div>
           <div class="search-condition_input_item">
-            <div class="text">授权有效期</div>
+            <div class="text">授权书提交日期</div>
             <el-select v-model="searchCondition.authorizationValidDateLegal	" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
               <el-option label="大于等于申请日期" value="0"></el-option>
@@ -112,7 +112,10 @@
           </el-table-column>
           <el-table-column prop="fileNo" label="档案编号" show-overflow-tooltip></el-table-column>
           <el-table-column prop="fileId" label="提供纸质授权书" show-overflow-tooltip>
-            <!-- //审核通过为是 -->
+            <template slot-scope="scope">
+              <span v-if="scope.row.fileId">已提供</span>
+              <span v-else-if="scope.row.fileId === null">未提供</span>
+            </template>
           </el-table-column>
           <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
@@ -125,6 +128,7 @@
                 class="table-btn"
                 size="mini"
                 type="danger"
+                :disabled="scope.row.auditState === 0"
                 @click="tableItemRejected(scope.row)"
               >驳回</el-button>
             </template>
@@ -150,11 +154,6 @@
             <div class="text">签署时间</div>
             <date-range @change="onSigninDateRangeChange"></date-range>
           </div>
-          <!-- 上传时间 -->
-          <!-- <div class="search-condition_input_item">
-            <div class="text">上传时间</div>
-            <date-range @change="onDateRangeChange"></date-range>
-          </div> -->
           <div class="search-condition_input_item second">
             <el-button class="search-btn" @click="unMatchedSearch">查询</el-button>
             <div class="export-excel" @click="exportUnmatchedExcel">导出Excel</div>
@@ -182,7 +181,7 @@
       </div>
     </div>
     <el-dialog
-      class="dialog-common"
+      class="dialog-common confirmDialog"
       title
       :visible.sync="isDialogVisible"
       width="30%"
@@ -200,22 +199,25 @@
         <el-button
           v-if="dialogHintOperate==='驳回'"
           type="primary"
+          class="submit-btn"
           @click="rejectOpinion"
         >{{dialogHintOperate}}</el-button>
         <el-button
           v-if="dialogHintOperate==='审核通过'"
           type="primary"
+          class="submit-btn"
           @click="reviewPass"
         >{{dialogHintOperate}}</el-button>
         <el-button
-          v-if="dialogHintOperate==='批量审核'"
+          v-if="dialogHintOperate==='批量通过'"
           type="primary"
+          class="submit-btn"
           @click="batchReviewPass"
         >{{dialogHintOperate}}</el-button>
       </div>
     </el-dialog>
     <el-dialog
-      class="dialog"
+      class="dialog confirmDialog"
       :title="dialogTitle"
       :visible.sync="dialogVisible"
       width="30%"
@@ -233,15 +235,14 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="驳回意见:" prop="problemDescription">
+          <el-form-item label="其他问题描述:" prop="problemDescription">
             <el-input v-model="rejectForm.problemDescription" auto-complete="off"></el-input>
           </el-form-item>
         </el-form>
       </div>
-      
       <div slot="footer" class="dialog-footer">
         <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleRejectClick">驳 回</el-button>
+        <el-button type="primary" class="submit-btn" @click="handleRejectClick">驳 回</el-button>
       </div>
     </el-dialog>
   </div>
@@ -252,8 +253,10 @@ import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import DateRange from "@/components/common/DateRange";
 import {formatQuery} from '@/helpers/formatGetParams';
-import { USERID, CHECK_STATUS_LIST, global_upload, PROBLEM_LIST} from '@/global/global';
+import { CHECK_STATUS_LIST, global_upload, PROBLEM_LIST} from '@/global/global';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const PAGE_SIZE = 10;
 const ELE_FILE = 0;
 
@@ -322,14 +325,27 @@ export default {
       totalCount: 0,
       unMatchedtotalCount: 0,
       currentTitle: "识别结果",
-      breadCrumbList: ["征信查询授权书","识别结果","电子版批次详情"],
+      breadCrumbList: ["首页", "征信查询授权书","识别结果","电子版批次详情"],
       pageSize: PAGE_SIZE,
       unMatchedPageSize: PAGE_SIZE,
       tableData: [],
       summaryId: ''
     };
   },
+  watch: {
+    'allChecked'() {
+      this.toggleSelection();
+    }
+  },
   methods: {
+    toggleSelection() {
+      if (this.allChecked) {
+        this.$refs.multipleTable.clearSelection();
+        this.$refs.multipleTable.toggleAllSelection();
+      } else {
+        this.$refs.multipleTable.clearSelection();
+      }
+    },
     onDateRangeChange(res) {
       this.searchCondition.submitStartTime = res.startTime;
       this.searchCondition.submitEndTime = res.endTime;
@@ -429,7 +445,7 @@ export default {
     tableItemDetails(row) {
       this.$router.push({
         name: "elec-batch-info-identify-details",
-        query: { id: row.id, auditState: row.auditState, batchNo: this.$route.query.batchNo }
+        query: { pageNum: this.currentPage, summaryId: this.summaryId, id: row.id, auditState: row.auditState, batchNo: this.$route.query.batchNo }
       });
     },
     // 驳回
@@ -483,7 +499,8 @@ ${formatQuery(params)}`,'_parent');
       this.dialogHintOperate = "审核通过";
     },
     tableItemRejected(row) {
-      // this.dialogVisible = true;
+      this.rejectForm.problemType = '';
+      this.rejectForm.problemDescription = '';
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否驳回";
       this.dialogHintOperate = "驳回";
@@ -536,8 +553,12 @@ ${formatQuery(params)}`,'_parent');
       });
     }
   },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
+  },
   mounted() {
     this.summaryId = this.$route.query.id;
+    this.currentPage = Number(this.$route.query.pageNum || 1);
     this.fetchElecDetailList();
     this.fetchUnmatchedElecDetailList();
   },
@@ -673,6 +694,9 @@ ${formatQuery(params)}`,'_parent');
       color: #4A90E2;
       cursor: pointer;
     }
+    .table-footer {
+      margin-top: 25px;
+    }
   }
   .identify-page-table {
     margin-top: 20px;
@@ -706,6 +730,9 @@ ${formatQuery(params)}`,'_parent');
             }
             th.is-leaf {
               border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+              .el-checkbox__input {
+                display: none;
+              }
             }
           }
         }
@@ -753,9 +780,10 @@ ${formatQuery(params)}`,'_parent');
         border: none;
         font-weight: normal;
         font-size: 14px;
-        span {
-          color: #4a90e2;
-          // margin-right: 20px;
+        &.is-disabled {
+          span {
+            color: #d9d9d9;
+          }
         }
       }
       .el-button--mini,
@@ -882,7 +910,6 @@ ${formatQuery(params)}`,'_parent');
   .el-dialog__header {
     .el-dialog__title {
       font-size: 20px;
-      color: #9a8b7b;
     }
     .el-dialog__headerbtn {
       // width: 30px;

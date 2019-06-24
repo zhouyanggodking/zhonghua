@@ -2,16 +2,14 @@
   <div class="contract-supplyment">
     <div class="payment-order-theme">
       <label>关联付款主题:</label>
-      <el-select v-model="paymentRequestOrderId" placeholder="">
+      <el-select v-if="paymentOrderId" v-model="paymentOrderId" placeholder="">
         <el-option v-for="(value, key, index) of titleInfos[0]" :key="index" :label="value" :value="Number(key)"></el-option>
       </el-select>
     </div>
     <el-form ref="contractSupplymentForm" label-position="right" :rules="rules" label-width="120px" :model="contractSupplymentForm">
       <el-form-item label="发票类型:" prop="invoiceType">
-        <el-select  v-model="contractSupplymentForm.invoiceType" placeholder="">
-          <el-option label="增值税普通发票" value="增值税普通发票"></el-option>
-          <el-option label="专票" value="专票"></el-option>
-          <el-option label="普票" value="普票"></el-option>
+        <el-select v-model="contractSupplymentForm.invoiceType" placeholder="">
+          <el-option v-for="(item, index) in invoiceType" :key="index" :label="item.name" :value="item.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="发票号码:" prop="invoiceNo">
@@ -56,12 +54,17 @@
 </template>
 <script>
 import { supplyInvoice, verifyInvoice } from '@/rest/realEstateUploadApi';
-import {USERID} from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
+import { INVOICE_TYPE } from '@/global/global';
+
+let USERID = null;
 
 export default {
   data() {
     return {
+      paymentOrderId: null,
+      invoiceType: INVOICE_TYPE,
       isAddInvoice: false,
       paymentRequestOrderId: 1,
       isFiledFormEdit: false,
@@ -94,7 +97,7 @@ export default {
         ],
         finalPrice: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+          { pattern: /^(?=\d+.?\d+$|0)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
         ]
       },
       verifiedInvoiceItems: {},
@@ -221,8 +224,11 @@ export default {
       })
     }
   },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
+  },
   mounted() {
-    this.paymentOrderId = this.$route.query.paymentOrderId;
+    this.paymentOrderId = Number(this.$route.query.paymentOrderId);
   }
 }
 </script>

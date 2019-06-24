@@ -10,7 +10,7 @@
           <div class="img-group">
             <el-carousel ref="imgCarousel" height="100%" :autoplay="imgAutoPlay" indicator-position="none" :initial-index="currentPage - 1" @change="imgCarouselChange">
               <el-carousel-item v-for="item in invoicesMessage.length" :key="item">
-                <zoom-image :imagePosition="singleImagePosition" style="height:360px;" :imgSrc="invoicesMessage[item-1].outputLocation" :imageRotate="String(rotateAngleList[item-1])" ref="img"></zoom-image>
+                <zoom-image :imagePosition="singleImagePosition" style="height:100%;" :imgSrc="invoicesMessage[item-1].outputLocation" :imageRotate="String(rotateAngleList[item-1])" ref="img"></zoom-image>
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -32,13 +32,15 @@
   </div>
 </template>
 <script>
-import {USERID} from '@/global/global';
 import { getTotalInvoices, getSimpleInfos } from "@/rest/realEstateUploadApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import ContractSupplyment from "@/components/views/AcceptanceOfRealEstateProjects/ContractSupplyment";
 import ContractMessage from "@/components/views/AcceptanceOfRealEstateProjects/ContractMessage";
 import IdentifyResultTopBanner from '@/components/common/IdentifyResultTopBanner';
 import ZoomImage from '@/components/common/ZoomImage';
+import localStorageHelper from '@/helpers/localStorageHelper';
+
+let USERID = null;
 
 export default {
   data() {
@@ -90,7 +92,7 @@ export default {
       this.invoicesMessage = [];
       const params = {
         paymentRequestId: this.paymentRequestId,
-        userId: 1
+        userId: USERID
       }
       getTotalInvoices(params).then(res => {
         this.invoicesMessage = res.data.data.invoices;
@@ -113,6 +115,9 @@ export default {
     isShowContractMsg() {
       this.fetchTotalInvoices();
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.currentPage = Number(this.$route.query.index);

@@ -9,7 +9,7 @@
       <div class="identify-page_search_condition">
         <div class="search-condition_input">
           <div class="search-condition_input_item date-picker">
-            <div class="text">申请日期</div>
+            <div class="text">上传日期</div>
             <date-range @change="onDateRangeChange"></date-range>
           </div>
           <div class="search-condition_input_item">
@@ -76,9 +76,11 @@ import {getEstateElecAuthorizationSummaryInfos} from "@/rest/letterOfAuthorizati
 import BreadCrumb from "@/components/common/BreadCrumb";
 import DateRange from "@/components/common/DateRange";
 import Pagination from "@/components/common/Pagination";
-import {global_upload} from "@/global/global";
+import { global_upload} from "@/global/global";
 import {formatQuery} from '@/helpers/formatGetParams';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const PAGE_SIZE = 10;
 
 export default {
@@ -153,7 +155,7 @@ export default {
       if (this.multipleSelection.length) {
         const params = {
           ids: this.multipleSelection,
-          userId: 1,
+          userId: USERID,
           elecOrFile: this.elecOrFile
         };
         window.open(`${global_upload}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
@@ -179,7 +181,7 @@ ${formatQuery(params)}`,'_parent');
         startTime: this.startTime,
         endTime: this.endTime,
         state: this.state,
-        userId: 1,
+        userId: USERID,
         elecOrFile: this.elecOrFile
       }
       window.open(`${global_upload}/auth/estateAuthorizationSummaryController/exportToExcel
@@ -210,7 +212,7 @@ ${formatQuery(params)}`,'_parent');
         startTime: this.startTime,
         endTime: this.endTime,
         state: this.state,
-        userId: 1,
+        userId: USERID,
         elecOrFile: this.elecOrFile,
         pageSize: this.pageSize,
         pageNum: this.currentPage
@@ -225,6 +227,9 @@ ${formatQuery(params)}`,'_parent');
   },
   mounted() {
     this.fetchTableData();
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   components: {
     BreadCrumb,
