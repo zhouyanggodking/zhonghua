@@ -3,9 +3,18 @@
     <div class="identify-page-title">
       <div class="top-box">
         <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <div class="btn-group">
+        <div
+          class="btn-group_item"
+          :class="{'btn-actived':index===activedIndex}"
+          v-for="(item,index) in topBtnGroup"
+          :key="index"
+          @click="topMenus(index)"
+        >{{item}}</div>
+      </div>
       </div>
     </div>
-    <div class="identify-page-search">
+    <div class="identify-page-search" v-if="activedIndex===0">
       <div class="identify-page_search_condition">
         <div class="search-condition_input">
           <div class="search-condition_input_item">
@@ -14,7 +23,7 @@
           </div>
           <div class="search-condition_input_item">
             <div class="text">公司名称</div>
-            <el-input v-model="searchCondition.companyName" placeholder="请输入内容"></el-input>
+            <el-input v-model="searchCondition.companyName" placeholder="请输入公司名称"></el-input>
           </div>
           <div class="search-condition_input_item">
             <div class="text">授权提交时间</div>
@@ -37,7 +46,7 @@
             </el-select>
           </div>
           <div class="search-condition_input_item">
-            <div class="text">授权有效期</div>
+            <div class="text">授权书提交日期</div>
             <el-select v-model="searchCondition.authorizationValidDateLegal	" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
               <el-option label="大于等于申请日期" value="0"></el-option>
@@ -57,7 +66,7 @@
         </div>
       </div>
     </div>
-    <div class="identify-page-table">
+    <div class="identify-page-table" v-if="activedIndex===0">
       <div class="identify-page-table_btn">
         <el-checkbox v-model="allChecked">全选</el-checkbox>
         <el-button class="btn" @click="tableDownload()">下载</el-button>
@@ -91,11 +100,7 @@
           </el-table-column>
           <el-table-column prop="submitDate" label="授权提交时间" show-overflow-tooltip></el-table-column>
           <el-table-column prop="signTime" label="签署时间" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="authorizationValidDateLegal" label="授权有效期" show-overflow-tooltip>
-            <template slot-scope="scope">
-              <span v-if="scope.row.authorizationValidDateLegal === 0">大于等于申请日期</span>
-              <span v-else-if="scope.row.authorizationValidDateLegal === 1">小于申请日期</span>
-            </template>
+          <el-table-column prop="authorizationValidDate" label="授权有效期" show-overflow-tooltip>
           </el-table-column>
           <el-table-column prop="auditState" label="审核状态" show-overflow-tooltip>
             <template slot-scope="scope">
@@ -106,7 +111,10 @@
           </el-table-column>
           <el-table-column prop="fileNo" label="档案编号" show-overflow-tooltip></el-table-column>
           <el-table-column prop="elecFileId" label="提供电子授权书" show-overflow-tooltip>
-            <!-- //审核通过为是 -->
+            <template slot-scope="scope">
+              <span v-if="scope.row.elecFileId">已提供</span>
+              <span v-else-if="scope.row.elecFileId === null">未提供</span>
+            </template>
           </el-table-column>
           <el-table-column label="操作" width="165" fixed="right">
             <template slot-scope="scope">
@@ -119,6 +127,7 @@
                 class="table-btn"
                 size="mini"
                 type="danger"
+                :disabled="scope.row.auditState === 0"
                 @click="tableItemRejected(scope.row)"
               >驳回</el-button>
             </template>
@@ -126,11 +135,52 @@
         </el-table>
       </div>
       <div class="table-footer">
-        <Pagination :totalCount="totalCount" @change="onPageNumberChange"></Pagination>
+        <Pagination :currPage="currentPage" :totalCount="totalCount" @change="onPageNumberChange"></Pagination>
+      </div>
+    </div>
+    <div class="identify-page-search search-unauth" v-if="activedIndex===1">
+      <div class="identify-page_search_condition">
+        <div class="search-condition_input">
+          <div class="search-condition_input_item">
+            <div class="text">公司章</div>
+            <el-input v-model="unMatchedSearchCondition.companySeal" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">人名章</div>
+            <el-input v-model="unMatchedSearchCondition.personSeal" placeholder="请输入内容"></el-input>
+          </div>
+          <div class="search-condition_input_item">
+            <div class="text">签署时间</div>
+            <date-range @change="onSigninDateRangeChange"></date-range>
+          </div>
+          <div class="search-condition_input_item second">
+            <el-button class="search-btn" @click="unMatchedSearch">查询</el-button>
+            <div class="export-excel" @click="exportUnmatchedExcel">导出Excel</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="search-unauth-table" v-if="activedIndex===1">
+      <el-table v-loading="isUnmatchedEleLoading" :data="unMatchedTableData" style="width: 100%">
+        <el-table-column type="index" label="序号" width="50"></el-table-column>
+        <el-table-column prop="companySeal" label="公司章"></el-table-column>
+        <el-table-column prop="personSeal" label="人名章"></el-table-column>
+        <el-table-column prop="signTime"  label="签署时间"></el-table-column>
+        <!-- <el-table-column prop="address" label="上传时间"></el-table-column> -->
+        <el-table-column label="操作">
+            <template slot-scope="scope">
+              <span class="detail-button" @click="lookOrigin(scope.row)">
+                查看原件
+              </span>
+            </template>
+          </el-table-column>
+      </el-table>
+      <div class="table-footer">
+        <Pagination :totalCount="unMatchedtotalCount" @change="onUnmatchedPageNumberChange"></Pagination>
       </div>
     </div>
     <el-dialog
-      class="dialog-common"
+      class="dialog-common confirmDialog"
       title
       :visible.sync="isDialogVisible"
       width="30%"
@@ -148,12 +198,13 @@
         <el-button
           v-if="dialogHintOperate==='驳回'"
           type="primary"
+          class="submit-btn"
           @click="rejectOpinion"
         >{{dialogHintOperate}}</el-button>
       </div>
     </el-dialog>
     <el-dialog
-      class="dialog"
+      class="dialog confirmDialog"
       :title="dialogTitle"
       :visible.sync="dialogVisible"
       width="30%"
@@ -171,7 +222,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="驳回意见:" prop="problemDescription">
+          <el-form-item label="其他问题描述:" prop="problemDescription">
             <el-input v-model="rejectForm.problemDescription" auto-complete="off"></el-input>
           </el-form-item>
         </el-form>
@@ -179,25 +230,31 @@
       
       <div slot="footer" class="dialog-footer">
         <el-button class="cancel-btn" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleRejectClick">驳 回</el-button>
+        <el-button type="primary" class="submit-btn" @click="handleRejectClick">驳 回</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import {elecDetailList, checkAuthRecord} from "@/rest/letterOfAuthorizationElecApi";
+import {elecDetailList, checkAuthRecord, unMatchedElecDetailList} from "@/rest/letterOfAuthorizationElecApi";
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import DateRange from "@/components/common/DateRange";
 import {formatQuery} from '@/helpers/formatGetParams';
-import {USERID, CHECK_STATUS_LIST, global_upload, PROBLEM_LIST} from '@/global/global';
+import { CHECK_STATUS_LIST, global_upload, PROBLEM_LIST} from '@/global/global';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const PAGE_SIZE = 10;
 const ELE_FILE = 1;
 
 export default {
   data() {
     return {
+      isUnmatchedEleLoading: false,
+      unMatchedTableData: [],
+      unMatchedcurrentPage: 1,
+      unMatchedPageSize: PAGE_SIZE,
       isLoading: false,
       searchCondition: {
         depart: '',
@@ -212,6 +269,15 @@ export default {
         userId: USERID,
         pageNum: '',
         pageSize: ''
+      },
+      unMatchedSearchCondition: {
+        companySeal: '',
+        personSeal: '',
+        signStartTime: '',
+        signEndTime: '',
+        summaryId: '',
+        elecOrFile: ELE_FILE,
+        userId: USERID
       },
       rejectObj: {
         fileId: '',
@@ -245,28 +311,56 @@ export default {
       multipleSelection: [],
       currentPage: 1,
       totalCount: 0,
-      currentTitle: "纸质版授权书批次详情",
-      breadCrumbList: ["征信查询授权书", "识别结果", "纸质版批次信息", "查询清单"],
+      currentTitle: "",
+      breadCrumbList: ["首页", "征信查询授权书", "识别结果", "纸质版批次信息", "查询清单"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       tableData: [],
       summaryId: ''
     };
   },
+  watch: {
+    'allChecked'() {
+      this.toggleSelection();
+    }
+  },
   methods: {
+    topMenus(index) {
+      this.activedIndex = index;
+    },
+    toggleSelection() {
+      if (this.allChecked) {
+        this.$refs.multipleTable.clearSelection();
+        this.$refs.multipleTable.toggleAllSelection();
+      } else {
+        this.$refs.multipleTable.clearSelection();
+      }
+    },
     onDateRangeChange(res) {
       this.searchCondition.submitStartTime = res.startTime;
       this.searchCondition.submitEndTime = res.endTime;
     },
-    goBack() {},
+    onSigninDateRangeChange(res) {
+      this.unMatchedSearchCondition.signStartTime = res.startTime || '';
+      this.unMatchedSearchCondition.signEndTime = res.endTime || '';
+    },
     search() {
       this.currentPage = 1;
       this.fetchPaperDetailList();
     },
+    unMatchedSearch() {
+      this.unMatchedcurrentPage = 1;
+      this.fetchUnmatchedElecDetailList();
+    },
     onPageNumberChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
-      this.fetchPaperDetailList();
+      this.fetchElecDetailList();
+    },
+    onUnmatchedPageNumberChange(res) {
+      this.unMatchedPageSize = res.pageSize;
+      this.unMatchedcurrentPage = res.pageNum;
+      this.fetchUnmatchedElecDetailList();
     },
     tableDownload() {
       if (this.multipleSelection.length) {
@@ -288,7 +382,7 @@ export default {
     tableItemDetails(row) {
       this.$router.push({
         name: "paper-batch-indentify-details",
-        query: { id: row.id, auditState: row.auditState }
+        query: { summaryId: this.$route.query.id, id: row.id, auditState: row.auditState, pageNum: this.currentPage, batchNo: this.$route.query.batchNo }
       });
     },
     // 驳回
@@ -307,18 +401,20 @@ export default {
       };
       this.$refs.rejectForm.validate(valid => {
         if (valid) {
-          checkAuthRecord(params).then(() => {
-            this.$message({
-              message: '驳回完成',
-              type: 'success'
-            });
-            this.dialogVisible = false;
-            this.fetchPaperDetailList();
-          }, () => {
-            this.$message({
-              message: '驳回失败',
-              type: 'warning'
-            })
+          checkAuthRecord(params).then((res) => {
+            if (res.status === 200) {
+              this.$message({
+                message: '驳回完成',
+                type: 'success'
+              });
+              this.dialogVisible = false;
+              this.fetchPaperDetailList();
+            } else {
+              this.$message({
+                message: '驳回失败',
+                type: 'warning'
+              });
+            }
           })
         }
       })
@@ -330,8 +426,15 @@ export default {
       params.pageSize = this.pageSize;
       window.open(`${global_upload}/auth/estateAuthorizationExcelController/exportExcelRecords${formatQuery(params)}`,'_parent');
     },
+    // 导出为匹配详情
+    exportUnmatchedExcel() {
+      const params = this.unMatchedSearchCondition;
+      window.open(`${global_upload}/auth/estateAuthorizationFileController/exportUnmatchedFilesToExcel
+${formatQuery(params)}`,'_parent');
+    },
     tableItemRejected(row) {
-      //this.dialogVisible = true;
+      this.rejectForm.problemType = '';
+      this.rejectForm.problemDescription = '';
       this.isDialogVisible = true;
       this.dialogHintText = "请确认是否驳回";
       this.dialogHintOperate = "驳回";
@@ -360,11 +463,29 @@ export default {
         this.totalCount = res.total;
         this.isLoading = false;
       });
+    },
+    fetchUnmatchedElecDetailList() {
+      this.unMatchedTableData = [];
+      this.isUnmatchedEleLoading = true;
+      this.unMatchedSearchCondition.pageSize = this.unMatchedPageSize;
+      this.unMatchedSearchCondition.pageNum = this.unMatchedcurrentPage;
+      this.unMatchedSearchCondition.summaryId = this.summaryId;
+      unMatchedElecDetailList(this.unMatchedSearchCondition)
+      .then(res => {
+        this.unMatchedTableData = res.data;
+        this.unMatchedtotalCount = res.total;
+        this.isUnmatchedEleLoading = false;
+      });
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.summaryId = this.$route.query.id;
+    this.currentPage = Number(this.$route.query.pageNum || 1);
     this.fetchPaperDetailList();
+    this.fetchUnmatchedElecDetailList();
   },
   components: {
     BreadCrumb,
@@ -420,8 +541,8 @@ export default {
         cursor: pointer;
       }
       .btn-actived {
-        color: #9b8b7c;
-        border-bottom: 3px solid #c1b071;
+        color: #0263FF;
+        border-bottom: 3px solid #0263FF;
       }
     }
     .title-name {
@@ -430,6 +551,18 @@ export default {
       color: #999999;
       padding-top: 33px;
       margin-left: 30px;
+    }
+  }
+  .search-unauth-table{
+    margin-top: 30px;
+    background: #fff;
+    padding: 30px;
+    .detail-button {
+      color: #4A90E2;
+      cursor: pointer;
+    }
+    .table-footer {
+      margin-top: 25px;
     }
   }
   .identify-page-search {
@@ -513,6 +646,9 @@ export default {
             }
             th.is-leaf {
               border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+              .el-checkbox__input {
+                display: none;
+              }
             }
           }
         }
@@ -570,8 +706,12 @@ export default {
         font-weight: normal;
         font-size: 14px;
         span {
-          color: #4a90e2;
-          // margin-right: 20px;
+          color: #4a90e2
+        }
+        &.is-disabled {
+          span {
+            color: #d9d9d9;
+          }
         }
       }
       .el-button--mini,
@@ -659,9 +799,13 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 123px;
     border-top: 2px solid #ebebeb;
     border-bottom: 2px solid #ebebeb;
+    /deep/ {
+      .el-form {
+        margin-top: 20px;
+      }
+    }
     .label-content {
       font-family: PingFangSC-Semibold;
       font-size: 14px;
@@ -694,7 +838,6 @@ export default {
   .el-dialog__header {
     .el-dialog__title {
       font-size: 20px;
-      color: #9a8b7b;
     }
     .el-dialog__headerbtn {
       // width: 30px;

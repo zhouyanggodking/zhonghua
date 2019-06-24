@@ -3,7 +3,7 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage"
+      :current-page.sync="currentPage"
       :page-sizes="pageSizes"
       :page-size="pageSize"
       layout="total, prev, pager, next, jumper"
@@ -15,18 +15,21 @@
 const PAGE_SIZE = 10;
 
 export default {
+  data() {
+    return {
+      currentPage: Number(this.$route.query.pageNum || 1),
+      pageSize: PAGE_SIZE,
+      pageSizes: [PAGE_SIZE]
+    };
+  },
   props:{
     totalCount:{
       type:Number,
       default: 0
+    },
+    currPage: {
+      type: Number
     }
-  },
-  data() {
-    return {
-      currentPage:1,
-      pageSize: PAGE_SIZE,
-      pageSizes: [PAGE_SIZE]
-    };
   },
   methods: {
     handleSizeChange(pageSize) {

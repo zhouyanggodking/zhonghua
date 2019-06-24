@@ -49,8 +49,9 @@
 <script>
 import LocalStorageHelper from '@/helpers/localStorageHelper'; 
 import {getFileCounts} from '@/rest/indexApi';
-import {USERID} from '@/global/global';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID =  null;
 const USERNAME = 'USERNAME';
 
 export default {
@@ -111,6 +112,9 @@ export default {
     this.userName = LocalStorageHelper.getItem(USERNAME);
     this.fetFilesCounts();
   },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
+  }
 }
 </script>
 <style lang="scss" scoped>

@@ -2,7 +2,7 @@
   <div class="elec-batch-info-indentify-page-details">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <bread-crumb :data="breadCrumbList" :currentTitle="`${currentTitle}批次`"></bread-crumb>
       </div>
     </div>
     <div class="paper-batch-container">
@@ -114,8 +114,8 @@
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button class="submit-btn" :disabled="auditState === 1 && paperFileForm === null" @click="reviewPass">审核通过</el-button>
-            <el-button class="submit-btn" :disabled="auditState === 0 && paperFileForm === null" @click="reviewReject">驳回</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 1 || paperFileForm === null" @click="reviewPass">审核通过</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 0 || paperFileForm === null" @click="reviewReject">驳回</el-button>
           </div>
         </div>
       </div>
@@ -154,9 +154,11 @@
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
 import { getEstateAuthorizationExcelInfo, checkAuthRecord, modifyFileMessage } from "@/rest/letterOfAuthorizationElecApi";
-import {USERID, PROBLEM_LIST} from "@/global/global";
+import { PROBLEM_LIST} from "@/global/global";
 import {dateFormat} from '@/helpers/dateHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const ELEORFILE = 1;
 const CHECK = 1;
 const REJECT = 0;
@@ -181,7 +183,7 @@ export default {
         {key: 'submitDate', value: "授权书提交日期："},
         {key: 'applyDate', value: "申请日期："},
         {key: 'depart', value: "部门："},
-        {key: 'seqNo0', value: "序号："}
+        {key: 'seqNo', value: "序号："}
       ],
       elecInfoItems: [
         {key: 'databusCompanyName', value: "公司名称："},
@@ -192,12 +194,14 @@ export default {
         {key: 'fileNo', value: "档案编号："},
         {key: 'submitDate', value: "提交时间："}
       ],
-      currentTitle: "20190404批次-金茂",
+      currentTitle: "",
       breadCrumbList: [
+        "首页",
         "征信查询授权书",
         "识别结果",
         "电子版批次信息",
-        "查询清单"
+        "查询清单",
+        "详情"
       ],
       excelMsg: null,
       elecMsg: true,
@@ -210,11 +214,9 @@ export default {
     };
   },
   methods: {
-    goBack() {},
-    search() {},
     // 返回
     previous() {
-      this.$router.go(-1);
+      this.$router.push({path: `/creditPaperBatchInformation/paperBatchInformationDetails?id=${this.$route.query.summaryId}&pageNum=${this.$route.query.pageNum}`});
     },
     // 审核通过
     reviewPass() {
@@ -226,23 +228,17 @@ export default {
     reviewPassOpearte() {
       this.isDialogVisible = false;
       this.checkOrRejectFun(CHECK, '', '');
-      this.elecMsg.problemType = 0;
-      this.elecMsg.problemDescription = '';
+      this.rejectForm.problemType = 0;
+      this.rejectForm.problemDescription = '';
       this.auditState = 1;
     },
     // 驳回
     reviewReject() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否驳回";
-      this.dialogHintOperate = "驳回";
-    },
-    // 驳回，确定
-    rejectOpinionOperate() {
-      this.isDialogVisible = false;
-      if (this.elecMsg) {
-        if (this.elecMsg.problemType !== '' && this.elecMsg.problemDescription !== '') {
-          this.checkOrRejectFun(REJECT, this.elecMsg.problemType, this.elecMsg.problemDescription);
-          this.auditState = 0;
+      if (this.rejectForm) {
+        if (this.rejectForm.problemType && this.rejectForm.problemType !== '' && this.rejectForm.problemDescription && this.rejectForm.problemDescription !== '') {
+          this.isDialogVisible = true;
+          this.dialogHintText = "请确认是否驳回";
+          this.dialogHintOperate = "驳回";
         } else {
           this.$message({
             message: '请选择问题分类并填写问题描述!',
@@ -250,6 +246,12 @@ export default {
           })
         }
       }
+    },
+    // 驳回，确定
+    rejectOpinionOperate() {
+      this.isDialogVisible = false;
+      this.checkOrRejectFun(REJECT, this.rejectForm.problemType, this.rejectForm.problemDescription);
+      this.auditState = 0;
     },
     // 驳回、审核
     checkOrRejectFun(state, problemType, problemDescription) {
@@ -266,18 +268,20 @@ export default {
         },
         userId: USERID
       };
-      checkAuthRecord(params).then(() => {
-        this.$message({
-          message: `${msg}完成`,
-          type: 'success'
-        });
-        this.dialogVisible = false;
-      }, (err) => {
-        this.$message({
-          // message: `${msg}失败`,
-          message: err.message,
-          type: 'warning'
-        })
+      checkAuthRecord(params).then((res) => {
+        if (res.data.status === 200) {
+          this.$message({
+            message: `${msg}完成`,
+            type: 'success'
+          });
+          this.dialogVisible = false;
+        } else {
+          this.$message({
+            // message: `${msg}失败`,
+            message: res.data.message,
+            type: 'warning'
+          });
+        }
       })
     },
     // 纸质信息，修改
@@ -307,25 +311,29 @@ export default {
       } else {
         params.file.changed = 1;
       }
-      modifyFileMessage(params).then(() => {
-        this.$message({
-          message: '修改成功',
-          type: 'success'
-        })
-      }, () => {
-        this.$message({
-          message: '修改失败',
-          type: 'failed'
-        })
+      modifyFileMessage(params).then((res) => {
+        if (res.status === 200) {
+          this.$message({
+            message: '修改成功',
+            type: 'success'
+          })
+        } else {
+          () => {
+            this.$message({
+              message: '修改失败',
+              type: 'failed'
+            })
+          }
+        }
       })
     },
     //电子，查看原件
     lookOriginElect() {
-      this.$router.push({ name: "look-origin-paper", query: {fileId: this.paperFileForm.id} });
+      this.$router.push({ name: "look-origin-paper", query: {fileId: this.paperFileForm.id, type: 'paper'} });
     },
     //纸质，查看原件
     lookOriginPaper() {
-      this.$router.push({ name: "look-origin-paper", query: {fileId: this.paperFileForm.id} });
+      this.$router.push({ name: "look-origin-paper", query: {fileId: this.paperFileForm.id, type: 'paper'} });
     },
     fetchEstateAuthorizationExcelInfo() {
       const params = {
@@ -349,9 +357,13 @@ export default {
       })
     }
   },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
+  },
   mounted() {
     this.excelId = this.$route.query.id;
     this.auditState = Number(this.$route.query.auditState);
+    this.currentTitle = this.$route.query.batchNo;
     this.fetchEstateAuthorizationExcelInfo();
   },
   components: {
@@ -454,7 +466,7 @@ export default {
             .item-title {
               display: flex;
               justify-content: flex-end;
-              font-family: PingFangSC-Semibold;
+              font-weight: bold;
               font-size: 14px;
               color: #666666;
             }
@@ -609,6 +621,9 @@ export default {
             &.submit-btn {
               @include buttonStyle;
               margin-left: 40px;
+              &.is-disabled, &.is-disabled:hover {
+                @include disbaledButtonStyle
+              }
             }
           }
         }
@@ -641,19 +656,6 @@ export default {
         .el-button {
           width: 135px;
           height: 40px;
-        }
-      }
-    }
-
-    .dialog-footer {
-      .cancel-btn {
-        margin-right: 40px;
-        background: #ffffff;
-        border: 1px solid #d9d9d9;
-        span {
-          font-family: PingFangSC-Regular;
-          font-size: 16px;
-          color: #666666 !important;
         }
       }
     }

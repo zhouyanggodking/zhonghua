@@ -67,21 +67,21 @@
             <div class="grid-content column1">累计已付金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result">{{formatMoney(data.acountPayable)}}</div>
+            <div class="grid-content grid-result">{{formatMoney(data.paidAmount)}}</div>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="6">
-            <div class="grid-content column1" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">本次应付金额（大写）：</div>
+            <div class="grid-content column1" :class="[data.acountPayable!==data.unpaidAmount ? 'red-text' :'green-text']">本次应付金额（大写）：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result"  :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">{{data.paidAmount}}</div>
+            <div class="grid-content grid-result"  :class="[data.acountPayable!==data.unpaidAmount ? 'red-text' :'green-text']">{{data.acountPayableUpcase}}</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content column1" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">应付未付金额：</div>
+            <div class="grid-content column1" :class="[data.acountPayable!==data.unpaidAmount ? 'red-text' :'green-text']">应付未付金额：</div>
           </el-col>
           <el-col :span="6">
-            <div class="grid-content grid-result" :class="[data.paidAmount!==data.unpaidAmoun ? 'red-text' :'green-text']">{{formatMoney(data.unpaidAmount)}}</div>
+            <div class="grid-content grid-result" :class="[data.acountPayable!==data.unpaidAmount ? 'red-text' :'green-text']">{{formatMoney(data.unpaidAmount)}}</div>
           </el-col>
         </el-row>
       </div>
@@ -97,10 +97,10 @@
             <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
             <el-table-column label="发票号码" prop="invoiceNo" width="120">
             </el-table-column>
-            <el-table-column prop="invoiceNo" label="发票代码" width="120"></el-table-column>
+            <el-table-column prop="invoiceCode" label="发票代码" width="120"></el-table-column>
             <el-table-column prop="buyyerName" label="购买方" show-overflow-tooltip></el-table-column>
             <el-table-column prop="salerName" label="销售方" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="createTime" label="开票日期" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="invoiceTime" label="开票日期" show-overflow-tooltip></el-table-column>
             <el-table-column prop="finalPrice" label="金额" show-overflow-tooltip>
               <template slot-scope="scope">
                 {{formatMoney(scope.row.finalPrice)}}
@@ -122,7 +122,7 @@
                 <span v-else-if="scope.row.stamped === 1">是</span>
               </template>
             </el-table-column>
-            <el-table-column prop="invoiceType" label="凭证联" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="certification" label="凭证联" show-overflow-tooltip></el-table-column>
             <el-table-column prop="verification" label="发票验真" show-overflow-tooltip>
               <template slot-scope="scope">
                 <span v-if="scope.row.verification === 0">未通过</span>
@@ -145,7 +145,7 @@
       <div class="divide-line"></div>
       <div class="review-opinion">
         <div class="review-opinion_header">
-          <div class="title">付款申请</div>
+          <div class="title">审批意见</div>
         </div>
         <div class="review-opinion_content">
           <el-input type="textarea" maxlength="100" show-word-limit :rows="4" placeholder="请输入内容" v-model="data.rejectReason"></el-input>
@@ -159,7 +159,7 @@
       </div>
     </div>
     <el-dialog
-      class="dialog-common"
+      class="dialog-common confirmDialog"
       title
       :visible.sync="isDialogVisible"
       width="30%"
@@ -175,11 +175,13 @@
         <el-button
           v-if="dialogHintOperate==='驳回'"
           type="primary"
+          class="submit-btn"
           @click="rejectOpinionOperate"
         >{{dialogHintOperate}}</el-button>
         <el-button
           v-if="dialogHintOperate==='审核通过'"
           type="primary"
+          class="submit-btn"
           @click="reviewPassOpearte"
         >{{dialogHintOperate}}</el-button>
       </div>
@@ -191,9 +193,11 @@ import {checkPaymentRequestOrder, modifyInvoiceUsedprice} from "@/rest/realEstat
 import BreadCrumb from "@/components/common/BreadCrumb";
 import Pagination from "@/components/common/Pagination";
 import resourceWrapper from "@/rest/resourceWrapper";
-import {global_upload, USERID} from '@/global/global';
+import { global_upload } from '@/global/global';
 import { formatMoney } from '@/helpers/moneyHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const CHECK = 1;
 const REJECT = 0;
 const PAGESIZE = 10;
@@ -229,26 +233,31 @@ export default {
       this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, paymentOrderId: this.paymentOrderId, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo, index: index + 1}});
     },
     onFinalPriceChange(row) {
-      const params = {
-        // paramMap: {
+      if (row.usePrice <= (row.finalPrice - row.usedPrice)) {
+        const params = {
           userId: USERID,
           paymentRequestOrderId: this.paymentOrderId,
           id: row.id,
           usePrice: row.usePrice
-        // }
+        }
+        modifyInvoiceUsedprice(params)
+        .then(() => {
+          this.$message({
+            message: '修改成功',
+            type: 'success'
+          })
+        }, () => {
+          this.$message({
+            message: '修改失败',
+            type: 'failed'
+          })
+        })
+      } else {
+        this.$message({
+          type: 'warning',
+          message: '本次使用金额大于发票可用金额,请重新提交'
+        })
       }
-      modifyInvoiceUsedprice(params)
-      .then(() => {
-        this.$message({
-          message: '修改成功',
-          type: 'success'
-        })
-      }, () => {
-        this.$message({
-          message: '修改失败',
-          type: 'failed'
-        })
-      })
     },
     exportExcel(){
       window.open(`${global_upload}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
@@ -259,9 +268,16 @@ export default {
       this.dialogHintOperate = "审核通过";
     },
     reviewReject(){
-    this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否驳回";
-      this.dialogHintOperate = "驳回";
+      if (this.data.rejectReason === '' || !this.data.rejectReason) {
+        this.$message({
+          message: '请填写驳回原因',
+          type: 'warning'
+        })
+      } else {
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否驳回";
+        this.dialogHintOperate = "驳回";
+      }
     },
     rejectOpinionOperate(){
       const params = {
@@ -272,26 +288,21 @@ export default {
           rejectReason: this.data.rejectReason
         }
       };
-      if (this.data.rejectReason === '') {
-        this.$message({
-          message: '请填写驳回原因',
-          type: 'warning'
-        })
-      } else {
-        checkPaymentRequestOrder(params).then(() => {
+      checkPaymentRequestOrder(params).then((res) => {
+        if (res.data.status === 200) {
           this.$message({
             message: '驳回成功',
             type: 'success'
           });
           this.data.auditState = 0;
           this.isDialogVisible = false;
-        },() => {
+        } else {
           this.$message({
             message: '驳回失败',
             type: 'warning'
           })
-        });
-      }
+        }
+      });
     },
     reviewPassOpearte(){
       const params = {
@@ -356,6 +367,9 @@ export default {
       this.currentPage = res.pageNum;
       this.getInvoicesTableData();
     },
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted(){
     this.paymentOrderId=this.$route.query.id;
@@ -589,19 +603,6 @@ export default {
         .el-button {
           width: 135px;
           height: 40px;
-        }
-      }
-    }
-
-    .dialog-footer {
-      .cancel-btn {
-        margin-right: 40px;
-        background: #ffffff;
-        border: 1px solid #d9d9d9;
-        span {
-          font-family: PingFangSC-Regular;
-          font-size: 16px;
-          color: #666666 !important;
         }
       }
     }

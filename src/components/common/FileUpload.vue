@@ -33,6 +33,10 @@ import {calculateMd5} from '@/utils/fileUpload.js';
 import {relocateFile, fileIsExist} from '@/rest/realEstateUploadApi';
 import {global_upload} from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
+
+
+let USERID = null;
 
 export default {
   data() {
@@ -73,7 +77,7 @@ export default {
           return {
             identifier: file.size + '_' + fileName,
             type: 'zc',
-            userId: 1,
+            userId: USERID,
             businessTypeId: fileType,
             authorizationValidDate: timeStamp,
           }
@@ -155,7 +159,7 @@ export default {
       let servicePath = ''
       // 合并文件
       let obg = {
-        userId: 1,
+        userId: USERID,
         businessTypeId: this.fileType,
         authorizationValidDate: dateFormat(this.timeStamp),
         md5: this.file_md5,
@@ -188,6 +192,9 @@ export default {
         })
       })
     },
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   }
 }
 </script>

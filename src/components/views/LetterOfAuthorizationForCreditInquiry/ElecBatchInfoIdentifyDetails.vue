@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="elect-batch-container">
-      <div class="elect-batch-row">
+      <div class="elect-batch-row" v-loading="isLoading">
         <div class="elect-batch-row_item">
           <div class="elect-batch-row_item_header">
             <div class="title">Excel提取信息</div>
@@ -30,20 +30,20 @@
           </div>
           <div class="content" v-if="elecFileForm">
             <el-form label-position="right" label-width="40%" :model="elecFileForm">
-              <el-form-item label="公司章:">
-                <!-- <el-input disabled v-model="elecFileForm.companySeal"></el-input> -->
-                <el-input readonly type="textarea" resize="none" :autosize="true" v-model="elecFileForm.companySeal"></el-input>
+              <el-form-item label="公司章：">
+                <!-- <el-input readonly type="textarea" resize="none" :autosize="true" v-model="elecFileForm.companySeal"></el-input> -->
+                <p>{{elecFileForm.companySeal}}</p>
               </el-form-item>
-              <el-form-item label="人名章:">
-                <el-input disabled v-model="elecFileForm.personSeal"></el-input>
+              <el-form-item label="人名章：">
+                <p>{{elecFileForm.personSeal}}</p>
               </el-form-item>
-              <el-form-item label="签署时间:">
-                <el-input disabled v-model="elecFileForm.signTime"></el-input>
+              <el-form-item label="签署时间：">
+                <p>{{elecFileForm.signTime}}</p>
               </el-form-item>
-              <el-form-item label="是否法人签章:">
-                <div style="padding-left: 15px">{{elecFileForm.corporateStamp ? '是' : '否'}}</div>
+              <el-form-item label="是否法人签章：">
+                <p>{{elecFileForm.corporateStamp ? '是' : '否'}}</p>
               </el-form-item>
-              <el-form-item label="授权有效期:">
+              <el-form-item label="授权有效期：">
                 <el-date-picker
                   v-if="!isEleFiledFormEdit"
                   v-model="elecFileForm.authorizationValidDate"
@@ -62,7 +62,7 @@
           <div class="content no-data" v-else>暂无数据</div>
         </div>
       </div>
-      <div class="elect-batch-row">
+      <div class="elect-batch-row" v-loading="isLoading">
         <div class="elect-batch-row_item">
           <div class="elect-batch-row_item_header">
             <div class="title">智罗盘信息</div>
@@ -136,7 +136,7 @@
       </div>
     </div>
     <el-dialog
-      class="dialog-common"
+      class="dialog-common confirmDialog"
       title
       :visible.sync="isDialogVisible"
       width="30%"
@@ -153,11 +153,13 @@
         <el-button
           v-if="dialogHintOperate==='驳回'"
           type="primary"
+          class="submit-btn"
           @click="rejectOpinionOperate"
         >{{dialogHintOperate}}</el-button>
         <el-button
           v-if="dialogHintOperate==='审核通过'"
           type="primary"
+          class="submit-btn"
           @click="reviewPassOpearte"
         >{{dialogHintOperate}}</el-button>
       </div>
@@ -167,8 +169,11 @@
 <script>
 import BreadCrumb from "@/components/common/BreadCrumb";
 import {getEstateAuthorizationExcelInfo, checkAuthRecord, modifyEleFileDate, modifyPaperFile} from "@/rest/letterOfAuthorizationElecApi";
-import {USERID, PROBLEM_LIST} from "@/global/global";
+import { PROBLEM_LIST} from "@/global/global";
 import { dateFormat } from '@/helpers/dateHelper';
+import localStorageHelper from '@/helpers/localStorageHelper';
+
+let USERID = null;
 const ELEORFILE = 0;
 const CHECK = 1;
 const REJECT = 0;
@@ -176,6 +181,7 @@ const REJECT = 0;
 export default {
   data() {
     return {
+      isLoading: false,
       isEleFiledFormEdit: true,
       isPaperFiledFormEdit: true,
       questionClassificationList: PROBLEM_LIST,
@@ -204,10 +210,12 @@ export default {
       ],
       currentTitle: "20190404批次-金茂",
       breadCrumbList: [
+        "首页",
         "征信查询授权书",
         "识别结果",
         "电子版批次详情",
-        "查询清单"
+        "查询清单",
+        "详情"
       ],
       excelMsg: null,
       elecFileForm: {},
@@ -227,21 +235,13 @@ export default {
       this.dialogHintOperate = "审核通过";
     },
     previous() {
-      this.$router.go(-1);
+      this.$router.push({path: `/creditElectronicBatchInformation/electronicBatchInformationDetails?id=${this.$route.query.summaryId}&pageNum=${this.$route.query.pageNum}&batchNo=${this.$route.query.batchNo}`});
     },
     rejectOpinionOperate() {
       this.isDialogVisible = false;
       this.dialogVisible = true;
-      if (this.problemForm.problemType !== '' && this.problemForm.problemDescription !== '') {
-        this.checkOrRejectFun(REJECT, this.problemForm.problemType, this.problemForm.problemDescription);
-        this.auditState = 0;
-      } else {
-        this.$message({
-          message: '请选择问题分类并填写问题描述!',
-          type: 'warning'
-        })
-      }
-      
+      this.checkOrRejectFun(REJECT, this.problemForm.problemType, this.problemForm.problemDescription);
+      this.auditState = 0;
     },
     reviewPassOpearte() {
       this.isDialogVisible = false;
@@ -252,9 +252,18 @@ export default {
       this.auditState = 1;
     },
     reviewReject() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否驳回";
-      this.dialogHintOperate = "驳回";
+      if (this.problemForm) {
+        if (this.problemForm.problemType && this.problemForm.problemType !== '' && this.problemForm.problemDescription && this.problemForm.problemDescription !== '') {
+          this.isDialogVisible = true;
+          this.dialogHintText = "请确认是否驳回";
+          this.dialogHintOperate = "驳回";
+        } else {
+          this.$message({
+            message: '请选择问题分类并填写问题描述!',
+            type: 'warning'
+          })
+        }
+      }
     },
     checkOrRejectFun(state, problemType, problemDescription) {
       const msg = state === 1 ? '审核' : '驳回';
@@ -270,18 +279,20 @@ export default {
         },
         userId: USERID
       };
-      checkAuthRecord(params).then(() => {
-        this.$message({
-          message: `${msg}完成`,
-          type: 'success'
-        });
-        this.dialogVisible = false;
-      }, (err) => {
-        this.$message({
-          // message: `${msg}失败`,
-          message: err.message,
-          type: 'warning'
-        })
+      checkAuthRecord(params).then((res) => {
+        if (res.data.status === 200) {
+          this.$message({
+            message: `${msg}完成`,
+            type: 'success'
+          });
+          this.dialogVisible = false;
+        } else {
+          this.$message({
+            // message: `${msg}失败`,
+            message: res.data.message,
+            type: 'warning'
+          });
+        }
       })
     },
     //智罗盘 查看企业详细信息
@@ -340,13 +351,14 @@ export default {
       })
     },
     lookOriginElect() {
-      this.$router.push({ name: "look-origin", query: {fileId: this.elecFileForm.id} });
+      this.$router.push({ name: "look-origin", query: {fileId: this.elecFileForm.id, type: 'elec'} });
     },
     //查看原件
     lookOriginPaper() {
-      this.$router.push({ name: "look-origin", query: {fileId: this.paperFileForm.id} });
+      this.$router.push({ name: "look-origin", query: {fileId: this.paperFileForm.id, type: 'elec'} });
     },
     fetchEstateAuthorizationExcelInfo() {
+      this.isLoading = true;
       const params = {
         excelId: this.excelId,
         userId: USERID,
@@ -365,8 +377,12 @@ export default {
           this.problemForm.problemType = '';
           this.problemForm.problemDescription = '';
         }
+        this.isLoading = false;
       })
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.excelId = this.$route.query.id;
@@ -484,10 +500,15 @@ export default {
                   font-weight: bold;
                 }
                 .el-form-item__content {
+                  p {
+                    padding: 0;
+                    margin: 0;
+                  }
                   line-height: 30px;
                   .el-input {
                     height: 30px;
                     .el-input__inner {
+                      padding: 0;
                       height: 30px;
                     }
                   &.is-disabled {
@@ -507,6 +528,11 @@ export default {
                     }
                   }
                   .el-date-editor {
+                    &.el-date-editor--date {
+                      .el-input__inner {
+                        padding-left: 30px;
+                      }
+                    }
                     .el-input__prefix {
                       .el-input__icon {
                         line-height: 30px;
@@ -543,7 +569,7 @@ export default {
             .item-title {
               display: flex;
               justify-content: flex-end;
-              font-family: PingFangSC-Semibold;
+              font-weight: bold;
               font-size: 14px;
               color: #666666;
             }
@@ -626,19 +652,6 @@ export default {
         .el-button {
           width: 135px;
           height: 40px;
-        }
-      }
-    }
-
-    .dialog-footer {
-      .cancel-btn {
-        margin-right: 40px;
-        background: #ffffff;
-        border: 1px solid #d9d9d9;
-        span {
-          font-family: PingFangSC-Regular;
-          font-size: 16px;
-          color: #666666 !important;
         }
       }
     }

@@ -140,8 +140,9 @@ import BreadCrumb from '@/components/common/BreadCrumb';
 import FileUpload from '@/components/common/FileUpload';
 import Pagination from "@/components/common/Pagination";
 import {getOcrExtractTemplateFields, updateOcrExtractTemplateFields, deleteTemplateField, getUploadHistory, startOcrJob} from '@/rest/realEstateUploadApi';
-import {USERID} from '@/global/global';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const PAGE_SIZE = 10;
 const BUSINESS_TYPEID = 1;
 
@@ -166,7 +167,7 @@ export default {
         editName: '',
         businessTypeId: 1,
         standardType: 1,
-        createUserId: 1,
+        createUserId: USERID,
         status: 1
       },
       filedList: [],
@@ -238,7 +239,7 @@ export default {
           editName: '',
           businessTypeId: 1,
           standardType: 1,
-          createUserId: 1,
+          createUserId: USERID,
           status: 1
         }
       });
@@ -259,7 +260,7 @@ export default {
         pageSize: this.pageSize,
         pageNum: this.currentPage,
         type: 1,
-        userId: 1
+        userId: USERID
       }
       getUploadHistory(params)
       .then((res) => {
@@ -312,20 +313,7 @@ export default {
         userId: USERID,
         originalFileId: this.originalFileId,
         businessTypeId: BUSINESS_TYPEID,
-        ocrExtractTemplateFieldsDtos: this.filedList,
-        // ocrExtractTemplateFieldsDtos: [
-        //   {
-        //     "businessTypeId": 1,
-        //     "createTime": "2019-05-30T06:56:52.690Z",
-        //     "createUserId": 1,
-        //     "editName": "付款主题2",
-        //     "standardName": "string",
-        //     "standardType": 1,
-        //     "status": 0,
-        //     "id":24,
-        //     "updateTime": "2019-05-30T06:56:52.690Z"
-        //   }
-        // ]
+        ocrExtractTemplateFieldsDtos: this.filedList
       };
       // console.log(params);
       startOcrJob(params).then(res => {
@@ -349,6 +337,9 @@ export default {
         })
       })
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.fetchTemplateFileds();

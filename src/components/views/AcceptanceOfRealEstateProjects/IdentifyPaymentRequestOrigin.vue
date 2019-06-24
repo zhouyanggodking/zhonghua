@@ -10,14 +10,14 @@
         <div class="left">
           <div class="title">付款申请原件</div>
           <div class="result" id="result">
-            <zoom-image v-if="imagesSrc" :imagePosition="singleImagePosition" style="height:360px;" :imgSrc="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image>
+            <zoom-image v-if="imagesSrc" :imagePosition="singleImagePosition" style="height:100%;" :imgSrc="imagesSrc" :imageRotate="rotateAngle" ref="img"></zoom-image>
           </div>
         </div>
         <div class="right">
           <div class="container">
             <div class="title">识别结果</div>
             <div class="result">
-              <el-form ref="paymentOrderForm" :rules="rules" label-position="right" label-width="40%" :model="paymentOrderForm">
+              <el-form ref="paymentOrderForm" :rules="rules" label-position="right" label-width="160px" :model="paymentOrderForm">
                 <el-form-item label="合同名称:" @click.native="filedFocus('合同名称')">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractName"></el-input>
                 </el-form-item>
@@ -44,15 +44,15 @@
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.receiver"></el-input>
                 </el-form-item>
                 <el-form-item label="本次应付金额(大写):" @click.native="filedFocus('本次应付金额(大写)')" prop="acountPayable">
-                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.acountPayable"></el-input>
+                  <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.acountPayableUpcase"></el-input>
                 </el-form-item>
-                <el-form-item label="合同动态金额(¥):" @click.native="filedFocus('合同动态金额(¥)')" prop="contractDynamicAmount">
+                <el-form-item label="合同动态金额(¥):" @click.native="filedFocus('合同动态金额')" prop="contractDynamicAmount">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.contractDynamicAmount"></el-input>
                 </el-form-item>
-                <el-form-item label="累计已付金额(¥):" @click.native="filedFocus('累计已付金额(¥)')" prop="paidAmount">
+                <el-form-item label="累计已付金额(¥):" @click.native="filedFocus('累计已付金额')" prop="paidAmount">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.paidAmount"></el-input>
                 </el-form-item>
-                <el-form-item label="应付未付金额(¥):" @click.native="filedFocus('应付未付金额(¥)')" prop="unpaidAmount">
+                <el-form-item label="应付未付金额(¥):" @click.native="filedFocus('应付未付金额')" prop="unpaidAmount">
                   <el-input :disabled="isFiledFormEdit" v-model="paymentOrderForm.unpaidAmount"></el-input>
                 </el-form-item>
               </el-form>
@@ -74,7 +74,9 @@ import BreadCrumb from "@/components/common/BreadCrumb";
 import resourceWrapper from "@/rest/resourceWrapper";
 import {dateFormat} from '@/helpers/dateHelper';
 import ZoomImage from '@/components/common/ZoomImage';
-// import {global_} from '@/global/global';
+import localStorageHelper from '@/helpers/localStorageHelper';
+
+let USERID = null;
 
 export default {
   data() {
@@ -97,21 +99,22 @@ export default {
       rules: {
         acountPayable: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+          { pattern: /^(?=\d+.?\d+$|0)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
         ],
         contractDynamicAmount: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+          { pattern: /^(?=\d+.?\d+$|0)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
         ],
         paidAmount: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+          { pattern: /^(?=\d+.?\d+$|0)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
         ],
         unpaidAmount: [
           { required: true, message: '请输入金额', trigger: 'blur' },
-          { pattern: /^(?=\d+.?\d+$)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
+          { pattern: /^(?=\d+.?\d+$|0)[\d.]{0,20}$/, message: '金额为20位以内数字', trigger: 'blur' }
         ]
       }
+      // /(^(?=\d+.?\d+$)[\d.] | 0){0,20}$/
     };
   },
   methods: {
@@ -139,7 +142,7 @@ export default {
         };
         const params = {
           order: mapData,
-          userId: 1
+          userId: USERID
         }
         resourceWrapper.modifyPaymentOrder(params).then((res) => {
           if (res.status === 200) {
@@ -159,13 +162,13 @@ export default {
     },
     getPaymentDetailData(){
       const params = {
-        userId: 1,
+        userId: USERID,
         id: this.paymentOrderId
       }
       resourceWrapper.getPaymentOrderDetail(params).then(res => {
           this.paymentOrderForm=res.data.order;
           this.imagesSrc = res.data.order.outputLocation;
-          this.positionInfo = JSON.parse(res.data.infos) ? JSON.parse(res.data.infos).position_info : {};
+          this.positionInfo = JSON.parse(res.data.infos) ? JSON.parse(res.data.infos).position : {};
           this.rotateAngle = JSON.parse(res.data.infos) ? String(JSON.parse(res.data.infos).rotation_angle) : '';
           this.currentTitle = `${res.data.order.payer}-${res.data.order.contractNo}-${res.data.order.paymentTitle}`;
       })
@@ -173,24 +176,28 @@ export default {
     filedFocus(item) {
       const location_info = this.positionInfo[item];
       const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
-          'imgUrl': this.imagesSrc,
-          'x': location_info.left,
-          'y': location_info.top,
-          'width': location_info.width,
-          'height': location_info.height,
-          borderColor: 'red',
-        }] : [{
-          'x': location_info.left,
-          'y': location_info.top,
-          'width': location_info.width,
-          'height': location_info.height,
-          borderColor: 'red',
-        }]) : [];
-        let imageUrl = location.length ? location[0].imgUrl : '';
-        if (imageUrl && imageUrl != 'undefined') {
-          this.singleImagePosition  = location;
-        }
+        'imgUrl': this.imagesSrc,
+        'x': location_info.left,
+        'y': location_info.top,
+        'width': location_info.width,
+        'height': location_info.height,
+        borderColor: 'red',
+      }] : [{
+        'x': location_info.left,
+        'y': location_info.top,
+        'width': location_info.width,
+        'height': location_info.height,
+        borderColor: 'red',
+      }]) : [];
+      this.singleImagePosition  = location;
+        // let imageUrl = location.length ? location[0].imgUrl : '';
+        // if (imageUrl && imageUrl != 'undefined') {
+        //   this.singleImagePosition  = location;
+        // }
     }
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
     this.paymentOrderId=this.$route.query.id;

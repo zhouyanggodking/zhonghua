@@ -41,7 +41,7 @@
         >
           <el-table-column fixed type="selection" width="30"></el-table-column>
           <el-table-column fixed type="index" label="序号" width="50"></el-table-column>
-          <el-table-column prop="applyDate" label="申请日期" width="120"></el-table-column>
+          <el-table-column prop="applyDate" label="包名称" width="120"></el-table-column>
           <el-table-column prop="submitOnApply" label="申请日提交" width="120"></el-table-column>
           <el-table-column prop="submitNotOnApply" label="非申请日提交" show-overflow-tooltip></el-table-column>
           <el-table-column prop="uploadFileNum" label="上传文件数量" show-overflow-tooltip></el-table-column>
@@ -76,9 +76,11 @@ import {getEstateElecAuthorizationSummaryInfos} from "@/rest/letterOfAuthorizati
 import BreadCrumb from "@/components/common/BreadCrumb";
 import DateRange from "@/components/common/DateRange";
 import Pagination from "@/components/common/Pagination";
-import {global_upload} from "@/global/global";
+import { global_upload} from "@/global/global";
 import {formatQuery} from '@/helpers/formatGetParams';
+import localStorageHelper from '@/helpers/localStorageHelper';
 
+let USERID = null;
 const PAGE_SIZE = 10;
 
 export default {
@@ -147,7 +149,7 @@ export default {
       if (this.multipleSelection.length) {
         const params = {
           ids: this.multipleSelection,
-          userId: 1,
+          userId: USERID,
           elecOrFile: this.elecOrFile
         };
         window.open(`${global_upload}/auth/estateAuthorizationSummaryController/downLoadExcelsBySummaryId
@@ -160,14 +162,14 @@ ${formatQuery(params)}`,'_parent');
       }
     },
     tableItemDetails(row) {
-      this.$router.push({ name: "paper-batch-information-details", query: { id: row.id } });
+      this.$router.push({ name: "paper-batch-information-details", query: { id: row.id, batchNo: row.applyDate } });
     },
     exportExcel() {
       const params = {
         startTime: this.startTime,
         endTime: this.endTime,
         state: this.state,
-        userId: 1,
+        userId: USERID,
         elecOrFile: this.elecOrFile
       }
       window.open(`${global_upload}/auth/estateAuthorizationSummaryController/exportToExcel
@@ -188,7 +190,7 @@ ${formatQuery(params)}`,'_parent');
         startTime: this.startTime,
         endTime: this.endTime,
         state: this.state,
-        userId: 1,
+        userId: USERID,
         elecOrFile: this.elecOrFile,
         pageSize: this.pageSize,
         pageNum: this.currentPage
@@ -203,6 +205,9 @@ ${formatQuery(params)}`,'_parent');
   },
   mounted() {
     this.fetchTableData();
+  },
+  beforeCreate() {
+    USERID = Number(localStorageHelper.getItem('USERID'));
   },
   components: {
     BreadCrumb,
