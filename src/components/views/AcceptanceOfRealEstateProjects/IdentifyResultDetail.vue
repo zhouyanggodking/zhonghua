@@ -13,7 +13,7 @@
         <div class="title">付款申请</div>
         <div class="look-origin-btn" @click="lookPayRequestOrigin">查看原件</div>
       </div>
-      <div class="content-table">
+      <div class="content-table" v-loading="paymentLoading">
         <el-row>
           <el-col :span="6">
             <div class="grid-content column1">付款主题：</div>
@@ -90,7 +90,6 @@
         <div class="invoice-table_header">
           <div class="title">发票信息</div>
           <div class="invoice-details">本次使用金额：{{data.invoiceTotalPrice}}</div>
-          <!-- <div class="invoice-num red-text">发票数量：</div> -->
         </div>
         <div class="invoice-table_content">
           <el-table v-loading="isLoading" ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
@@ -98,8 +97,16 @@
             <el-table-column label="发票号码" prop="invoiceNo" width="120">
             </el-table-column>
             <el-table-column prop="invoiceCode" label="发票代码" width="120"></el-table-column>
-            <el-table-column prop="buyyerName" label="购买方" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="salerName" label="销售方" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="buyyerName" label="购买方" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span :class="{'not-match': scope.row.buyyerName !== data.payer}">{{scope.row.buyyerName}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="salerName" label="销售方" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span :class="{'not-match': scope.row.salerName !== data.receiver}">{{scope.row.salerName}}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="invoiceTime" label="开票日期" show-overflow-tooltip></el-table-column>
             <el-table-column prop="finalPrice" label="金额" show-overflow-tooltip>
               <template slot-scope="scope">
@@ -113,7 +120,7 @@
             </el-table-column>
             <el-table-column prop="usePrice" label="本次使用金额" show-overflow-tooltip width="120">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.usePrice" @blur="onFinalPriceChange(scope.row)"></el-input>
+                <el-input :disabled="scope.row.verification === 0" v-model="scope.row.usePrice" @blur="onFinalPriceChange(scope.row)"></el-input>
               </template>
             </el-table-column>
             <el-table-column prop="stamped" label="是否盖章" show-overflow-tooltip>
@@ -221,8 +228,9 @@ export default {
       dialogHintOperate: "驳回",
       rejectContent:'',
       breadCrumbList: ["首页", "资产识别比对", "识别结果"],
-      currentTitle: "",
-      paymentOrderId: ''
+      currentTitle: '',
+      paymentOrderId: '',
+      paymentLoading: false
     };
   },
   methods: {
@@ -233,6 +241,7 @@ export default {
       this.$router.push({ name: "identify-invoice-origin", query: { id: row.id, paymentOrderId: this.paymentOrderId, title: this.data.paymentTitle, payer: this.data.payer, contractNo: this.data.contractNo, index: index + 1}});
     },
     onFinalPriceChange(row) {
+      row.usePrice = row.usePrice !== '' ? row.usePrice : 0;
       if (row.usePrice <= (row.finalPrice - row.usedPrice)) {
         const params = {
           userId: USERID,
@@ -241,16 +250,16 @@ export default {
           usePrice: row.usePrice
         }
         modifyInvoiceUsedprice(params)
-        .then(() => {
-          this.$message({
-            message: '修改成功',
-            type: 'success'
-          })
-        }, () => {
-          this.$message({
-            message: '修改失败',
-            type: 'failed'
-          })
+        .then((res) => {
+          if (res.status === 200) {
+            this.$message({
+              message: '修改成功',
+              type: 'success'
+            });
+            this.getPaymentDetailData();
+          } else {
+            this.$message.error('修改失败');
+          }
         })
       } else {
         this.$message({
@@ -260,28 +269,36 @@ export default {
       }
     },
     exportExcel(){
-      window.open(`${global_upload}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=1&id=1`,'_parent');
+      window.open(`${global_upload}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrderToExcel?userId=${USERID}&id=${this.paymentOrderId}`,'_parent');
     },
     reviewPass(){
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否审核通过";
-      this.dialogHintOperate = "审核通过";
+      if (USERID === this.data.createUser) {
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否审核通过";
+        this.dialogHintOperate = "审核通过";
+      } else {
+        this.$message.error('没有审核权限!');
+      }
     },
     reviewReject(){
-      if (this.data.rejectReason === '' || !this.data.rejectReason) {
-        this.$message({
-          message: '请填写驳回原因',
-          type: 'warning'
-        })
+      if (USERID === this.data.createUser) {
+        if (this.data.rejectReason === '' || !this.data.rejectReason) {
+          this.$message({
+            message: '请填写驳回原因',
+            type: 'warning'
+          })
+        } else {
+          this.isDialogVisible = true;
+          this.dialogHintText = "请确认是否驳回";
+          this.dialogHintOperate = "驳回";
+        }
       } else {
-        this.isDialogVisible = true;
-        this.dialogHintText = "请确认是否驳回";
-        this.dialogHintOperate = "驳回";
+        this.$message.error('没有驳回权限!');
       }
     },
     rejectOpinionOperate(){
       const params = {
-        userId: 1,
+        userId: USERID,
         order: {
           auditState: REJECT,
           id: this.data.id,
@@ -306,7 +323,7 @@ export default {
     },
     reviewPassOpearte(){
       const params = {
-        userId: 1,
+        userId: USERID,
         order: {
           auditState: CHECK,
           id: this.data.id,
@@ -338,13 +355,20 @@ export default {
       this.$router.push({ name: "identify-payment-request-origin", query: { id: this.paymentOrderId }});
     },
     getPaymentDetailData(){
+      this.data = [];
+      this.paymentLoading = true;
       const params = {
-        userId: 1,
+        userId: USERID,
         id: this.paymentOrderId
       }
       resourceWrapper.getPaymentOrderDetail(params).then(res => {
+        if (res.status === 200) {
           this.data=res.data.order;
           this.currentTitle = `${res.data.order.payer}-${res.data.order.contractNo}-${res.data.order.paymentTitle}`;
+          this.paymentLoading = false;
+        } else {
+          this.$message.error('获取付款申请单信息错误!');
+        }
       })
     },
     getInvoicesTableData() {
@@ -354,12 +378,16 @@ export default {
         pageSize: this.pageSize,
         pageNum: this.currentPage,
         paymentRequestOrderId: this.paymentOrderId,
-        userId: 1
+        userId: USERID
       }
       resourceWrapper.getInvoicesByPaymentOrder(params).then(res => {
-        this.isLoading = false;
-        this.tableData = res.data.data;
-        this.totalCount = res.data.total;
+        if (res.status === 200) {
+          this.tableData = res.data.data;
+          this.totalCount = res.data.total;
+          this.isLoading = false;
+        } else {
+          this.$message.error('获取发票信息错误!');
+        }
       })
     },
     onPageNumberChange(res) {
@@ -387,6 +415,9 @@ export default {
 @import '@/scss/mixin.scss';
 
 .identify-result-detail-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   .identify-page-title {
     position: relative;
     .export-excel {
@@ -406,9 +437,6 @@ export default {
   .top-box {
     min-height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px;
-    }
   }
   .identify-result-detail-page-content {
     margin-top: 30px;
@@ -471,43 +499,8 @@ export default {
         .invoices-pager {
           margin-top: 25px;
         }
-        /deep/ .el-table {
-          .el-table__header-wrapper {
-            .el-table__header {
-              tr {
-                border-radius: 4px 4px 0px 0px;
-                th {
-                  background: #fafafa;
-                  border-color: rgba(0, 0, 0, 0.09);
-                  .cell {
-                    font-family: PingFangSC-Medium;
-                    font-size: 14px;
-                    color: rgba(0, 0, 0, 0.85);
-                    line-height: 22px;
-                  }
-                }
-                // .el-table_1_column_1{
-                //   .cell{
-                //     display: none;
-                //   }
-                // }
-                // .el-table_1_column_2{
-                //   position: relative;
-
-                // }
-              }
-            }
-          }
-          .el-table__body-wrapper {
-            .el-table__body {
-              .el-table__row {
-                .el-table_1_column_1 {
-                }
-                .el-table_1_column_2 {
-                }
-              }
-            }
-          }
+        .not-match {
+          color: #d0021b;
         }
         /deep/ .table-btn {
           width: 28px;
@@ -535,6 +528,7 @@ export default {
         background: #fafafa;
         .el-textarea {
           /deep/ .el-textarea__inner {
+            font-family: inherit;
             border-radius: 0;
             font-family: PingFangSC-Regular;
             font-size: 14px;

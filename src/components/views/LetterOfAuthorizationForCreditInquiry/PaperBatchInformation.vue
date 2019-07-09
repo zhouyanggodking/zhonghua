@@ -47,8 +47,9 @@
           <el-table-column prop="uploadFileNum" label="上传文件数量" show-overflow-tooltip></el-table-column>
           <el-table-column prop="state" label="状态" show-overflow-tooltip>
             <template slot-scope="scope">
-              <span v-if="scope.row.state === '0'">驳回</span>
-              <span v-else-if="scope.row.state === '1'" style="color: #417505;">已审核</span>
+              <span v-if="scope.row.state === '3'" style="color: #F5A623;">审核中</span>
+              <span v-else-if="scope.row.state === '0'">未识别</span>
+              <span v-else-if="scope.row.state === '1'" style="color: #417505;">审核完成</span>
               <span v-else-if="scope.row.state === '2'" style="color: #F5A623;">未审核</span>
             </template>
           </el-table-column>
@@ -107,11 +108,15 @@ export default {
           id: ''
         },
         {
-          name: '驳回',
+          name: '未识别',
           id: 0
         },
         {
-          name: '已审核',
+          name: '审核中',
+          id: 3
+        },
+        {
+          name: '审核完成',
           id: 1
         },
         {
@@ -182,6 +187,7 @@ ${formatQuery(params)}`,'_parent');
     onPageNumberChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
+      this.allChecked = false;
       this.fetchTableData();
     },
     fetchTableData() {
@@ -221,12 +227,12 @@ ${formatQuery(params)}`,'_parent');
 @import '@/scss/mixin.scss';
 
 .identify-page {
+  display: -webkit-box;
+  flex: 1;
+  flex-direction: column;
   .top-box {
     height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
   .identify-page-title {
     background-color: #ffffff;
@@ -311,6 +317,7 @@ ${formatQuery(params)}`,'_parent');
     }
   }
   .identify-page-table {
+    flex: 1;
     margin-top: 20px;
     padding: 20px 40px;
     background: #ffffff;
@@ -324,53 +331,6 @@ ${formatQuery(params)}`,'_parent');
     }
     .identify-page-table_content {
       margin-top: 20px;
-      /deep/ .el-table {
-        .el-table__fixed-header-wrapper {
-          thead {
-            th,
-            tr {
-              background: #fafafa !important;
-            }
-            th {
-              border-color: rgba(0, 0, 0, 0.09);
-              .cell {
-                font-family: PingFangSC-Medium;
-                font-size: 14px;
-                color: rgba(0, 0, 0, 0.85);
-                line-height: 22px;
-              }
-            }
-            th.is-leaf {
-              border-bottom: 1px solid rgba(0, 0, 0, 0.09);
-              .el-checkbox__input {
-                display: none;
-              }
-            }
-          }
-        }
-        .el-table__fixed-body-wrapper {
-          .el-table__body {
-          }
-        }
-        .el-table__header-wrapper {
-          .el-table__header {
-            tr {
-              border-radius: 4px 4px 0px 0px;
-              background: #fafafa !important;
-              th {
-                background: #fafafa !important;
-                border-color: rgba(0, 0, 0, 0.09);
-                .cell {
-                  font-family: PingFangSC-Medium;
-                  font-size: 14px;
-                  color: rgba(0, 0, 0, 0.85);
-                  line-height: 22px;
-                }
-              }
-            }
-          }
-        }
-      }
       /deep/ .table-btn {
         width: 28px;
         height: 20px;
@@ -431,7 +391,6 @@ ${formatQuery(params)}`,'_parent');
         span {
           font-family: PingFangSC-Regular;
           font-size: 16px;
-          color: #666666 !important;
         }
       }
     }
@@ -494,7 +453,6 @@ ${formatQuery(params)}`,'_parent');
       span {
         font-family: PingFangSC-Regular;
         font-size: 16px;
-        color: #666666 !important;
       }
     }
   }

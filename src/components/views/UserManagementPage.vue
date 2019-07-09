@@ -63,10 +63,10 @@
     <el-dialog class="dialog-form user-dialog" :title="dialogTitle" :visible.sync="isDialogVisible" :before-close="cancelEditFileds">
       <el-form :model="addUserform" :rules="rules" ref="addUserform">
         <el-form-item label="姓名" :label-width="formLabelWidth" prop="username">
-          <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入标准字段(必填)" v-model="addUserform.username" autocomplete="off"></el-input>
+          <el-input :disabled="this.dialogTitle === '用户变更'" :class="{'update-account': this.dialogTitle === '用户变更'}" placeholder="请输入姓名(必填)" v-model="addUserform.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="手机号" :label-width="formLabelWidth" prop="telephone">
-          <el-input placeholder="请输入提取字段(必填)" v-model="addUserform.telephone" autocomplete="off"></el-input>
+          <el-input placeholder="请输入手机号(必填)" v-model="addUserform.telephone" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="部门" :label-width="formLabelWidth" prop="department">
           <el-select v-model="addUserform.department" placeholder="请选择">
@@ -134,10 +134,9 @@ export default {
         { id: 4, authorityName: '征信查询' },
       ],
       departmentList: [
-        { id: '', departmentName: '全部' },
-        { id: 1, departmentName: '开发部' },
-        { id: 2, departmentName: '测试部' },
-        { id: 3, departmentName: '销售部' }
+        { id: 1, departmentName: '全部' },
+        { id: 2, departmentName: '财务公司信贷部' },
+        { id: 3, departmentName: '其他' }
       ],
       isDialogVisible: false,
       confirmDialogVisiable: false,
@@ -158,7 +157,8 @@ export default {
       },
       rules: {
         username: [
-          { required: true, message: '请输入姓名(必填)', trigger: 'blur' }
+          { required: true, message: '请输入姓名(必填)', trigger: 'blur' },
+          { min: 1, max: 10, message: '请输入10位以内字符', trigger: 'blur' }
         ],
         telephone: [
           { required: true, message: '请输入手机号(必填)', trigger: 'blur' },
@@ -347,6 +347,9 @@ export default {
 @import '@/scss/mixin.scss';
 
 .usermanagement-page {
+  display: -webkit-box;
+  flex: 1;
+  flex-direction: column;
   .usermanagement-page-search {
     background: #fff;
     padding-bottom: 20px;
@@ -391,6 +394,7 @@ export default {
     }
   }
   .usermanagement-page-table {
+    flex: 1;
     margin-top: 20px;
     padding: 30px;
     background: #ffffff;
@@ -404,53 +408,6 @@ export default {
     }
     .usermanagement-page-table_content {
       margin-top: 20px;
-      /deep/ .el-table {
-        .el-table__fixed-header-wrapper {
-          thead {
-            th,
-            tr {
-              background: #fafafa !important;
-            }
-            th {
-              border-color: rgba(48, 224, 142, 0.09);
-              .cell {
-                font-family: PingFangSC-Medium;
-                font-size: 14px;
-                color: rgba(0, 0, 0, 0.85);
-                line-height: 22px;
-              }
-            }
-            th.is-leaf {
-              border-bottom: 1px solid rgba(0, 0, 0, 0.09);
-            }
-          }
-        }
-        .el-table__fixed-right {
-          th {
-            text-align: center;
-          }
-        }
-        .el-table__header-wrapper {
-          .el-table__header {
-            tr {
-              border-radius: 4px 4px 0px 0px;
-              background: #fafafa !important;
-              th {
-                background: #fafafa !important;
-                border-color: rgba(0, 0, 0, 0.09);
-                text-align: center;
-                .cell {
-                  font-family: PingFangSC-Medium;
-                  font-size: 14px;
-                  color: rgba(0, 0, 0, 0.85);
-                  line-height: 22px;
-                }
-              }
-            }
-          }
-        }
-        
-      }
       /deep/ .option-btn {
         width: 28px;
         height: 20px;

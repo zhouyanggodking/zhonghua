@@ -7,7 +7,7 @@
       <div class="count-box payment-box">
         <div class="icon payment-icon"></div>
         <div class="type">付款申请</div>
-        <div class="file-count">已上传资料{{paymentFilesCount.fileCountTotal || 0}}份</div>
+        <div class="file-count">已上传资料{{ paymentFilesCount ? (paymentFilesCount.fileCountTotal || 0) : 0}}份</div>
         <div class="btn-group">
           <router-link to="/realEstateIdentifyResult">
             <el-button class="download-btn">去下载</el-button>
@@ -20,7 +20,7 @@
       <div class="count-box ele-file-box">
         <div class="icon ele-file-icon"></div>
         <div class="type">电子版征信授权书</div>
-        <div class="file-count">已上传资料{{eleFilesCount.fileCountTotal || 0}}份</div>
+        <div class="file-count">已上传资料{{ eleFilesCount ? (eleFilesCount.fileCountTotal || 0) : 0}}份</div>
         <div class="btn-group">
           <router-link to="/creditElectronicBatchInformation">
             <el-button class="download-btn">去下载</el-button>
@@ -33,7 +33,7 @@
       <div class="count-box paper-file-box">
         <div class="icon paper-file-icon"></div>
         <div class="type">纸质版征信授权书</div>
-        <div class="file-count">已上传资料{{paperFilesCount.fileCountTotal || 0}}份</div>
+        <div class="file-count">已上传资料{{ paperFilesCount ? (paperFilesCount.fileCountTotal || 0) : 0}}份</div>
         <div class="btn-group">
           <router-link to="/creditPaperBatchInformation">
             <el-button class="download-btn">去下载</el-button>
@@ -125,6 +125,9 @@ p {
   margin: 0;
 }
 .index-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   .index-logo {
     height: 110px;
     line-height: 110px;

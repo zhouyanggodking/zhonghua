@@ -2,7 +2,7 @@
   <div class="elec-batch-info-indentify-page-details">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="`${batchNo}批次`"></bread-crumb>
+        <bread-crumb :data="breadCrumbList" :currentTitle="`${batchNo}批次-${(excelMsg && excelMsg.companyName !== null) ? excelMsg.companyName : ''}`"></bread-crumb>
       </div>
     </div>
     <div class="elect-batch-container">
@@ -31,7 +31,6 @@
           <div class="content" v-if="elecFileForm">
             <el-form label-position="right" label-width="40%" :model="elecFileForm">
               <el-form-item label="公司章：">
-                <!-- <el-input readonly type="textarea" resize="none" :autosize="true" v-model="elecFileForm.companySeal"></el-input> -->
                 <p>{{elecFileForm.companySeal}}</p>
               </el-form-item>
               <el-form-item label="人名章：">
@@ -51,11 +50,11 @@
                   value-format="yyyy-MM-dd"
                   placeholder="选择日期">
                 </el-date-picker>
-                <el-input disabled v-else v-model="elecFileForm.authorizationValidDate"></el-input>
+                <el-input disabled v-else :value="elecFileForm.authorizationValidDate"></el-input>
               </el-form-item>
             </el-form>
             <div class="btn-group">
-              <el-button v-if="isEleFiledFormEdit" class="modify-btn" @click="eleModifyFile">修改</el-button>
+              <el-button v-if="isEleFiledFormEdit" :disabled="isExpired" class="modify-btn" @click="eleModifyFile">修改</el-button>
               <el-button v-else class="modify-btn" @click="eleSaveFile">保存</el-button>
             </div>
           </div>
@@ -102,7 +101,7 @@
               </el-form-item>
             </el-form>
             <div class="btn-group">
-              <el-button v-if="isPaperFiledFormEdit" class="modify-btn" @click="paperModifyFile">修改</el-button>
+              <el-button v-if="isPaperFiledFormEdit" :disabled="isExpired" class="modify-btn" @click="paperModifyFile">修改</el-button>
               <el-button v-else class="modify-btn" @click="paperSaveFile">保存</el-button>
             </div>
           </div>
@@ -129,7 +128,7 @@
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button class="submit-btn" :disabled="auditState === 1 || elecFileForm === null" @click="reviewPass">审核通过</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 1 || elecFileForm === null || isExpired" @click="reviewPass">审核通过</el-button>
             <el-button class="submit-btn" :disabled="auditState === 0 || elecFileForm === null" @click="reviewReject">驳回</el-button>
           </div>
         </div>
@@ -225,14 +224,20 @@ export default {
         problemType: null,
         problemDescription: ''
       },
-      batchNo: ''
+      batchNo: '',
+      timeNowStamp: 0,
+      isExpired: false,
     };
   },
   methods: {
     reviewPass() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否审核通过";
-      this.dialogHintOperate = "审核通过";
+      if (USERID === this.elecFileForm.createUser) {
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否审核通过";
+        this.dialogHintOperate = "审核通过";
+      } else {
+        this.$message.error('没有审核权限!');
+      }
     },
     previous() {
       this.$router.push({path: `/creditElectronicBatchInformation/electronicBatchInformationDetails?id=${this.$route.query.summaryId}&pageNum=${this.$route.query.pageNum}&batchNo=${this.$route.query.batchNo}`});
@@ -252,17 +257,21 @@ export default {
       this.auditState = 1;
     },
     reviewReject() {
-      if (this.problemForm) {
-        if (this.problemForm.problemType && this.problemForm.problemType !== '' && this.problemForm.problemDescription && this.problemForm.problemDescription !== '') {
-          this.isDialogVisible = true;
-          this.dialogHintText = "请确认是否驳回";
-          this.dialogHintOperate = "驳回";
-        } else {
-          this.$message({
-            message: '请选择问题分类并填写问题描述!',
-            type: 'warning'
-          })
+      if (USERID === this.elecFileForm.createUser) {
+        if (this.problemForm) {
+          if (this.problemForm.problemType && this.problemForm.problemType !== '' && this.problemForm.problemDescription && this.problemForm.problemDescription !== '') {
+            this.isDialogVisible = true;
+            this.dialogHintText = "请确认是否驳回";
+            this.dialogHintOperate = "驳回";
+          } else {
+            this.$message({
+              message: '请选择问题分类并填写问题描述!',
+              type: 'warning'
+            })
+          }
         }
+      } else {
+        this.$message.error('没有驳回权限!');
       }
     },
     checkOrRejectFun(state, problemType, problemDescription) {
@@ -301,7 +310,11 @@ export default {
     },
     // 电子识别
     eleModifyFile() {
-      this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
+      if (USERID === this.elecFileForm.createUser) {
+        this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
+      } else {
+        this.$message.error('没有修改权限!');
+      }
     },
     eleSaveFile() {
       this.isEleFiledFormEdit = !this.isEleFiledFormEdit;
@@ -312,21 +325,24 @@ export default {
         },
         userId: USERID
       }
-      modifyEleFileDate(params).then(() => {
-        this.$message({
-          message: '修改成功',
-          type: 'success'
-        })
-      }, () => {
-        this.$message({
-          message: '修改失败',
-          type: 'failed'
-        })
+      modifyEleFileDate(params).then((res) => {
+        if (res.data.status === 200) {
+          this.$message({
+            message: '电子文件识别结果修改成功',
+            type: 'success'
+          })
+        } else {
+          this.$message.error('电子文件识别结果修改失败');
+        }
       })
     },
     // 纸质信息匹配
     paperModifyFile() {
-      this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
+      if (USERID === this.elecFileForm.createUser) {
+        this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
+      } else {
+        this.$message.error('没有修改权限!');
+      }
     },
     paperSaveFile() {
       this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
@@ -338,24 +354,23 @@ export default {
         },
         userId: USERID
       }
-      modifyPaperFile(params).then(() => {
-        this.$message({
-          message: '修改成功',
-          type: 'success'
-        })
-      }, () => {
-        this.$message({
-          message: '修改失败',
-          type: 'failed'
-        })
+      modifyPaperFile(params).then((res) => {
+        if (res.data.status === 200) {
+          this.$message({
+            message: '纸质文件信息修改成功',
+            type: 'success'
+          })
+        } else {
+          this.$message.error('纸质文件信息修改失败');
+        }
       })
     },
     lookOriginElect() {
-      this.$router.push({ name: "look-origin", query: {fileId: this.elecFileForm.id, type: 'elec'} });
+      this.$router.push({ name: "look-origin", query: {fileId: this.elecFileForm.id, type: 'elec-match', batchNo: this.$route.query.batchNo} });
     },
     //查看原件
     lookOriginPaper() {
-      this.$router.push({ name: "look-origin", query: {fileId: this.paperFileForm.id, type: 'elec'} });
+      this.$router.push({ name: "look-origin", query: {fileId: this.paperFileForm.id, type: 'elec-match', batchNo: this.$route.query.batchNo} });
     },
     fetchEstateAuthorizationExcelInfo() {
       this.isLoading = true;
@@ -368,6 +383,10 @@ export default {
       .then(res => {
         this.excelMsg = res.excel;
         this.elecFileForm = res.elecFile;
+        if (this.elecFileForm) {
+          this.isExpired = (this.timeNowStamp > Number(this.elecFileForm.authorizationValidDate));
+          this.elecFileForm.authorizationValidDate = this.getNowFormatDate(this.elecFileForm.authorizationValidDate);
+        }
         this.dataBusData = res.databusInfo;
         this.paperFileForm = res.file;
         if (res.elecFile !== null) {
@@ -379,12 +398,20 @@ export default {
         }
         this.isLoading = false;
       })
+    },
+    getNowFormatDate(timeStamp) {
+      const date = new Date(timeStamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const strDate = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${strDate}`
     }
   },
   beforeCreate() {
     USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
+    this.timeNowStamp = new Date().valueOf();
     this.excelId = this.$route.query.id;
     this.batchNo = this.$route.query.batchNo;
     this.auditState = Number(this.$route.query.auditState);
@@ -403,9 +430,6 @@ export default {
   .top-box {
     height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
   .identify-page-title {
     background-color: #ffffff;
@@ -479,6 +503,9 @@ export default {
         }
         .content {
           padding: 30px;
+          .bg-purple {
+            padding: 0 15px;
+          }
           &.no-data {
             font-size: 24px;
             color: #333333;
@@ -488,10 +515,6 @@ export default {
           /deep/ {
             .el-form {
               padding:  0 20px;
-              // z-index: 1999;
-              .goods-list {
-                border: 1px dashed #EBEBEB;
-              }
               .el-form-item {
                 .el-form-item__label {
                   line-height: 30px;
@@ -501,14 +524,13 @@ export default {
                 }
                 .el-form-item__content {
                   p {
-                    padding: 0;
+                    padding: 0 15px;
                     margin: 0;
                   }
                   line-height: 30px;
                   .el-input {
                     height: 30px;
                     .el-input__inner {
-                      padding: 0;
                       height: 30px;
                     }
                   &.is-disabled {
@@ -523,6 +545,7 @@ export default {
                   }
                   .el-textarea {
                     .el-textarea__inner {
+                      font-family: inherit;
                       border: none;
                       color: #333333;
                     }
@@ -560,6 +583,9 @@ export default {
             .modify-btn {
               margin-left: 40px;
               @include buttonStyle;
+              &.is-disabled, &.is-disabled:hover {
+                @include disbaledButtonStyle
+              }
             }
           }
           .item {

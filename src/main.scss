@@ -63,6 +63,7 @@ html, body{
 .el-dialog__wrapper {
   &.dialog-form {
     .el-dialog {
+      // width: 600px !important;
       padding: 0 50px;
       .el-dialog__header {
         padding: 20px 30px;
@@ -103,6 +104,7 @@ html, body{
   }
   &.confirmDialog {
     .el-dialog {
+      width: 600px !important;
       .el-dialog__footer {
         border: none;
         .dialog-footer {
@@ -138,6 +140,67 @@ html, body{
           font-weight: bold;
           color: #666666;
           text-align: center;
+        }
+      }
+    }
+  }
+}
+// table样式
+.el-table {
+  .el-table__fixed-header-wrapper {
+    thead {
+      th,
+      tr {
+        background: #fafafa !important;
+      }
+      th {
+        border-color: rgba(0, 0, 0, 0.09);
+        .cell {
+          font-family: PingFangSC-Medium;
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.85);
+          line-height: 22px;
+        }
+      }
+      th.is-leaf {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+        .el-checkbox__input {
+          display: none;
+        }
+      }
+    }
+  }
+  .el-table__fixed-body-wrapper {
+    .el-table__body {
+    }
+  }
+  .el-table__header-wrapper {
+    .el-table__header {
+      tr {
+        border-radius: 4px 4px 0px 0px;
+        background: #fafafa !important;
+        th {
+          background: #fafafa !important;
+          border-color: rgba(0, 0, 0, 0.09);
+          .cell {
+            font-family: PingFangSC-Medium;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.85);
+            line-height: 22px;
+          }
+        }
+      }
+    }
+  }
+  .el-table__body-wrapper {
+    .el-table__body {
+      .el-table__row {
+        .el-table_1_column_1 {
+        }
+        .el-table_1_column_13 {
+          .cell {
+            // display: flex;
+          }
         }
       }
     }

@@ -62,11 +62,14 @@
               <span v-else-if="scope.row.status === null" style="color: #C0C4CC;">未识别</span>
               <span v-else-if="scope.row.status === 2" style="color: #417505;">识别成功</span>
               <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span> -->
-              <span v-if="scope.row.status === 1" style="color: #4A90E2;">进行中</span>
-              <span v-else-if="scope.row.status === 0" style="color: #C0C4CC;">未开始</span>
-              <span v-else-if="scope.row.status === 2" style="color: #417505;">运行成功</span>
-              <span v-else-if="scope.row.status === -1" style="color: #D0021B;">运行失败</span>
+              
+              <span v-if="scope.row.status === 1" style="color: #4A90E2;">识别中</span>
+              <span v-else-if="scope.row.status === 0" style="color: #C0C4CC;">识别中</span>
+              <span v-else-if="scope.row.status === 2" style="color: #417505;">识别成功</span>
+              <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span>
               <span v-else-if="scope.row.status === -2" style="color: #D0021B;">上传失败</span>
+              <span v-else-if="scope.row.status === -3" style="color: #D0021B;">文件错误</span>
+              <span v-else-if="scope.row.status === null" style="color: #C0C4CC;">未识别</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -74,9 +77,10 @@
             label="审核状态"
             prop="audit_status">
             <template slot-scope="scope">
-              <span v-if="scope.row.audit_status === 0">未审核</span>
-              <span v-else-if="scope.row.audit_status === 1" style="color: #4A90E2;">已审核</span>
-              <span v-else-if="scope.row.audit_status === 2" style="color: #D0021B;">驳回</span>
+              <span v-if="scope.row.auditStatus === 0">未识别</span>
+              <span v-else-if="scope.row.auditStatus === 1" style="color: #417505;">已审核</span>
+              <span v-else-if="scope.row.auditStatus === 2" style="color: #4A90E2;">未审核</span>
+              <span v-else-if="scope.row.auditStatus === 3" style="color: #4A90E2;">审核中</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -88,7 +92,7 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button v-loading.fullscreen.lock="fullscreenLoading" element-loading-text="提交任务中" :disabled="scope.row.status !== null && scope.row.status !== -2" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
+              <el-button v-loading.fullscreen.lock="fullscreenLoading" element-loading-text="提交任务中" :disabled="scope.row.status !== null" @click="handleTableStartOcrJob(scope.row)">提交</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -120,7 +124,7 @@ export default {
       isLoading: false,
       disableUpload: true,
       authorizationValidDate: '',
-      businessTypeId: '',
+      businessTypeId: '3',
       currentPage: 1,
       totalCount: 0,
       pageSize: PAGE_SIZE,
@@ -226,6 +230,8 @@ export default {
             type: 'error'
           });
           this.fullscreenLoading = false;
+          this.isStartOcrJob = true;
+          this.fetchHistoryList();
         }
       }, err => {
         this.$message({
@@ -263,6 +269,9 @@ export default {
   beforeCreate() {
     USERID = Number(localStorageHelper.getItem('USERID'));
   },
+  mounted() {
+    this.fetchHistoryList();
+  },
   components: {
     BreadCrumb,
     FileUpload,
@@ -275,15 +284,17 @@ export default {
 
 .credit-upload {
   display: flex;
+  flex: 1;
   flex-direction: column;
   padding-bottom: 200px;
   .bread-crumb {
-    padding: 14px 20px 30px 20px;
     background-color: #ffffff;
   }
   .upload-main {
+    flex: 1;
     padding: 20px 30px 0  30px;
     margin-top: 20px;
+    margin-bottom: 60px;
     background-color: #ffffff;
     .upload-filter {
       padding: 10px 0 20px 0;

@@ -103,7 +103,8 @@ export default {
     }
   
     .el-main {
-      // min-width: 1200px;
+      display: flex;
+      flex-direction: column;
       height: calc(100vh - 240px);
       padding: 20px 50px 0 30px;
       background-color: #f5f7f9;

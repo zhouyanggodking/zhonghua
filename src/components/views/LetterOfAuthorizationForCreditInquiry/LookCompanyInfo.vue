@@ -39,7 +39,7 @@
           </div>
           <div class="content_item">
             <div class="item_title">注册资本:</div>
-            <div class="item_content">{{dataBusInfo.regcap}} (万元)</div>
+            <div class="item_content">{{formatMoney(dataBusInfo.regcap)}} (万元)</div>
           </div>
           <div class="content_item">
             <div class="item_title">所属行业:</div>
@@ -106,10 +106,12 @@ export default {
       ],
       batch: "",
       breadCrumbList: [
+        "首页",
         "征信查询授权书",
         "识别结果",
-        "电子版批次信息",
-        "电子版批次详情"
+        "电子版批次详情",
+        "查询清单",
+        "详情"
       ],
       dataBusInfo: {}
     };
@@ -151,11 +153,7 @@ export default {
 
 .company-info-page {
   .top-box {
-    height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
   .company-info-page-title {
     background-color: #ffffff;
@@ -246,14 +244,14 @@ export default {
     .license-info {
       margin-top: 30px;
       .title {
+        margin-bottom: 10px;
         font-family: PingFangSC-Semibold;
         font-size: 18px;
-        color: #796f65;
+        color: #000000;
       }
       .content {
         display: flex;
         flex-wrap: wrap;
-        margin-top: 10px;
         padding: 30px 50px;
         border: 1px solid #ebebeb;
         .content_item {
@@ -280,43 +278,13 @@ export default {
     .shareholders-info {
       margin-top: 30px;
       .title {
+        margin-bottom: 10px;
         font-family: PingFangSC-Semibold;
         font-size: 18px;
         color: #333333;
       }
       .content {
         padding: 0;
-        /deep/ .el-table {
-          .el-table__header-wrapper {
-            tr {
-              th {
-                background: #fafafa;
-                border-right: 1px solid #ebebeb;
-                border-bottom: 1px solid #ebebeb;
-                .cell {
-                  font-family: PingFangSC-Semibold;
-                  font-size: 14px;
-                  color: #333333;
-                  text-align: center;
-                }
-              }
-            }
-          }
-          .el-table__body-wrapper {
-            tr {
-              td {
-                border-right: 1px solid #ebebeb;
-                border-bottom: 1px solid #ebebeb;
-                .cell {
-                  font-family: PingFangSC-Regular;
-                  font-size: 14px;
-                  color: #333333;
-                  text-align: center;
-                }
-              }
-            }
-          }
-        }
       }
     }
     .go-back-btn{

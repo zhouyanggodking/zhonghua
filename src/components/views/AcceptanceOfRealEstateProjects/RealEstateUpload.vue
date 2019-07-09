@@ -35,17 +35,13 @@
             <div class="add-filed" :class="{'add-filed-disabled': filedList.length >= 15}" @click="addNewFiled">
               +&nbsp;新增字段
             </div>
-            <div class="filed-option">
-              <el-button class="cancle-btn" @click="cancleEditFileds">返回</el-button>
-              <el-button class="submit-btn" @click="handleUpdateFiledsClick">提交</el-button>
-            </div>
           </div>
         </el-collapse-transition>
         <div class="collapse up" v-if="isShowFiledList" @click="toggleFiledList">
           <div class="collapse-text">点击收起</div>
           <div class="collapse-icon"></div>
         </div>
-        <el-dialog class="dialog-form" title="新增字段" :visible.sync="dialogFormVisible">
+        <el-dialog class="dialog-form add-template-form" title="新增字段" :visible.sync="dialogFormVisible">
           <el-form :model="addFiledform" :rules="rules" ref="addFiledform">
             <el-form-item label="标准字段" :label-width="formLabelWidth" prop="standardName">
               <el-input placeholder="请输入标准字段(必填)" v-model="addFiledform.standardName" autocomplete="off"></el-input>
@@ -84,7 +80,7 @@
             label="识别状态"
             prop="status">
             <template slot-scope="scope">
-              <span v-if="scope.row.status === 0" style="color: #4A90E2;">识别中</span>
+              <span v-if="scope.row.status === 0 || scope.row.status === 1" style="color: #4A90E2;">识别中</span>
               <span v-else-if="scope.row.status === null" style="color: #C0C4CC;">未识别</span>
               <span v-else-if="scope.row.status === 2" style="color: #417505;">识别成功</span>
               <span v-else-if="scope.row.status === -1" style="color: #D0021B;">识别失败</span>
@@ -95,9 +91,9 @@
             label="审核状态"
             prop="audit_status">
             <template slot-scope="scope">
-              <span v-if="scope.row.audit_status === 0">未审核</span>
-              <span v-else-if="scope.row.audit_status === 1" style="color: #4A90E2;">已审核</span>
-              <span v-else-if="scope.row.audit_status === 2" style="color: #D0021B;">驳回</span>
+              <span v-if="scope.row.auditStatus === 0" style="color: #4A90E2;">未审核</span>
+              <span v-else-if="scope.row.auditStatus === 1" style="color: #417505;">已审核</span>
+              <span v-else-if="scope.row.auditStatus === 2" style="color: #D0021B;">驳回</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -173,11 +169,13 @@ export default {
       filedList: [],
       copyFiledList: [],
       rules: {
-        name: [
-          { required: true, message: '请输入标准字段(必填)', trigger: 'blur' }
+        standardName: [
+          { required: true, message: '请输入标准字段(必填)', trigger: 'blur' },
+          { min: 1, max: 20, message: '请输入20位以内字符', trigger: 'blur' }
         ],
-        text: [
-          { required: true, message: '请输入提取字段(必填)', trigger: 'blur' }
+        editName: [
+          { required: true, message: '请输入提取字段(必填)', trigger: 'blur' },
+          { min: 1, max: 20, message: '请输入20位以内字符', trigger: 'blur' }
         ],
       },
       tableData: [],
@@ -200,11 +198,15 @@ export default {
       this.isShowFiledList = !this.isShowFiledList;
     },
     removeItem(item) {
-      this.deleteFiledId = ''
-      this.delDialogVisiable  = true;
-      this.readyDeleteItem = item;
-      if (item.id) {
-        this.deleteFiledId = item.id;
+      this.deleteFiledId = '';
+      if (this.filedList.length <=1) {
+        this.$message.error('至少保留一条数据!')
+      } else {
+        this.delDialogVisiable  = true;
+        this.readyDeleteItem = item;
+        if (item.id) {
+          this.deleteFiledId = item.id;
+        }
       }
     },
     handleDeleteClick() {
@@ -221,17 +223,22 @@ export default {
         this.dialogFormVisible = true;
       }
     },
-    cancleEditFileds() {
-      this.filedList = this.copyFiledList;
-    },
+    // cancleEditFileds() {
+    //   this.filedList = this.copyFiledList;
+    // },
     handleSubmitClick(btnType) {
       this.$refs.addFiledform.validate((valid) => {
         if (valid) {
-          this.filedList.push(this.addFiledform);
-          if (btnType === 'goonBtn') {
-            this.dialogFormVisible = true;
+          if (this.filedList.filter(item => item.standardName === this.addFiledform.standardName).length) {
+            this.$message.error('字段模版已有此数据,请重新输入!');
           } else {
-            this.dialogFormVisible = false;
+            this.filedList.push(this.addFiledform);
+            if (btnType === 'goonBtn') {
+              this.dialogFormVisible = true;
+            } else {
+              this.dialogFormVisible = false;
+            }
+            this.updateTemplateFileds(this.filedList);
           }
         }
         this.addFiledform = {
@@ -243,9 +250,6 @@ export default {
           status: 1
         }
       });
-    },
-    handleUpdateFiledsClick() {
-      this.updateTemplateFileds(this.filedList);
     },
     onHistoryPageNumChange(res) {
       this.pageSize = res.pageSize;
@@ -271,19 +275,25 @@ export default {
       )
     },
     fetchTemplateFileds() {
-      // this.filedList = [];
-      // this.isLoading = true;
       getOcrExtractTemplateFields(1, 1, '')
       .then((res) => {
         this.filedList = res.data;
         this.copyFiledList = JSON.parse(JSON.stringify(res.data));
-        // this.isLoading = false;
       });
     },
     updateTemplateFileds(data) {
       updateOcrExtractTemplateFields(data)
-      .then(() => {
-        this.fetchTemplateFileds();
+      .then((res) => {
+        if (res.status === 200) {
+          this.$message({
+            type: 'success',
+            message: '添加字段成功!'
+          });
+          this.fetchTemplateFileds();
+        } else {
+          this.$message.error('添加字段失败!');
+          this.dialogFormVisible = true;
+        }
       })
     },
     deleteTemplateField(id) {
@@ -358,10 +368,9 @@ export default {
 .real-estate-upload {
   display: flex;
   flex-direction: column;
-  padding-bottom: 200px;
+  padding-bottom: 100px;
   .bread-crumb {
     background-color: #ffffff;
-    padding: 14px 20px 30px 20px;
   }
   .upload-main {
     padding: 20px 30px 0  30px;
@@ -483,7 +492,7 @@ export default {
       .add-filed {
         height: 44px;
         line-height: 40px;
-        margin-top: 20px;
+        margin: 20px 0px;
         border: 2px dashed #EBEBEB;
         text-align: center;
         cursor: pointer;
@@ -497,25 +506,6 @@ export default {
             border-color: #666666;
             color: #666666;
           }
-        }
-      }
-      .filed-option {
-        display: flex;
-        padding-top: 30px;
-        margin: 40px 0;
-        justify-content: flex-end;
-        border-top: 1px solid #EBEBEB;
-        .submit-btn {
-          width: 136px;
-          height: 40px;
-          @include buttonStyle;
-          margin: 0 14px;
-        }
-        .cancle-btn {
-          width: 136px;
-          height: 40px;
-          @include cancelBtnStyle;
-          margin: 0 14px;
         }
       }
     }
@@ -542,7 +532,7 @@ export default {
     padding: 24px  0;
     background-color: #ffffff;
     text-align: right;
-    z-index: 9999;
+    z-index: 999;
     /deep/ {
       .el-button {
         &.return-back {
@@ -556,6 +546,18 @@ export default {
         &.is-disabled, &.is-disabled:hover {
           @include disbaledButtonStyle;
         }
+      }
+    }
+  }
+  /deep/ {
+    // .el-dialog {
+    //   &.add-template-form {
+    //     width: 700px !important;
+    //   }
+    // }
+    .add-template-form {
+      .el-dialog {
+        width: 700px !important;
       }
     }
   }

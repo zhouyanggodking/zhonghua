@@ -75,7 +75,7 @@ export default {
         query: function (file) {
           let fileName = (file.name).substring(0, (file.name).lastIndexOf('.'));
           return {
-            identifier: file.size + '_' + fileName,
+            identifier: file.size + '_' + fileName + '_' + USERID,
             type: 'zc',
             userId: USERID,
             businessTypeId: fileType,
@@ -106,7 +106,7 @@ export default {
       var ext = fileName.slice(fileName.lastIndexOf(".") + 1).toLowerCase();
       if ('rar' == ext || 'zip' == ext || '7z' === ext) {
         let completeFiile = e.target.files[0];
-        let identifier = `${e.target.files[0].size}_${e.target.files[0].name.split('.')[0]}`
+        let identifier = `${e.target.files[0].size}_${e.target.files[0].name.split('.')[0]}_${USERID}`
         that.load = true
         calculateMd5(completeFiile, function (val) {
           that.file_md5 = val;
@@ -116,7 +116,7 @@ export default {
             businessTypeId: that.identifyFileType,
             identifier: identifier
           }).then(res => {
-            if(res.status === 200) {
+            if (res.status === 200) {
               if (res.data) {
                 that.$message({
                   message: '此文件已经上传过，请您选择其他文件',
@@ -155,7 +155,7 @@ export default {
       this.loading = true;
       let file = arguments[0].file
       let _fileName = (file.name).substring(0, (file.name).lastIndexOf('.'))
-      let _identifier = file.size + '_' + _fileName
+      let _identifier = file.size + '_' + _fileName + '_' + USERID
       let servicePath = ''
       // 合并文件
       let obg = {
@@ -191,7 +191,7 @@ export default {
           type: 'error'
         })
       })
-    },
+    }
   },
   beforeCreate() {
     USERID = Number(localStorageHelper.getItem('USERID'));

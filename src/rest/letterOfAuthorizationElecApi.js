@@ -87,7 +87,7 @@ export const getFileMessage = (params) => {
 export const modifyFileMessage = (params) => {
   return axios.post('/auth/estateAuthorizationFileController/modifyOneFile', params)
   .then(res => {
-    return Promise.resolve(res);
+    return Promise.resolve(res.data);
   }, err => {
     return Promise.reject(err);
   });

@@ -32,7 +32,7 @@ export default {
 .bread-crumb {
   display: flex;
   flex-direction: column;
-  padding: 14px 20px;
+  padding: 20px 14px 30px 14px;
   .bread-crumb_header {
     display: flex;
     align-items: center;
@@ -46,9 +46,9 @@ export default {
     }
   }
   .bread-crumb-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
     width: 16px;
     height: 18px;
     margin-right: 10px;
@@ -60,7 +60,7 @@ export default {
     font-family: "PingFangSC-Semibold";
     font-size: 20px;
     color: #333333;
-    padding: 30px 10px;
+    padding: 34px 16px 0px;
   }
   .el-breadcrumb {
     font-size: 12px;
