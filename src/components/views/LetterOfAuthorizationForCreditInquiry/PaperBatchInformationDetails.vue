@@ -2,7 +2,7 @@
   <div class="paper-batch-info-page-details">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <bread-crumb :data="formatBreadCrumbList()" :currentTitle="currentTitle"></bread-crumb>
         <div class="btn-group">
         <div
           class="btn-group_item"
@@ -26,7 +26,7 @@
             <el-input v-model="searchCondition.companyName" placeholder="请输入公司名称"></el-input>
           </div>
           <div class="search-condition_input_item">
-            <div class="text">授权提交时间</div>
+            <div class="text">授权书提交日期</div>
             <date-range @change="onDateRangeChange"></date-range>
           </div>
           <div class="search-condition_input_item">
@@ -46,7 +46,7 @@
             </el-select>
           </div>
           <div class="search-condition_input_item">
-            <div class="text">授权书提交日期</div>
+            <div class="text">授权有效期</div>
             <el-select v-model="searchCondition.authorizationValidDateLegal	" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
               <el-option label="大于等于申请日期" value="0"></el-option>
@@ -98,7 +98,7 @@
               <span v-else-if="scope.row.corporateStamp === 1">是</span>
             </template>
           </el-table-column>
-          <el-table-column prop="submitDate" label="授权提交时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="submitDate" label="授权书提交日期" show-overflow-tooltip></el-table-column>
           <el-table-column prop="signTime" label="签署时间" show-overflow-tooltip></el-table-column>
           <el-table-column prop="authorizationValidDate" label="授权有效期" show-overflow-tooltip>
           </el-table-column>
@@ -127,7 +127,7 @@
                 class="table-btn"
                 size="mini"
                 type="danger"
-                :disabled="scope.row.auditState === 0"
+                :disabled="scope.row.auditState === 0 || !scope.row.companySeal"
                 @click="tableItemRejected(scope.row)"
               >驳回</el-button>
             </template>
@@ -309,10 +309,10 @@ export default {
       dialogVisible: false,
       reviewStatus: "全部",
       multipleSelection: [],
+      downLoadMultipleSelection: [],
       currentPage: 1,
       totalCount: 0,
       currentTitle: "",
-      breadCrumbList: ["首页", "征信查询授权书", "识别结果", "纸质版批次信息", "查询清单"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
       tableData: [],
@@ -324,7 +324,22 @@ export default {
       this.toggleSelection();
     }
   },
+  beforeRouteEnter(to, from, next) {
+    if (from.path === '/creditPaperBatchInformation/lookPaperOrigin') {
+      next(vm => {
+        vm.activedIndex = 1;
+      });
+    } else {
+      next();
+    }
+  },
   methods: {
+    formatBreadCrumbList() {
+      if (this.activedIndex) {
+        return ["首页", "征信查询授权书","识别结果","纸质版批次详情","未匹配查询清单授权书"]
+      }
+      return ["首页", "征信查询授权书","识别结果","纸质版批次详情","查询清单"]
+    },
     topMenus(index) {
       this.activedIndex = index;
     },
@@ -355,7 +370,8 @@ export default {
     onPageNumberChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
-      this.fetchElecDetailList();
+      this.allChecked = false;
+      this.fetchPaperDetailList();
     },
     onUnmatchedPageNumberChange(res) {
       this.unMatchedPageSize = res.pageSize;
@@ -363,14 +379,14 @@ export default {
       this.fetchUnmatchedElecDetailList();
     },
     tableDownload() {
-      if (this.multipleSelection.length) {
+      if (this.downLoadMultipleSelection.length) {
         const params = {
-          ids: this.multipleSelection,
+          ids: this.downLoadMultipleSelection,
           elecOrFile: ELE_FILE,
           summaryId: this.summaryId,
           userId: USERID
         };
-        window.open(`${global_upload}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById${formatQuery(params)}`,'_parent');
+        window.open(`${global_upload}/auth/estateAuthorizationExcelController/downElecExcels${formatQuery(params)}`,'_parent');
       } else {
         this.$message({
           message: '请勾选要下载的对象!',
@@ -384,6 +400,10 @@ export default {
         name: "paper-batch-indentify-details",
         query: { summaryId: this.$route.query.id, id: row.id, auditState: row.auditState, pageNum: this.currentPage, batchNo: this.$route.query.batchNo }
       });
+    },
+    //未授权 查看原件
+    lookOrigin(row){
+      this.$router.push({ name: "look-paper-origin", query: {fileId: row.id, batchNo: this.$route.query.batchNo, type: 'paper-notMatch'} });
     },
     // 驳回
     handleRejectClick() {
@@ -433,13 +453,17 @@ export default {
 ${formatQuery(params)}`,'_parent');
     },
     tableItemRejected(row) {
-      this.rejectForm.problemType = '';
-      this.rejectForm.problemDescription = '';
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否驳回";
-      this.dialogHintOperate = "驳回";
-      this.rejectObj.fileId = row.elecFileId;
-      this.rejectObj.id = row.id
+      if (USERID === row.createUser) {
+        this.rejectForm.problemType = '';
+        this.rejectForm.problemDescription = '';
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否驳回";
+        this.dialogHintOperate = "驳回";
+        this.rejectObj.fileId = row.fileId;
+        this.rejectObj.id = row.id;
+      } else {
+        this.$message.error('没有驳回权限!');
+      }
     },
     rejectOpinion() {
       this.isDialogVisible = false;
@@ -450,6 +474,7 @@ ${formatQuery(params)}`,'_parent');
     },
     handleSelectionChange(val) {
       this.multipleSelection = val.map(item => item.id);
+      this.downLoadMultipleSelection = val.map(item => item.id);
     },
     fetchPaperDetailList() {
       this.isLoading = true;
@@ -499,14 +524,13 @@ ${formatQuery(params)}`,'_parent');
 @import '@/scss/mixin.scss';
 
 .paper-batch-info-page-details {
+  display: -webkit-box;
+  flex: 1;
+  flex-direction: column;
   .top-box {
     height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
-
   .identify-page-title {
     background-color: #ffffff;
     height: 129px;
@@ -554,6 +578,7 @@ ${formatQuery(params)}`,'_parent');
     }
   }
   .search-unauth-table{
+    flex: 1;
     margin-top: 30px;
     background: #fff;
     padding: 30px;
@@ -615,6 +640,7 @@ ${formatQuery(params)}`,'_parent');
     }
   }
   .identify-page-table {
+    flex: 1;
     margin-top: 20px;
     padding: 20px 40px;
     background: #ffffff;
@@ -628,75 +654,6 @@ ${formatQuery(params)}`,'_parent');
     }
     .identify-page-table_content {
       margin-top: 20px;
-      /deep/ .el-table {
-        .el-table__fixed-header-wrapper {
-          thead {
-            th,
-            tr {
-              background: #fafafa !important;
-            }
-            th {
-              border-color: rgba(0, 0, 0, 0.09);
-              .cell {
-                font-family: PingFangSC-Medium;
-                font-size: 14px;
-                color: rgba(0, 0, 0, 0.85);
-                line-height: 22px;
-              }
-            }
-            th.is-leaf {
-              border-bottom: 1px solid rgba(0, 0, 0, 0.09);
-              .el-checkbox__input {
-                display: none;
-              }
-            }
-          }
-        }
-        .el-table__fixed-body-wrapper {
-          .el-table__body {
-          }
-        }
-        .el-table__header-wrapper {
-          .el-table__header {
-            tr {
-              border-radius: 4px 4px 0px 0px;
-              background: #fafafa !important;
-              th {
-                background: #fafafa !important;
-                border-color: rgba(0, 0, 0, 0.09);
-                .cell {
-                  font-family: PingFangSC-Medium;
-                  font-size: 14px;
-                  color: rgba(0, 0, 0, 0.85);
-                  line-height: 22px;
-                }
-              }
-              // .el-table_1_column_1{
-              //   .cell{
-              //     display: none;
-              //   }
-              // }
-              // .el-table_1_column_2{
-              //   position: relative;
-
-              // }
-            }
-          }
-        }
-        .el-table__body-wrapper {
-          .el-table__body {
-            .el-table__row {
-              .el-table_1_column_1 {
-              }
-              .el-table_1_column_13 {
-                .cell {
-                  // display: flex;
-                }
-              }
-            }
-          }
-        }
-      }
       /deep/ .table-btn {
         width: 28px;
         height: 20px;
@@ -761,7 +718,6 @@ ${formatQuery(params)}`,'_parent');
         span {
           font-family: PingFangSC-Regular;
           font-size: 16px;
-          color: #666666 !important;
         }
       }
     }
@@ -828,7 +784,6 @@ ${formatQuery(params)}`,'_parent');
       span {
         font-family: PingFangSC-Regular;
         font-size: 16px;
-        color: #666666 !important;
       }
     }
   }

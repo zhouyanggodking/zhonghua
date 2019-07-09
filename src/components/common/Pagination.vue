@@ -9,6 +9,7 @@
       layout="total, prev, pager, next, jumper"
       :total="totalCount"
     ></el-pagination>
+    {{this.currPage}}
   </div>
 </template>
 <script>

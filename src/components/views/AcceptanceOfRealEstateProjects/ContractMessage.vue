@@ -8,7 +8,7 @@
       <el-input v-else :disabled="isFiledFormEdit" :value="titleInfos[0][paymentOrderId]"></el-input>
     </div>
     <el-form ref="filedResultForm" label-position="right" :rules="rules" label-width="120px" :model="filedResultForm">
-      <el-form-item label="发票类型:" @click.native="filedFocus('发票类型')" prop="invoiceType">
+      <el-form-item label="发票类型:" prop="invoiceType">
         <el-select v-if="!isFiledFormEdit" :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceType" placeholder="">
           <el-option v-for="(item, index) in invoiceType" :key="index" :label="item.name" :value="item.id"></el-option>
         </el-select>
@@ -32,7 +32,7 @@
       <el-form-item label="发票代码:" @click.native="filedFocus('发票代码')" prop="invoiceCode">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.invoiceCode"></el-input>
       </el-form-item>
-      <el-form-item label="开票日期:" @click.native="filedFocus('开票日期')">
+      <el-form-item label="开票日期:" @click.native="filedFocus('开票时间')">
         <el-date-picker
           v-if="!isFiledFormEdit"
           v-model="filedResultForm.invoiceTime"
@@ -42,41 +42,41 @@
         </el-date-picker>
         <el-input disabled v-else v-model="filedResultForm.invoiceTime"></el-input>
       </el-form-item>
-      <el-form-item label="购买方:" @click.native="filedFocus('购买方')">
+      <el-form-item label="购买方:" @click.native="filedFocus('购买方名称')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.buyyerName"></el-input>
       </el-form-item>
-      <el-form-item label="购买方税号:" @click.native="filedFocus('购买方税号')">
+      <el-form-item label="购买方税号:" @click.native="filedFocus('购买方纳税人识别号')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.buyyerIndentification"></el-input>
       </el-form-item>
-      <el-form-item label="销售方:" @click.native="filedFocus('销售方')">
+      <el-form-item label="销售方:" @click.native="filedFocus('销售方名称')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.salerName"></el-input>
       </el-form-item>
-      <el-form-item label="销售方税号:" @click.native="filedFocus('销售方税号')">
+      <el-form-item label="销售方税号:" @click.native="filedFocus('销售方纳税人识别号')">
         <el-input :disabled="isFiledFormEdit" v-model="filedResultForm.salerIndentification"></el-input>
       </el-form-item>
       <div class="goods-list" v-for="(item, index) in filedResultForm.estateInvoiceItems" :key="index">
-        <el-form-item label="货物或服务名称:" @click.native="filedFocus('货物或服务名称')">
+        <el-form-item label="货物或服务名称:">
           <el-input :disabled="isFiledFormEdit" v-model="item.itemName"></el-input>
         </el-form-item>
-        <el-form-item label="规格型号:" @click.native="filedFocus('规格型号')">
+        <el-form-item label="规格型号:">
           <el-input :disabled="isFiledFormEdit" v-model="item.spec"></el-input>
         </el-form-item>
-        <el-form-item label="单位:" @click.native="filedFocus('单位')">
+        <el-form-item label="单位:">
           <el-input :disabled="isFiledFormEdit" v-model="item.unit"></el-input>
         </el-form-item>
-        <el-form-item label="数量:" @click.native="filedFocus('数量')">
+        <el-form-item label="数量:">
           <el-input :disabled="isFiledFormEdit" v-model="item.counts"></el-input>
         </el-form-item>
-        <el-form-item label="单价:" @click.native="filedFocus('单价')">
+        <el-form-item label="单价:">
           <el-input :disabled="isFiledFormEdit" v-model="item.unitPrice"></el-input>
         </el-form-item>
-        <el-form-item label="金额:" @click.native="filedFocus('金额')">
+        <el-form-item label="金额:">
           <el-input :disabled="isFiledFormEdit" v-model="item.totalPrice"></el-input>
         </el-form-item>
-        <el-form-item label="税率:" @click.native="filedFocus('税率')">
+        <el-form-item label="税率:">
           <el-input :disabled="isFiledFormEdit" v-model="item.taxRate"></el-input>
         </el-form-item>
-        <el-form-item label="税额:" @click.native="filedFocus('税额')">
+        <el-form-item label="税额:">
           <el-input :disabled="isFiledFormEdit" v-model="item.taxPrice"></el-input>
         </el-form-item>
       </div>
@@ -109,7 +109,6 @@ import { modifyInvoice, getTotalInvoices } from '@/rest/realEstateUploadApi';
 import { INVOICE_TYPE } from '@/global/global';
 import {dateFormat} from '@/helpers/dateHelper';
 import localStorageHelper from '@/helpers/localStorageHelper';
-import { Promise } from 'q';
 
 let USERID = null;
 
@@ -118,9 +117,7 @@ export default {
     return {
       paymentOrderId: null,
       newInvoice: [],
-      imagesSrc: 
-        "http://www.pptbz.com/pptpic/UploadFiles_6909/201201/20120101182704481.jpg"
-      ,
+      imagesSrc: '',
       paymentOrderTheme: '',
       paymentRequestOrderId: 1,
       invoiceId: null,
@@ -138,7 +135,7 @@ export default {
       currentTitle: "付款公司名称-合同编号-付款主题",
       propsData: {
         isShowContractMsg: true,
-        singleFieldPosition: []
+        singleImagePosition: []
       },
       rules: {
         invoiceType: [
@@ -186,7 +183,11 @@ export default {
       this.$refs.carousel.setActiveItem(pageNum-1);
     },
     handleClickModify() {
-      this.isFiledFormEdit = !this.isFiledFormEdit;
+      if (USERID === this.filedResultForm.createUser) {
+        this.isFiledFormEdit = !this.isFiledFormEdit;
+      } else {
+        this.$message.error('没有补录发票的权限!');
+      }
     },
     handleClickSave() {
       // this.isFiledFormEdit = !this.isFiledFormEdit;
@@ -200,15 +201,18 @@ export default {
       this.currentPage = index + 1;
     },
     invoiceSupply() {
-      this.propsData.isShowContractMsg = false;
-      this.$emit('change', this.propsData);
+      if (USERID === this.filedResultForm.createUser) {
+        this.propsData.isShowContractMsg = false;
+        this.$emit('change', this.propsData);
+      } else {
+        this.$message.error('没有补录发票的权限!');
+      }
     },
     modifyInvoice() {
       const mapData = this.filedResultForm;
       mapData.createTime = dateFormat(mapData.createTime);
       mapData.invoiceTime = dateFormat(mapData.invoiceTime);
       mapData.lastUpdateTime = dateFormat(mapData.lastUpdateTime);
-      mapData.paymentRequestOrderId = this.paymentRequestOrderId;
       const invoicesItem = mapData.estateInvoiceItems;
       this.$delete(mapData, 'estateInvoiceItems');
       const params = {
@@ -250,38 +254,36 @@ export default {
             }
           })
         } else {
-          this.$message({
-            message: '修改失败',
-            type: 'failed'
-          })
+          this.$message.error(res.message);
+          this.isFiledFormEdit = !this.isFiledFormEdit;
         }
       })
     },
-    fetchInvoice() {
-      
-    },
     filedFocus(item) {
-      console.log(item);
-      // const location_info = JSON.parse(this.positionInfos[this.index]).position_info[item];
-      // const location = location_info ? (location_info.hasOwnProperty('filePath') ? [{
-      //   'imgUrl': this.imagesSrc,
-      //   'x': location_info.left,
-      //   'y': location_info.top,
-      //   'width': location_info.width,
-      //   'height': location_info.height,
-      //   borderColor: 'red',
-      // }] : [{
-      //   'x': location_info.left,
-      //   'y': location_info.top,
-      //   'width': location_info.width,
-      //   'height': location_info.height,
-      //   borderColor: 'red',
-      // }]) : [];
-      // let imageUrl = location.length ? location[0].imgUrl : '';
-      // if (imageUrl && imageUrl != 'undefined') {
-      //   this.propsData.singleImagePosition = location;
-      //   this.$emit('change', this.propsData);
-      // }
+      if (JSON.parse(this.positionInfos[this.index]).position_info) {
+        const location_info = JSON.parse(this.positionInfos[this.index]).position_info[item];
+        const location = location_info ? [{
+          'x': location_info.left,
+          'y': location_info.top,
+          'width': location_info.width,
+          'height': location_info.height,
+          borderColor: 'red',
+        }] : [];
+        this.propsData.singleImagePosition = location;
+      } else {
+        this.propsData.singleImagePosition = [];
+      }
+      this.$emit('change', this.propsData);
+    },
+    // 保留两位小数
+    toDecimal2(val) {
+      let s = val.toString();
+      let rs = s.indexOf('.');if (rs < 0) {
+        rs = s.length;
+        s += '.';
+      } while (s.length <= rs + 2)
+      { s += '0';}
+      return s;
     }
   },
   beforeCreate() {
@@ -292,7 +294,10 @@ export default {
     this.paymentOrderTheme = this.$route.query.title;
     this.paymentOrderId = Number(this.$route.query.paymentOrderId);
     this.filedResultForm = JSON.parse(JSON.stringify(this.contractData));
-    this.filedResultForm.invoiceType = (this.filedResultForm.invoiceType).padStart(2, '0');
+    this.filedResultForm.invoiceType = this.filedResultForm.invoiceType ? (this.filedResultForm.invoiceType).padStart(2, '0') : '';
+    this.filedResultForm.finalPrice = this.filedResultForm.finalPrice >=0 ? this.toDecimal2(this.filedResultForm.finalPrice) : '';
+    this.filedResultForm.usedPrice = this.filedResultForm.usedPrice >=0 ? this.toDecimal2(this.filedResultForm.usedPrice) : '';
+    this.filedResultForm.usePrice = this.filedResultForm.usePrice >=0 ? this.toDecimal2(this.filedResultForm.usePrice) : '';
     this.paymentRequestOrderId = this.$route.query.paymentOrderId;
   }
 };
@@ -412,6 +417,7 @@ export default {
           .el-textarea {
             &.is-disabled {
               .el-textarea__inner {
+                font-family: inherit;
                 border: none !important;
                 color: #333333;
                 background-color: #FAFAFA !important;
@@ -437,11 +443,17 @@ export default {
       &.submit-btn {
         @include buttonStyle;
         margin: 0;
+        &.is-disabled, &.is-disabled:hover {
+          @include disbaledButtonStyle;
+        }
       }
       &.verify-btn {
         @include buttonStyle;
         margin: 0;
         padding: 10px 20px;
+        &.is-disabled, &.is-disabled:hover {
+          @include disbaledButtonStyle;
+        }
       }
     }
   }

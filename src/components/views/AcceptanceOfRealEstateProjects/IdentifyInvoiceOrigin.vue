@@ -25,9 +25,6 @@
           </el-carousel>
         </div>
       </div>
-      <!-- <div class="footer-btn">
-        <el-button>提交验真</el-button>
-      </div> -->
     </div>
   </div>
 </template>
@@ -46,7 +43,7 @@ export default {
   data() {
     return {
       isLoading: false,
-      singleImagePosition: null,
+      singleImagePosition: [],
       rotateAngle: null,
       locationInfos: null,
       isShowContractMsg: true,
@@ -141,7 +138,7 @@ export default {
 @import '@/scss/mixin.scss';
 
 .identify-result-detail-page {
-  display: flex;
+  display: -webkit-box;
   flex-direction: column;
   height: 100%;
   .top-box {
@@ -161,7 +158,7 @@ export default {
     background-color: #ffffff;
     .result {
       display: flex;
-      height: 100%;
+      flex: 1;
       justify-content: center;
       margin-bottom: 30px;
       .left-img {

@@ -203,6 +203,7 @@ export default {
       breadCrumbList: ["首页", "地产项目承兑", "识别结果"],
       pageSize: PAGE_SIZE,
       pageSizes: [PAGE_SIZE],
+      downloadMultipleSelection: [],
       reviewStatusList: [
         {
           name: '全部',
@@ -252,7 +253,7 @@ export default {
       }
     },
     batchReview() {
-      if (this.multipleSelection.length) {
+      if (this.downloadMultipleSelection.length && this.multipleSelection.length) {
         this.isDialogVisible = true;
         if (this.multipleSelection.length > 1) {
           this.dialogHintText = "请确认是否批量通过";
@@ -261,13 +262,11 @@ export default {
           this.dialogHintText = "请确认是否审核通过";
           this.dialogHintOperate = "审核通过";
         }
-      } else {
-        this.$message({
-          message: '请勾选要审核的对象!',
-          type: 'warning'
-        })
+      } else if (this.downloadMultipleSelection.length && !this.multipleSelection.length) {
+        this.$message.error('没有审核权限!');
+      } else if (!this.downloadMultipleSelection.length && !this.multipleSelection.length) {
+        this.$message.error('请勾选要下载的对象!');
       }
-      
     },
     // 全选toggle
     toggleSelection() {
@@ -293,16 +292,15 @@ export default {
       }
       window.open(`${global_upload}/estate/estatePaymentRequestOrderController/exportPaymentRequestOrdersToExcel?userId=${params.userId}&paymentTitle=${params.paymentTitle}&contractNo=${params.contractNo}&payer=${params.payer}&receiver=${params.receiver}&fileName=${params.fileName}`,'_parent');
     },
-    tableItemReview() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否审核通过";
-      this.dialogHintOperate = "审核通过";
-    },
     tableItemRejected(row) {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否驳回";
-      this.dialogHintOperate = "驳回";
-      this.rejectId = row.id;
+      if (USERID === row.createUser) {
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否驳回";
+        this.dialogHintOperate = "驳回";
+        this.rejectId = row.id;
+      } else {
+        this.$message.error('没有驳回权限!');
+      }
     },
     // 批量审核
     batchReviewPass() {
@@ -371,12 +369,14 @@ export default {
       this.dialogVisible = false;
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val.map(item => item.id);
+      this.downloadMultipleSelection = val.map(item => item.id);
+      this.multipleSelection = val.filter(item => USERID === item.createUser).map(item => item.id);
     },
     // 分页
     onPageNumberChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
+      this.allChecked = false;
       this.getPaymentOrderInfos();
     },
     getPaymentOrderInfos(){
@@ -416,12 +416,12 @@ export default {
 @import '@/scss/mixin.scss';
 
 .identify-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   .top-box {
     height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
   .identify-page-title {
     background-color: #ffffff;
@@ -514,66 +514,6 @@ export default {
     }
     .identify-page-table_content {
       margin-top: 20px;
-      /deep/ .el-table {
-        .el-table__fixed-header-wrapper {
-          thead {
-            th,
-            tr {
-              background: #fafafa !important;
-            }
-            th {
-              border-color: rgba(0, 0, 0, 0.09);
-              .cell {
-                font-family: PingFangSC-Medium;
-                font-size: 14px;
-                color: rgba(0, 0, 0, 0.85);
-                line-height: 22px;
-              }
-            }
-            th.is-leaf {
-              border-bottom: 1px solid rgba(0, 0, 0, 0.09);
-              .el-checkbox__input {
-                display: none;
-              }
-            }
-          }
-        }
-        .el-table__fixed-body-wrapper {
-          .el-table__body {
-          }
-        }
-        .el-table__header-wrapper {
-          .el-table__header {
-            tr {
-              border-radius: 4px 4px 0px 0px;
-              background: #fafafa !important;
-              th {
-                background: #fafafa !important;
-                border-color: rgba(0, 0, 0, 0.09);
-                .cell {
-                  font-family: PingFangSC-Medium;
-                  font-size: 14px;
-                  color: rgba(0, 0, 0, 0.85);
-                  line-height: 22px;
-                }
-              }
-            }
-          }
-        }
-        .el-table__body-wrapper {
-          .el-table__body {
-            .el-table__row {
-              .el-table_1_column_1 {
-              }
-              .el-table_1_column_13 {
-                .cell {
-                  // display: flex;
-                }
-              }
-            }
-          }
-        }
-      }
       /deep/ .table-btn {
         width: 28px;
         height: 20px;
@@ -589,7 +529,6 @@ export default {
           span {
             color: #d9d9d9;
           }
-          // color: #d9d9d9;
         }
       }
       .el-button--mini,
@@ -639,7 +578,6 @@ export default {
         span {
           font-family: PingFangSC-Regular;
           font-size: 16px;
-          color: #666666 !important;
         }
       }
     }
@@ -703,7 +641,6 @@ export default {
       span {
         font-family: PingFangSC-Regular;
         font-size: 16px;
-        color: #666666 !important;
       }
     }
   }

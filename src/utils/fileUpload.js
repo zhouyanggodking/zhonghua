@@ -28,7 +28,7 @@ export function calculateMd5(file, callBack){
             end = start + chunkSize >= file.size ? file.size : start + chunkSize;
 
         fileReader.readAsBinaryString(blobSlice.call(file, start, end));
-    };
+    }
 
     loadNext();
 }

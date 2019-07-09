@@ -91,7 +91,7 @@ export default {
           }
           changePassword(params)
             .then((res) => {
-              if (res) {
+              if (res.status === 200) {
                 this.$message({
                   message: '密码修改成功!',
                   type: 'success'
@@ -99,7 +99,7 @@ export default {
                 this.clearResetPwdForm();
               } else {
                 this.$message({
-                  message: '原始密码错误，请重新输入!',
+                  message: `${res.message}`,
                   type: 'error'
                 })
               }

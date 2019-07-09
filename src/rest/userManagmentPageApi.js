@@ -46,11 +46,7 @@ export const resetPassword = (params)=> {
 export const changePassword = (params)=> {
   return axios.post('/sys/ocr/changePassword', Qs.stringify(params))
   .then(res => {
-    var flag = false;
-    if(res.data.status == '200'){
-      flag = true;
-    }
-    return flag;
+    return Promise.resolve(res.data);
   }, (err) => {
     return Promise.reject(err)
   })

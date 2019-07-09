@@ -85,7 +85,7 @@
               </div>
             </el-form>
             <div class="elec-btn-group">
-              <el-button v-if="isPaperFiledFormEdit" class="modify-btn" @click="paperModifyFile">修改</el-button>
+              <el-button v-if="isPaperFiledFormEdit" :disabled="isExpired" class="modify-btn" @click="paperModifyFile">修改</el-button>
               <el-button v-else class="modify-btn" @click="paperSaveFile">保存</el-button>
             </div>
           </div>
@@ -114,7 +114,7 @@
           </div>
           <div class="review-btn-group">
             <el-button class="cancel-btn" @click="previous">返回</el-button>
-            <el-button class="submit-btn" :disabled="auditState === 1 || paperFileForm === null" @click="reviewPass">审核通过</el-button>
+            <el-button class="submit-btn" :disabled="auditState === 1 || paperFileForm === null || isExpired" @click="reviewPass">审核通过</el-button>
             <el-button class="submit-btn" :disabled="auditState === 0 || paperFileForm === null" @click="reviewReject">驳回</el-button>
           </div>
         </div>
@@ -199,7 +199,7 @@ export default {
         "首页",
         "征信查询授权书",
         "识别结果",
-        "电子版批次信息",
+        "纸质版批次详情",
         "查询清单",
         "详情"
       ],
@@ -210,19 +210,25 @@ export default {
         problemDescription: ''
       },
       paperFileForm: {},
-      oldData: {}
+      oldData: {},
+      isExpired: false,
+      timeNowStamp: ''
     };
   },
   methods: {
     // 返回
     previous() {
-      this.$router.push({path: `/creditPaperBatchInformation/paperBatchInformationDetails?id=${this.$route.query.summaryId}&pageNum=${this.$route.query.pageNum}`});
+      this.$router.push({path: `/creditPaperBatchInformation/paperBatchInformationDetails?id=${this.$route.query.summaryId}&pageNum=${this.$route.query.pageNum}&batchNo=${this.$route.query.batchNo}`});
     },
     // 审核通过
     reviewPass() {
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否审核通过";
-      this.dialogHintOperate = "审核通过";
+      if (USERID === this.paperFileForm.createUser) {
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否审核通过";
+        this.dialogHintOperate = "审核通过";
+      } else {
+        this.$message.error('没有审核权限!');
+      }
     },
     // 审核通过，确定
     reviewPassOpearte() {
@@ -234,17 +240,21 @@ export default {
     },
     // 驳回
     reviewReject() {
-      if (this.rejectForm) {
-        if (this.rejectForm.problemType && this.rejectForm.problemType !== '' && this.rejectForm.problemDescription && this.rejectForm.problemDescription !== '') {
-          this.isDialogVisible = true;
-          this.dialogHintText = "请确认是否驳回";
-          this.dialogHintOperate = "驳回";
-        } else {
-          this.$message({
-            message: '请选择问题分类并填写问题描述!',
-            type: 'warning'
-          })
+      if (USERID === this.paperFileForm.createUser) {
+        if (this.rejectForm) {
+          if (this.rejectForm.problemType && this.rejectForm.problemType !== '' && this.rejectForm.problemDescription && this.rejectForm.problemDescription !== '') {
+            this.isDialogVisible = true;
+            this.dialogHintText = "请确认是否驳回";
+            this.dialogHintOperate = "驳回";
+          } else {
+            this.$message({
+              message: '请选择问题分类并填写问题描述!',
+              type: 'warning'
+            })
+          }
         }
+      } else {
+        this.$message.error('没有驳回权限!');
       }
     },
     // 驳回，确定
@@ -286,7 +296,11 @@ export default {
     },
     // 纸质信息，修改
     paperModifyFile() {
-      this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
+      if (USERID === this.paperFileForm.createUser) {
+        this.isPaperFiledFormEdit = !this.isPaperFiledFormEdit;
+      } else {
+        this.$message.error('没有修改权限!');
+      }
     },
     // 纸质信息，保存
     paperSaveFile() {
@@ -312,28 +326,24 @@ export default {
         params.file.changed = 1;
       }
       modifyFileMessage(params).then((res) => {
-        if (res.status === 200) {
+        if (res.status === 200 || res.status === 202) {
           this.$message({
             message: '修改成功',
             type: 'success'
-          })
+          });
+          this.fetchEstateAuthorizationExcelInfo();
         } else {
-          () => {
-            this.$message({
-              message: '修改失败',
-              type: 'failed'
-            })
-          }
+          this.$message.error('修改失败');
         }
       })
     },
     //电子，查看原件
     lookOriginElect() {
-      this.$router.push({ name: "look-origin-paper", query: {fileId: this.paperFileForm.id, type: 'paper'} });
+      this.$router.push({ name: "look-paper-origin", query: {fileId: this.elecMsg.id, type: 'paper-match', batchNo: this.$route.query.batchNo} });
     },
     //纸质，查看原件
     lookOriginPaper() {
-      this.$router.push({ name: "look-origin-paper", query: {fileId: this.paperFileForm.id, type: 'paper'} });
+      this.$router.push({ name: "look-paper-origin", query: {fileId: this.paperFileForm.id, type: 'paper-match', batchNo: this.$route.query.batchNo} });
     },
     fetchEstateAuthorizationExcelInfo() {
       const params = {
@@ -345,6 +355,10 @@ export default {
       .then(res => {
         this.excelMsg = res.excel;
         this.elecMsg = res.elecFile;
+        if (this.elecMsg) {
+          this.isExpired = (this.timeNowStamp > Number(this.elecMsg.authorizationValidDate));
+          this.elecMsg.authorizationValidDate = this.getNowFormatDate(this.elecMsg.authorizationValidDate);
+        }
         this.paperFileForm = res.file;
         this.oldData = JSON.parse(JSON.stringify(res.file));
         if (res.file !== null) {
@@ -355,12 +369,20 @@ export default {
           this.rejectForm.problemDescription = '';
         }
       })
+    },
+    getNowFormatDate(timeStamp) {
+      const date = new Date(timeStamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const strDate = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${strDate}`
     }
   },
   beforeCreate() {
     USERID = Number(localStorageHelper.getItem('USERID'));
   },
   mounted() {
+    this.timeNowStamp = new Date().valueOf();
     this.excelId = this.$route.query.id;
     this.auditState = Number(this.$route.query.auditState);
     this.currentTitle = this.$route.query.batchNo;
@@ -379,9 +401,6 @@ export default {
   .top-box {
     height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
   .identify-page-title {
     background-color: #ffffff;
@@ -574,6 +593,9 @@ export default {
             .modify-btn {
               @include buttonStyle;
               margin-left: 40px;
+              &.is-disabled, &.is-disabled:hover {
+                @include disbaledButtonStyle
+              }
             }
             // .submit-btn {
             //   @include buttonStyle;

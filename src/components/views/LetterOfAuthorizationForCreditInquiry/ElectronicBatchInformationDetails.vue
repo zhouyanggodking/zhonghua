@@ -2,7 +2,7 @@
   <div class="elect-batch-info-page-details">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList"></bread-crumb>
+        <bread-crumb :data="formatBreadCrumbList()"></bread-crumb>
       </div>
       <div class="btn-group">
         <div
@@ -26,7 +26,7 @@
             <el-input v-model="searchCondition.companyName" placeholder="请输入内容"></el-input>
           </div>
           <div class="search-condition_input_item">
-            <div class="text">授权提交时间</div>
+            <div class="text">授权书提交日期</div>
             <date-range @change="onDateRangeChange"></date-range>
           </div>
           <div class="search-condition_input_item">
@@ -46,7 +46,7 @@
             </el-select>
           </div>
           <div class="search-condition_input_item">
-            <div class="text">授权书提交日期</div>
+            <div class="text">授权有效期</div>
             <el-select v-model="searchCondition.authorizationValidDateLegal	" placeholder="请选择">
               <el-option label="全部" value=""></el-option>
               <el-option label="大于等于申请日期" value="0"></el-option>
@@ -99,7 +99,7 @@
               <span v-else-if="scope.row.corporateStamp === 1">是</span>
             </template>
           </el-table-column>
-          <el-table-column prop="submitDate" label="授权提交时间" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="submitDate" label="授权书提交日期" show-overflow-tooltip></el-table-column>
           <el-table-column prop="signTime" label="签署时间" show-overflow-tooltip></el-table-column>
           <el-table-column prop="authorizationValidDate" label="授权有效期" show-overflow-tooltip>
           </el-table-column>
@@ -128,7 +128,7 @@
                 class="table-btn"
                 size="mini"
                 type="danger"
-                :disabled="scope.row.auditState === 0"
+                :disabled="scope.row.auditState === 0 || !scope.row.companySeal"
                 @click="tableItemRejected(scope.row)"
               >驳回</el-button>
             </template>
@@ -136,6 +136,7 @@
         </el-table>
       </div>
       <div class="table-footer">
+        <!-- <Pagination></Pagination> -->
         <Pagination :totalCount="totalCount" @change="onPageNumberChange"></Pagination>
       </div>
     </div>
@@ -167,7 +168,6 @@
         <el-table-column prop="companySeal" label="公司章"></el-table-column>
         <el-table-column prop="personSeal" label="人名章"></el-table-column>
         <el-table-column prop="signTime"  label="签署时间"></el-table-column>
-        <!-- <el-table-column prop="address" label="上传时间"></el-table-column> -->
         <el-table-column label="操作">
             <template slot-scope="scope">
               <span class="detail-button" @click="lookOrigin(scope.row)">
@@ -320,6 +320,7 @@ export default {
       dialogVisible: false,
       reviewStatus: "全部",
       multipleSelection: [],
+      downloadMultipleSelection: [],
       currentPage: 1,
       unMatchedcurrentPage: 1,
       totalCount: 0,
@@ -337,7 +338,22 @@ export default {
       this.toggleSelection();
     }
   },
+  beforeRouteEnter(to, from, next) {
+    if (from.path === '/creditElectronicBatchInformation/lookOrigin') {
+      next(vm => {
+        vm.activedIndex = 1;
+      });
+    } else {
+      next();
+    }
+  },
   methods: {
+    formatBreadCrumbList() {
+      if (this.activedIndex) {
+        return ["首页", "征信查询授权书","识别结果","电子版批次详情","未匹配查询清单授权书"]
+      }
+      return ["首页", "征信查询授权书","识别结果","电子版批次详情","查询清单"]
+    },
     toggleSelection() {
       if (this.allChecked) {
         this.$refs.multipleTable.clearSelection();
@@ -354,7 +370,6 @@ export default {
       this.unMatchedSearchCondition.signStartTime = res.startTime || '';
       this.unMatchedSearchCondition.signEndTime = res.endTime || '';
     },
-    goBack() {},
     search() {
       this.currentPage = 1;
       this.fetchElecDetailList();
@@ -366,6 +381,7 @@ export default {
     onPageNumberChange(res) {
       this.pageSize = res.pageSize;
       this.currentPage = res.pageNum;
+      this.allChecked = false;
       this.fetchElecDetailList();
     },
     onUnmatchedPageNumberChange(res) {
@@ -375,14 +391,14 @@ export default {
     },
     // 下载
     tableDownload() {
-      if (this.multipleSelection.length) {
+      if (this.downloadMultipleSelection.length) {
         const params = {
-          ids: this.multipleSelection,
+          ids: this.downloadMultipleSelection,
           elecOrFile: ELE_FILE,
           summaryId: this.summaryId,
           userId: USERID
         };
-        window.open(`${global_upload}/estate/estatePaymentRequestOrderController/downloadEstatePaymentRequestOrderById${formatQuery(params)}`,'_parent');
+        window.open(`${global_upload}/auth/estateAuthorizationExcelController/downElecExcels${formatQuery(params)}`,'_parent');
       } else {
         this.$message({
           message: '请勾选要下载的对象!',
@@ -391,20 +407,34 @@ export default {
       }
     },
     batchReview() {
-      if (this.multipleSelection.length) {
+      // if (this.multipleSelection.length) {
+      //   this.isDialogVisible = true;
+      //   if (this.multipleSelection.length > 0) {
+      //     this.dialogHintText = "请确认是否批量通过";
+      //     this.dialogHintOperate = "批量通过";
+      //   } else {
+      //     this.dialogHintText = "请确认是否审核通过";
+      //     this.dialogHintOperate = "审核通过";
+      //   }
+      // } else {
+      //   this.$message({
+      //     message: '请勾选符合审核条件的对象!',
+      //     type: 'warning'
+      //   })
+      // }
+      if (this.downloadMultipleSelection.length && this.multipleSelection.length) {
         this.isDialogVisible = true;
-        if (this.multipleSelection.length > 1) {
+        if (this.multipleSelection.length > 0) {
           this.dialogHintText = "请确认是否批量通过";
           this.dialogHintOperate = "批量通过";
         } else {
           this.dialogHintText = "请确认是否审核通过";
           this.dialogHintOperate = "审核通过";
         }
-      } else {
-        this.$message({
-          message: '请勾选要审核的对象!',
-          type: 'warning'
-        })
+      } else if (this.downloadMultipleSelection.length && !this.multipleSelection.length) {
+        this.$message.error('没有审核权限或者当前勾选项不可审核!');
+      } else if (!this.downloadMultipleSelection.length && !this.multipleSelection.length) {
+        this.$message.error('请勾选要下载的对象!');
       }
     },
     topMenus(index) {
@@ -413,7 +443,7 @@ export default {
     //未授权 查看原件
     lookOrigin(row){
       // this.$router.push({ name: "look-origin" });
-      this.$router.push({ name: "look-origin", query: {fileId: row.id} });
+      this.$router.push({ name: "look-origin", query: {fileId: row.id, batchNo: this.$route.query.batchNo, type: 'elec-notMatch'} });
     },
     // 批量审核
     batchReviewPass() {
@@ -429,17 +459,17 @@ export default {
         },
         userId: USERID
       }
-      checkAuthRecords(params).then(() => {
-        this.$message({
-          message: '审核完成',
-          type: 'success'
-        });
-        this.fetchElecDetailList();
-      }, () => {
-        this.$message({
-          message: '审核失败',
-          type: 'warning'
-        })
+      checkAuthRecords(params).then((res) => {
+        if (res.data.status === 200) {
+          this.$message({
+            message: '审核完成',
+            type: 'success'
+          });
+          this.fetchElecDetailList();
+          this.allChecked = false;
+        } else {
+          this.$message.error('审核失败');
+        }
       })
     },
     tableItemDetails(row) {
@@ -464,18 +494,17 @@ export default {
       };
       this.$refs.rejectForm.validate(valid => {
         if (valid) {
-          checkAuthRecord(params).then(() => {
-            this.$message({
-              message: '驳回完成',
-              type: 'success'
-            });
-            this.dialogVisible = false;
-            this.fetchElecDetailList();
-          }, () => {
-            this.$message({
-              message: '驳回失败',
-              type: 'warning'
-            })
+          checkAuthRecord(params).then((res) => {
+            if (res.data.status === 200) {
+              this.$message({
+                message: '驳回完成',
+                type: 'success'
+              });
+              this.dialogVisible = false;
+              this.fetchElecDetailList();
+            } else {
+              this.$message.error('驳回失败');
+            }
           })
         }
       })
@@ -499,13 +528,17 @@ ${formatQuery(params)}`,'_parent');
       this.dialogHintOperate = "审核通过";
     },
     tableItemRejected(row) {
-      this.rejectForm.problemType = '';
-      this.rejectForm.problemDescription = '';
-      this.isDialogVisible = true;
-      this.dialogHintText = "请确认是否驳回";
-      this.dialogHintOperate = "驳回";
-      this.rejectObj.fileId = row.elecFileId;
-      this.rejectObj.id = row.id
+      if (USERID === row.createUser) {
+        this.rejectForm.problemType = '';
+        this.rejectForm.problemDescription = '';
+        this.isDialogVisible = true;
+        this.dialogHintText = "请确认是否驳回";
+        this.dialogHintOperate = "驳回";
+        this.rejectObj.fileId = row.elecFileId;
+        this.rejectObj.id = row.id
+      } else {
+        this.$message.error('没有驳回权限!');
+      }
     },
     reviewPass() {
       this.isDialogVisible = false;
@@ -518,7 +551,8 @@ ${formatQuery(params)}`,'_parent');
       this.dialogVisible = false;
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val.map(item => item.id);
+      this.multipleSelection = val.filter(item => item.companySeal && USERID === item.createUser).map(item => item.id);
+      this.downloadMultipleSelection = val.map(item => item.id);
     },
     handleSizeChange(pageSize) {
       this.pageSize = pageSize;
@@ -574,14 +608,13 @@ ${formatQuery(params)}`,'_parent');
 @import '@/scss/mixin.scss';
 
 .elect-batch-info-page-details {
+  display: -webkit-box;
+  flex: 1;
+  flex-direction: column;
   .top-box {
     height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
-
   .identify-page-title {
     background-color: #ffffff;
     height: 129px;
@@ -687,6 +720,7 @@ ${formatQuery(params)}`,'_parent');
     }
   }
   .search-unauth-table{
+    flex: 1;
     margin-top: 30px;
     background: #fff;
     padding: 30px;
@@ -699,6 +733,7 @@ ${formatQuery(params)}`,'_parent');
     }
   }
   .identify-page-table {
+    flex: 1;
     margin-top: 20px;
     padding: 20px 40px;
     background: #ffffff;
@@ -712,66 +747,6 @@ ${formatQuery(params)}`,'_parent');
     }
     .identify-page-table_content {
       margin-top: 20px;
-      /deep/ .el-table {
-        .el-table__fixed-header-wrapper {
-          thead {
-            th,
-            tr {
-              background: #fafafa !important;
-            }
-            th {
-              border-color: rgba(0, 0, 0, 0.09);
-              .cell {
-                font-family: PingFangSC-Medium;
-                font-size: 14px;
-                color: rgba(0, 0, 0, 0.85);
-                line-height: 22px;
-              }
-            }
-            th.is-leaf {
-              border-bottom: 1px solid rgba(0, 0, 0, 0.09);
-              .el-checkbox__input {
-                display: none;
-              }
-            }
-          }
-        }
-        .el-table__fixed-body-wrapper {
-          .el-table__body {
-          }
-        }
-        .el-table__header-wrapper {
-          .el-table__header {
-            tr {
-              border-radius: 4px 4px 0px 0px;
-              background: #fafafa !important;
-              th {
-                background: #fafafa !important;
-                border-color: rgba(0, 0, 0, 0.09);
-                .cell {
-                  font-family: PingFangSC-Medium;
-                  font-size: 14px;
-                  color: rgba(0, 0, 0, 0.85);
-                  line-height: 22px;
-                }
-              }
-            }
-          }
-        }
-        .el-table__body-wrapper {
-          .el-table__body {
-            .el-table__row {
-              .el-table_1_column_1 {
-              }
-              .el-table_1_column_13 {
-                .cell {
-                  // display: flex;
-                }
-              }
-            }
-          }
-        }
-      }
       /deep/ .table-btn {
         width: 28px;
         height: 20px;
@@ -796,10 +771,10 @@ ${formatQuery(params)}`,'_parent');
     }
   }
 }
-.dialog-common {
+.confirmDialog {
   /deep/ .el-dialog {
     width: 521px !important;
-    height: 228px !important;
+    // height: 228px !important;
     border-radius: 0;
     .el-dialog__header {
       padding-top: 0;
@@ -833,7 +808,6 @@ ${formatQuery(params)}`,'_parent');
         span {
           font-family: PingFangSC-Regular;
           font-size: 16px;
-          color: #666666 !important;
         }
       }
     }
@@ -900,36 +874,7 @@ ${formatQuery(params)}`,'_parent');
       span {
         font-family: PingFangSC-Regular;
         font-size: 16px;
-        color: #666666 !important;
       }
-    }
-  }
-}
-/deep/ .el-dialog {
-  width: 660px !important;
-  .el-dialog__header {
-    .el-dialog__title {
-      font-size: 20px;
-    }
-    .el-dialog__headerbtn {
-      // width: 30px;
-      // height: 30px;
-      font-size: 30px;
-      .el-dialog__close {
-        color: rgba(51, 51, 51, 0.3);
-      }
-    }
-  }
-  .el-dialog__body {
-    padding-bottom: 20px;
-  }
-  .el-dialog__footer {
-    padding-top: 0;
-    border: none;
-    padding-bottom: 30px;
-    .el-button {
-      width: 135px !important;
-      height: 40px !important;
     }
   }
 }

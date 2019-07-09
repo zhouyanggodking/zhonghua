@@ -87,7 +87,7 @@ export default {
       imagesSrc: '',
       positionInfo: null,
       rotateAngle: '',
-      singleImagePosition: null,
+      singleImagePosition: [],
       textarea: "",
       isSaveBtn: false,
       paymentOrderForm: {
@@ -122,7 +122,11 @@ export default {
       this.$router.go(-1);
     },
     modifyFile() {
-      this.isFiledFormEdit = !this.isFiledFormEdit;
+      if (USERID === this.paymentOrderForm.createUser) {
+        this.isFiledFormEdit = !this.isFiledFormEdit;
+      } else {
+        this.$message.error('没有修改权限!');
+      }
     },
     saveFile() {
       this.$refs.paymentOrderForm.validate(valid => {
@@ -166,7 +170,9 @@ export default {
         id: this.paymentOrderId
       }
       resourceWrapper.getPaymentOrderDetail(params).then(res => {
-          this.paymentOrderForm=res.data.order;
+          this.paymentOrderForm = res.data.order;
+          this.paymentOrderForm.paidAmount = this.toDecimal2(res.data.order.paidAmount);this.paymentOrderForm.contractDynamicAmount = this.toDecimal2(res.data.order.contractDynamicAmount);
+          this.paymentOrderForm.unpaidAmount = this.toDecimal2(res.data.order.unpaidAmount);
           this.imagesSrc = res.data.order.outputLocation;
           this.positionInfo = JSON.parse(res.data.infos) ? JSON.parse(res.data.infos).position : {};
           this.rotateAngle = JSON.parse(res.data.infos) ? String(JSON.parse(res.data.infos).rotation_angle) : '';
@@ -190,10 +196,16 @@ export default {
         borderColor: 'red',
       }]) : [];
       this.singleImagePosition  = location;
-        // let imageUrl = location.length ? location[0].imgUrl : '';
-        // if (imageUrl && imageUrl != 'undefined') {
-        //   this.singleImagePosition  = location;
-        // }
+    },
+    // 保留两位小数
+    toDecimal2(val) {
+      let s = val.toString();
+      let rs = s.indexOf('.');if (rs < 0) {
+        rs = s.length;
+        s += '.';
+      } while (s.length <= rs + 2)
+      { s += '0';}
+      return s;
     }
   },
   beforeCreate() {
@@ -214,6 +226,9 @@ export default {
 @import '@/scss/mixin.scss';
 
 .identify-result-detail-page {
+  display: -webkit-box;
+  flex: 1;
+  flex-direction: column;
   .top-box {
     height: 130px;
     background-color: #ffffff;
@@ -222,6 +237,7 @@ export default {
     }
   }
   .identify-pay-detail-page {
+    flex: 1;
     margin-top: 30px;
     background: #fff;
     padding: 30px;
@@ -268,6 +284,7 @@ export default {
             border-top: 1px solid #ebebeb;
             /deep/ {
               .el-form {
+                width: 600px;
                 margin-top: 6px;
                 padding:  0 20px;
                 .goods-list {

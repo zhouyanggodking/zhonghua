@@ -2,7 +2,7 @@
   <div class="identify-result-detail-page">
     <div class="identify-page-title">
       <div class="top-box">
-        <bread-crumb :data="breadCrumbList" :currentTitle="currentTitle"></bread-crumb>
+        <bread-crumb :data="breadCrumbList" :currentTitle="`${batchNo}批次-${fileMessageForm.companySeal && fileMessageForm.companySeal !== null ? fileMessageForm.companySeal : ''}`"></bread-crumb>
       </div>
     </div>
     <div class="identify-pay-detail-page">
@@ -56,7 +56,7 @@
                     <el-select v-if="!isFiledFormEdit"  v-model="fileMessageForm.problemType" placeholder="">
                       <el-option v-for="(item, index) in problemList" :key="index" :label="item.name" :value="item.id"></el-option>
                     </el-select>
-                    <el-input disabled v-else v-model="problemMappingFun(fileMessageForm.problemType)[0].name"></el-input>
+                    <el-input disabled v-else :value="problemMappingFun(fileMessageForm.problemType)"></el-input>
                   </el-form-item>
                 </el-form>
               </div>
@@ -92,14 +92,16 @@ export default {
       imagesSrc: '',
       positionInfo: null,
       rotateAngle: '',
-      singleImagePosition: null,
+      singleImagePosition: [],
       textarea: "",
       isSaveBtn: false,
       breadCrumbList: [],
-      currentTitle: "付款公司名称-合同编号-付款主题",
+      currentTitle: "",
       fileMessageForm: {},
       oldData: {},
-      fileId: ''
+      fileId: '',
+      fileType: '',
+      batchNo: ''
     };
   },
   methods: {
@@ -110,10 +112,16 @@ export default {
       this.$router.go(-1);
     },
     problemMappingFun (target) {
-      return this.problemList.filter(item => item.id === target);
+      if (this.problemList.filter(item => item.id === target).length) {
+        return this.problemList.filter(item => item.id === target)[0].name;
+      } return '暂无'
     },
     modifyFile() {
-      this.isFiledFormEdit = !this.isFiledFormEdit;
+      if (USERID === this.fileMessageForm.createUser) {
+        this.isFiledFormEdit = !this.isFiledFormEdit;
+      } else {
+        this.$message.error('您没有修改权限!');
+      }
     },
     saveFile() {
       this.isFiledFormEdit = !this.isFiledFormEdit;
@@ -137,16 +145,15 @@ export default {
       } else {
         params.file.changed = 1;
       }
-      modifyFileMessage(params).then(() => {
-        this.$message({
-          message: '修改成功',
-          type: 'success'
-        })
-      }, () => {
-        this.$message({
-          message: '修改失败',
-          type: 'failed'
-        })
+      modifyFileMessage(params).then((res) => {
+        if (res.status === 200 || res.status === 202) {
+          this.$message({
+            message: '修改成功',
+            type: 'success'
+          })
+        } else {
+          this.$message.error('修改失败');
+        }
       })
     },
     getFileDetailData(){
@@ -185,6 +192,17 @@ export default {
         //   this.singleImagePosition  = location;
         // }
         this.singleImagePosition  = location;
+    },
+    formatFileType(tar) {
+      if (tar === 'elec-match') {
+        return [ "首页", "征信查询授权书", "识别结果", "电子版批次详情", "查询清单", "详情" ]
+      } else if (tar === 'elec-notMatch') {
+        return [ "首页", "征信查询授权书", "识别结果", "电子版批次详情", "未匹配查询清单授权书", "详情" ]
+      } else if (tar === 'paper-match') {
+        return [ "首页", "征信查询授权书", "识别结果", "纸质版批次详情", "查询清单", "详情" ]
+      } else if (tar === 'paper-notMatch') {
+        return [ "首页", "征信查询授权书", "识别结果", "纸质版批次详情", "未匹配查询清单授权书", "详情" ]
+      }
     }
   },
   beforeCreate() {
@@ -192,7 +210,8 @@ export default {
   },
   mounted() {
     this.fileId=this.$route.query.fileId;
-    this.breadCrumbList = this.$route.query.type === 'elec' ? [ "首页", "征信查询授权书", "识别结果", "电子版批次详情", "查询清单", "详情" ] : [ "首页", "征信查询授权书", "识别结果", "纸质版批次信息", "查询清单", "详情" ];
+    this.batchNo = this.$route.query.batchNo;
+    this.breadCrumbList = this.formatFileType(this.$route.query.type);
     this.getFileDetailData();
   },
   components: {
@@ -206,14 +225,15 @@ export default {
 @import '@/scss/mixin.scss';
 
 .identify-result-detail-page {
+  display: -webkit-box;
+  flex: 1;
+  flex-direction: column;
   .top-box {
     height: 130px;
     background-color: #ffffff;
-    .bread-crumb {
-      padding: 14px 20px 0px;
-    }
   }
   .identify-pay-detail-page {
+    flex: 1;
     margin-top: 30px;
     background: #fff;
     padding: 30px;

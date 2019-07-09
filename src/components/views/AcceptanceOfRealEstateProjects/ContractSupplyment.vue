@@ -125,7 +125,7 @@ export default {
     handleNotVerifyClick() {},
     handleVerifyClick() {
       const invoiceItems = this.contractSupplymentForm;
-      invoiceItems.paymentRequestOrderId = this.paymentRequestOrderId;
+      invoiceItems.paymentRequestOrderId = this.paymentOrderId;
       const params = {
         invoice: invoiceItems,
         userId: USERID
@@ -140,7 +140,7 @@ export default {
               this.verifiedInvoiceItems = res.data;
               this.isAddInvoice = true;
               this.$message({
-                message: '验真成功',
+                message: '验真完成',
                 type: 'success'
               })
             } else {
@@ -155,7 +155,7 @@ export default {
       mapData.createTime = dateFormat(mapData.createTime);
       mapData.invoiceTime = dateFormat(mapData.invoiceTime);
       mapData.lastUpdateTime = dateFormat(mapData.lastUpdateTime);
-      mapData.paymentRequestOrderId = this.paymentRequestOrderId;
+      mapData.paymentRequestOrderId = this.paymentOrderId;
       const invoicesItem = mapData.estateInvoiceItems;
       this.$delete(mapData, 'estateInvoiceItems');
       const params = {
@@ -183,18 +183,17 @@ export default {
       this.addInvoice(params);
     },
     addInvoice(params) {
-      supplyInvoice(params).then(() => {
-        this.$message({
-          message: '补录成功',
-          type: 'success'
-        });
-        this.propsData.isShowContractMsg = true;
-        this.$emit('change', this.propsData);
-      }, () => {
-        this.$message({
-          message: '补录失败',
-          type: 'failed'
-        })
+      supplyInvoice(params).then((res) => {
+        if (res.status === 200) {
+          this.$message({
+            message: '补录成功',
+            type: 'success'
+          });
+          this.propsData.isShowContractMsg = true;
+          this.$emit('change', this.propsData);
+        } else {
+          this.$message.error('补录失败');
+        }
       })
     },
     // 无法识别,验证不通过
@@ -209,18 +208,17 @@ export default {
         invoiceItems: [],
         userId: USERID
       };
-      supplyInvoice(params).then(() => {
-        this.$message({
-          message: '补录成功',
-          type: 'success'
-        });
-        this.propsData.isShowContractMsg = true;
-        this.$emit('change', this.propsData);
-      }, () => {
-        this.$message({
-          message: '补录失败',
-          type: 'success'
-        });
+      supplyInvoice(params).then((res) => {
+        if (res.status === 200) {
+          this.$message({
+            message: '补录成功',
+            type: 'success'
+          });
+          this.propsData.isShowContractMsg = true;
+          this.$emit('change', this.propsData);
+        } else {
+          this.$message.error('补录失败');
+        }
       })
     }
   },
